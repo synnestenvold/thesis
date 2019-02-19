@@ -22,6 +22,7 @@ namespace FEbrep
         /// Subcategory the panel. If you use non-existing tab or panel names, 
         /// new tabs/panels will automatically be created.
         /// </summary>
+        /// test
         public FEbrepComponent()
           : base("Finite Element of brep", "FEbep",
               "Description",
