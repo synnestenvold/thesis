@@ -43,13 +43,21 @@ namespace FEbrep
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddPointParameter("Node 1", "1", "Displacement, stress and strain for node 1", GH_ParamAccess.item);
-
+            pManager.AddPointParameter("Node 2", "2", "Displacement, stress and strain for node 2", GH_ParamAccess.item);
+            pManager.AddPointParameter("Node 3", "3", "Displacement, stress and strain for node 3", GH_ParamAccess.item);
+            pManager.AddPointParameter("Node 4", "4", "Displacement, stress and strain for node 4", GH_ParamAccess.item);
+            pManager.AddPointParameter("Node 5", "5", "Displacement, stress and strain for node 5", GH_ParamAccess.item);
+            pManager.AddPointParameter("Node 6", "6", "Displacement, stress and strain for node 6", GH_ParamAccess.item);
+            pManager.AddPointParameter("Node 7", "7", "Displacement, stress and strain for node 7", GH_ParamAccess.item);
+            pManager.AddPointParameter("Node 8", "8", "Displacement, stress and strain for node 8", GH_ParamAccess.item);
         }
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
         /// to store data in output parameters.</param>
+        /// 
+        
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             List<Curve> listaCrv = new List<Curve>();
@@ -61,9 +69,18 @@ namespace FEbrep
 
             array = brp.DuplicateVertices();
 
-            DA.SetData(0, array[0]);
+            Console.WriteLine(array[0].DistanceTo(array[1]));
 
-            
+            //Creates an array with the three lengths of the cube, in x y and z direction.
+            double[] lengths = new double[3];
+            lengths[0] = array[0].DistanceTo(array[1]);
+            lengths[1] = array[1].DistanceTo(array[2]);
+            lengths[2] = array[2].DistanceTo(array[3]);
+
+            DA.SetData(0, lengths[0]);
+            DA.SetData(1, lengths[1]);
+            DA.SetData(2, lengths[2]);
+            DA.SetData(3, lengths[3]);
 
             /*
             DA.SetData(0, node1);
