@@ -35,7 +35,7 @@ namespace StiffnessMatrix
             Matrix<double> Ke = Matrix<double>.Build.Dense(24, 24);
 
 
-            //3D Constitutive matrix
+            //3D Constitutive matrix: C
             double value = E / ((1 + nu) * (1 - 2 * nu));
             Matrix<double> C = DenseMatrix.OfArray(new double[,]
             {
@@ -52,9 +52,11 @@ namespace StiffnessMatrix
             C = C.Multiply(value); //Constitutive matrix
 
             
-
+            //Gauss points
             Vector<double> gaussPoints = DenseVector.OfArray(new double[] { -1 / Math.Sqrt(3), 1 / Math.Sqrt(3) }); //Gauss points
 
+
+            //Center points for each line
             Matrix<double> coordinates = DenseMatrix.OfArray(new double[,]
             {
                 {-lx/2, -ly/2, -lz/2},
@@ -68,16 +70,16 @@ namespace StiffnessMatrix
 
             });
 
-            
-            
-            
-            
+
+            //Numerical integration
             foreach (double g1 in gaussPoints)
             {
                 foreach (double g2 in gaussPoints)
                 {
                     foreach (double g3 in gaussPoints)
                     {
+
+                        //Shape functions
                         Matrix<double> shapeF = DenseMatrix.OfArray(new double[,]
                        {
                             {-(1-g2)*(1-g3), (1-g2)*(1-g3), (1+g2)*(1-g3),-(1+g2)*(1-g3),-(1-g2)*(1+g3),(1-g2)*(1+g3),(1+g2)*(1+g3),-(1+g2)*(1+g3)},
@@ -86,43 +88,25 @@ namespace StiffnessMatrix
 
                        });
 
-                        shapeF = shapeF.Divide(8);
-                        
-                        
-                        
+                        shapeF = shapeF.Divide(8); //Divided by 8
 
-                        
+
+                        //Jacobi Matrix
 
                         Matrix<double> JacobiMatrix = Matrix<double>.Build.Dense(3,3);
 
                         JacobiMatrix = shapeF.Multiply(coordinates);
 
-                      
-
+                        // Auxiliar matrix for assemblinng of B-matrix 
                         Matrix<double> auxiliar = Matrix<double>.Build.Dense(3, 8);
 
                         auxiliar = JacobiMatrix.Inverse().Multiply(shapeF);
 
-                        
-                        /*
-                        for (int i = 0; i < auxiliar.RowCount; i++)
-                        {
-                            for (int j = 0; j < auxiliar.ColumnCount; j++)
-                            {
-                                Console.Write(auxiliar[i, j]);
-                                Console.Write(" ");
-                            }
-                            Console.WriteLine();
-                        }
-                        Console.WriteLine();
-                        */
-                        
 
-                        
-
+                        // B matrix
                         Matrix<double> B = Matrix<double>.Build.Dense(6, 24);
 
-                        //First three rows OK!
+                        //First three rows
 
                         for (int i = 0; i<3; i++)
                         {
@@ -132,7 +116,6 @@ namespace StiffnessMatrix
                             }
                         }
 
-                        
 
                         //Fourth row
                         for (int j = 0; j <= 7; j++)
@@ -140,7 +123,6 @@ namespace StiffnessMatrix
                             B[3, 3 * j] = auxiliar[1, j];
                         }
 
-                       
                         
                         for (int j = 0; j <= 7; j++)
                         {
@@ -148,7 +130,6 @@ namespace StiffnessMatrix
                         }
 
                         
-
                         //Fifth row
                         for (int j = 0; j <= 7; j++)
                        {
@@ -160,7 +141,6 @@ namespace StiffnessMatrix
                             B[4, 3 * j + 1] = auxiliar[2, j];
                         }
                         
-
                         
                         //Sixth row
                        for (int j = 0; j <= 7; j++)
@@ -174,52 +154,13 @@ namespace StiffnessMatrix
                        }
 
 
-                        /*
-                          for (int i = 0; i < B.Transpose().RowCount; i++)
-                          {
-                              for (int j = 0; j < B.Transpose().ColumnCount; j++)
-                              {
-                                  Console.Write(B.Transpose()[i, j]);
-                                  Console.Write("| ");
-                              }
-                              Console.WriteLine();
-                          }
-                          Console.WriteLine();
 
-                          */
-
-
-
-
-
-
-                        /*
-
-                        Console.WriteLine(B.Inverse().RowCount);
-                        Console.WriteLine(B.Inverse().ColumnCount);
-                        Console.WriteLine(C.RowCount);
-                        Console.WriteLine(C.ColumnCount);
-                        */
-
-                        
-
-
-                        
-
-                        
+                        //Adding the stiffness matrix. Ke = Ke + B'*C*B*Det(JacobiMatrix)
                         Ke = Ke.Add(B.Transpose().Multiply(C).Multiply(B).Multiply(JacobiMatrix.Determinant()));
 
-
-
-                            
-
-                            
-
-
                     }
-                    Console.WriteLine();
+                    
                 }
-                Console.WriteLine();
             }
 
             for (int i = 0; i < Ke.RowCount; i++)
@@ -232,17 +173,6 @@ namespace StiffnessMatrix
                 Console.WriteLine();
             }
             Console.WriteLine();
-
-            /*
-            for (int i = 0; i < C.RowCount; i++)
-            {
-                for (int j = 0; j < C.ColumnCount; j++)
-                {
-                    Console.Write(C[i, j]);
-                }
-                Console.WriteLine();
-            }
-           */
 
             Console.ReadKey();
         }
