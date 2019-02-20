@@ -61,7 +61,7 @@ namespace FEbrep
 
             Brep brp = new Brep();
             Point3d[] array = new Point3d[8];
-
+       
             if (!DA.GetData(0, ref brp)) return;
 
             array = brp.DuplicateVertices();
@@ -71,6 +71,10 @@ namespace FEbrep
             lengths[0] = array[0].DistanceTo(array[1]);
             lengths[1] = array[0].DistanceTo(array[3]);
             lengths[2] = array[0].DistanceTo(array[4]);
+
+            StiffnessMatrix K = new StiffnessMatrix(10, 1, lengths[0], lengths[1], lengths[2]);
+            Matrix<double> Ke = K.createMatrix();
+      
 
             DA.SetData(0, lengths[0]);
             DA.SetData(1, lengths[1]);
