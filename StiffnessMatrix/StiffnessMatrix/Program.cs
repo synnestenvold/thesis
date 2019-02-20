@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using mns = MathNet.Symbolics;
 
 
 namespace StiffnessMatrix
@@ -27,10 +28,10 @@ namespace StiffnessMatrix
             lz = _lz;
         }
 
-        public void matrix()
+        public Matrix<double> matrix()
         {
-            double[,] array = new double[6, 4];
-            array = fillZeros(array);
+            //double[,] array = new double[6, 4];
+            //array = fillZeros(array);
 
             Matrix<double> Ke = Matrix<double>.Build.Dense(24, 24);
 
@@ -174,7 +175,10 @@ namespace StiffnessMatrix
             }
             Console.WriteLine();
 
+
             Console.ReadKey();
+            return Ke;
+            
         }
 
         public double[,] fillZeros(double[,] array)
