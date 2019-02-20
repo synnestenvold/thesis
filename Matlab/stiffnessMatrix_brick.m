@@ -1,4 +1,4 @@
-function K = stiffnessMatrix_brick (E,nu,length_x,length_y,length_z)
+function Q = stiffnessMatrix_brick (E,nu,length_x,length_y,length_z)
 % STIFFNESSMATRIX_BRICK Compute stiffness matrix for brick element
 %   K = stiffnessMatrix_brick (E,nu,length_x,length_y,length_z) Computes
 %   the 24x24 stiffness matrix for a regular 8 noded hexahedral finite 
@@ -33,6 +33,7 @@ coordinates(8,:) = [-length_x/2 length_y/2 length_z/2];
 
 % Preallocate memory for stiffness matrix
 K = zeros (24,24);
+Q = zeros(6,24);
 % Loop over each Gauss point
 for xi1=GaussPoint
     for xi2=GaussPoint
@@ -69,22 +70,24 @@ for xi1=GaussPoint
             end
             % Construct fifth row
             for j=0:7
-                B(5,3*j+3) = auxiliar(2,j+1);
+                B(5,3*j+1) = auxiliar(3,j+1);
             end
             for j=0:7
-                B(5,3*j+2) = auxiliar(3,j+1);
+                B(5,3*j+3) = auxiliar(1,j+1);
             end
             % Construct sixth row
             for j=0:7
-                B(6,3*j+1) = auxiliar(3,j+1);
+                B(6,3*j+2) = auxiliar(3,j+1);
             end
             for j=0:7
-                B(6,3*j+3) = auxiliar(1,j+1);
+                B(6,3*j+3) = auxiliar(2,j+1);
             end
-
+            
+            Q = Q+B;
+            
             
             % Add to stiffness matrix
-            K = K + B'*C*B*det(JacobianMatrix);
+            K = K+B'*C*B*det(JacobianMatrix);
   
             
         end
