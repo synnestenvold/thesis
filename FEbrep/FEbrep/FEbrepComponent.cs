@@ -72,16 +72,18 @@ namespace FEbrep
             lengths[1] = array[0].DistanceTo(array[3]);
             lengths[2] = array[0].DistanceTo(array[4]);
 
-            StiffnessMatrix K = new StiffnessMatrix(10, 1, lengths[0], lengths[1], lengths[2]);
-            Matrix<double> Ke = K.createMatrix();
+            StiffnessMatrix K = new StiffnessMatrix(200000, 0.3, lengths[0], lengths[1], lengths[2]);
+            Matrix<double> Ke = K.createMatrix(); //a dense matrix stored in an array, column major.
             Matrix<double> Ke_inverse = Ke.Inverse();
             double[] R_array = new double[] { 0,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1 };
             var V = Vector<double>.Build;
             var R = V.DenseOfArray(R_array);
             Vector<double> u = Ke_inverse.Multiply(R);
             double[] u1 = new double[] { u[0],u[1],u[2] };
-
-            DA.SetDataList(0, u1);
+            //TODO: Fix tree structure, we want a list with 3 components: three deformations in a list, stress and strain.
+            //List<List<double>> list = new List<List<double>> { u1, { 5 }, { 5 } };
+            //DA.SetDataList(0, u1);
+            DA.SetData(0, u[0]);
             DA.SetData(1, u[1]);
             DA.SetData(2, u[2]);
      
