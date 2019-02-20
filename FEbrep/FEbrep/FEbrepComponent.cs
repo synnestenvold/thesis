@@ -43,7 +43,7 @@ namespace FEbrep
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Node 1", "1", "Displacement, stress and strain for node 1", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Node 1", "1", "Displacement, stress and strain for node 1", GH_ParamAccess.list);
             pManager.AddNumberParameter("Node 2", "2", "Displacement, stress and strain for node 2", GH_ParamAccess.item);
             pManager.AddNumberParameter("Node 3", "3", "Displacement, stress and strain for node 3", GH_ParamAccess.item);
 
@@ -74,21 +74,24 @@ namespace FEbrep
 
             StiffnessMatrix K = new StiffnessMatrix(10, 1, lengths[0], lengths[1], lengths[2]);
             Matrix<double> Ke = K.createMatrix();
-      
+            Matrix<double> Ke_inverse = Ke.Inverse();
+            double[] R_array = new double[] { 0,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1 };
+            var V = Vector<double>.Build;
+            var R = V.DenseOfArray(R_array);
+            Vector<double> u = Ke_inverse.Multiply(R);
+            double[] u1 = new double[] { u[0],u[1],u[2] };
 
-            DA.SetData(0, lengths[0]);
-            DA.SetData(1, lengths[1]);
-            DA.SetData(2, lengths[2]);
-
+            DA.SetDataList(0, u1);
+            DA.SetData(1, u[1]);
+            DA.SetData(2, u[2]);
+     
             /*
-            DA.SetData(0, node1);
-            DA.SetData(0, node2);
-            DA.SetData(0, node3);
-            DA.SetData(0, node4);
-            DA.SetData(0, node5);
-            DA.SetData(0, node6);
-            DA.SetData(0, node7);
-            DA.SetData(0, node8);
+            GH_Boolean => Boolean
+            GH_Integer => int
+            GH_Number => double
+            GH_Vector => Vector3d
+            GH_Matrix => Matrix
+            GH_Surface => Brep
             */
         }
 
