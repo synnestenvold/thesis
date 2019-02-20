@@ -155,7 +155,7 @@ namespace StiffnessMatrix
                        }
 
 
-
+                       
                         //Adding the stiffness matrix. Ke = Ke + B'*C*B*Det(JacobiMatrix)
                         Ke = Ke.Add(B.Transpose().Multiply(C).Multiply(B).Multiply(JacobiMatrix.Determinant()));
 
