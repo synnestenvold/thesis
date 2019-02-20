@@ -28,7 +28,7 @@ namespace StiffnessMatrix
             lz = _lz;
         }
 
-        public Matrix<double> matrix()
+        public Matrix<double> createMatrix()
         {
             //double[,] array = new double[6, 4];
             //array = fillZeros(array);
@@ -192,7 +192,7 @@ namespace StiffnessMatrix
         static void Main(string[] args)
         {
             StiffnessMatrix s = new StiffnessMatrix(10, 1, 5, 5, 5);
-            s.matrix();
+            s.createMatrix();
 
         }
 
