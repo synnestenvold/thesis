@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
@@ -25,7 +21,7 @@ namespace FEbrep
             ly = _ly;
             lz = _lz;
         }
-        public Matrix<double> createMatrix()
+        public Matrix<double> CreateMatrix()
         {
             //double[,] array = new double[6, 4];
             //array = fillZeros(array);
