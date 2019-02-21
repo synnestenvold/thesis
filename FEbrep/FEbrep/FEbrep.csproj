@@ -61,6 +61,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bmatrix.cs" />
+    <Compile Include="Cmatrix.cs" />
     <Compile Include="FEbrepComponent.cs" />
     <Compile Include="FEbrepInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

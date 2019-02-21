@@ -66,20 +66,28 @@ namespace FEbrep
 
             array = brp.DuplicateVertices();
 
-            //Creates an array with the three lengths of the cube, in x y and z direction.
-            double[] lengths = new double[3];
-            lengths[0] = array[0].DistanceTo(array[1]);
-            lengths[1] = array[0].DistanceTo(array[3]);
-            lengths[2] = array[0].DistanceTo(array[4]);
+            double lx = array[0].DistanceTo(array[1]);
+            double ly = array[0].DistanceTo(array[3]);
+            double lz = array[0].DistanceTo(array[4]);
 
-            StiffnessMatrix K = new StiffnessMatrix(200000, 0.3, lengths[0], lengths[1], lengths[2]);
-            Matrix<double> Ke = K.createMatrix(); //a dense matrix stored in an array, column major.
+            StiffnessMatrix K_new = new StiffnessMatrix(10, 0.3, lx, ly, lz);
+            Matrix<double> Ke = K_new.CreateMatrix(); //a dense matrix stored in an array, column major.
             Matrix<double> Ke_inverse = Ke.Inverse();
-            double[] R_array = new double[] { 0,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1 };
+            double[] R_array = new double[] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1 };
             var V = Vector<double>.Build;
             var R = V.DenseOfArray(R_array);
             Vector<double> u = Ke_inverse.Multiply(R);
             double[] u1 = new double[] { u[0],u[1],u[2] };
+
+            //Finding strain
+            Bmatrix B_new = new Bmatrix(lx, ly, lz);
+            Matrix<double> B = B_new.CreateMatrix();
+            Vector<double> strain = B.Multiply(u);
+
+            //Finding stress
+            Cmatrix C_new = new Cmatrix(10, 0.3);
+            Matrix<double> C = C_new.CreateMatrix();
+            Vector<double> stress = C.Multiply(strain);
             //TODO: Fix tree structure, we want a list with 3 components: three deformations in a list, stress and strain.
             //List<List<double>> list = new List<List<double>> { u1, { 5 }, { 5 } };
             //DA.SetDataList(0, u1);
