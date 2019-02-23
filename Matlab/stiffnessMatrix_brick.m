@@ -50,7 +50,7 @@ for xi1=GaussPoint
                 (1-xi1)*(1-xi2),(1+xi1)*(1-xi2),(1+xi1)*(1+xi2),...
                 (1-xi1)*(1+xi2)];
             % Compute Jacobian matrix
-            JacobianMatrix = dShape*coordinates
+            JacobianMatrix = dShape*coordinates;
             % Compute auxiliar matrix for construction of B-Operator
             auxiliar = inv(JacobianMatrix)*dShape;
 

@@ -58,6 +58,7 @@ for i = 0:7
     B(5,3*i+3) = dN(1,i+1);
 end
 
+
 %Sixth row
 for i = 0:7
     B(6,3*i+2) = dN(3,i+1);
@@ -78,11 +79,8 @@ D = [
     0, 0, 0, 0, d55, 0;
     0, 0, 0, 0, 0, d66;];
 
-%Preallocating the size of the stiffness matrix.
 K = zeros(24,24);
 
-%Multiplying matrixes to assembly stiffness matrix. Just need to integrate
-%to obtain the full stiffness matrix.
 K = B'*D*B;
 
 %Integrate the matriz in natural coordinates
@@ -94,15 +92,11 @@ K = int(K,z,-1,1);
 K = a*b*c*K;
 
 
-%%%CHECK:
+
 % Inserting values to compare with other stiffness-matrices.
 E = 10;
 nu = 0.3;
-a = 10;
-b = 10;
-c = 10;
 
-%Constitutive matrix
 val = E/((1+nu)*(1-2*nu));
 
 d11 = val*(1-nu);
@@ -115,6 +109,10 @@ d33 = d11;
 d13 = d12;
 d66 = d44;
 
-K_show = subs(K);
+a = 10;
+b = 10;
+c = 10;
 
-K_show = vpa(K_show,8); %% Display matrix
+B = subs(K);
+
+B = vpa(B,8);
