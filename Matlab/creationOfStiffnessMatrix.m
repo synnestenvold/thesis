@@ -4,7 +4,11 @@ function K = creationOfStiffnessMatrix ()
 % converted to natural coordinates and following the general way of
 % computing the stiffness matrix.
 
+%%%% OBS!!! lx, ly and lz is just half of the lengths of the cube. The cube
+%%%% has a size of 2*lx x 2*ly x 2*lz
+
 % k = ksi, e = eta, z = zeta
+clc;
 
 syms k real, syms e real, syms z real, syms lx real, syms ly real, syms lz real
 
@@ -93,18 +97,35 @@ K = int(K,z,-1,1);
 %Multiply with abc for convertion to cartessian coordinates
 K = lx*ly*lz*K;
 
-% Printing stiffness matrix to textfile
+% Printing stiffness matrix to textfile that could be copied to C#
 [rows, columns] = size(K);
 
-fileID = fopen('stivhet2.txt','w');
+fileID = fopen('stiffnessMatrix.txt','w');
 
 for i=1:rows
   fprintf (fileID,'{');
   for j = 1:columns
+      
+     c = char(K(i,j));
+     s = c;
+     
+     % C# dont use the notation ^2. Changed to multiplied together instead
+     for k = 1: length(c)
+         if (strcmp(c(k),'^'))
+            if(strcmp(c(k-1),'x'))
+                  s = strrep(s,'lx^2','(lx*lx)');
+            elseif(strcmp(c(k-1),'y'))
+                  s = strrep(s,'ly^2','(ly*ly)');
+            elseif(strcmp(c(k-1),'z'))
+                  s = strrep(s,'lz^2','(lz*lz)');
+            end
+         end
+     end
+     
      if (j < columns)
-         fprintf(fileID,'%s, ',char(vpa(K(i,j),2)));
+         fprintf(fileID,'%s, ',s);
      else
-         fprintf(fileID,'%s',char(vpa(K(i,j),2)));
+         fprintf(fileID,'%s',s);
      end
       
   end
@@ -141,4 +162,4 @@ d66 = d44;
 
 K_show = subs(K);
 
-K_show = vpa(K_show,8); %% Display matrix
+K_show = vpa(K_show,8) %% Display matrix
