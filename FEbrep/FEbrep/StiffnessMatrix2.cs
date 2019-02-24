@@ -17,9 +17,9 @@ namespace FEbrep
         {
             E = _E;
             nu = _nu;
-            lx = _lx;
-            ly = _ly;
-            lz = _lz;
+            lx = _lx/2;
+            ly = _ly/2;
+            lz = _lz/2;
         }
         public Matrix<double> CreateMatrix()
         {

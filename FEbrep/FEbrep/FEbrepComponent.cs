@@ -70,7 +70,7 @@ namespace FEbrep
             double ly = array[0].DistanceTo(array[3]);
             double lz = array[0].DistanceTo(array[4]);
 
-            StiffnessMatrix K_new = new StiffnessMatrix(10, 0.3, lx, ly, lz);
+            StiffnessMatrix2 K_new = new StiffnessMatrix2(10, 0.3, lx, ly, lz);
             Matrix<double> Ke = K_new.CreateMatrix(); //a dense matrix stored in an array, column major.
             Matrix<double> Ke_inverse = Ke.Inverse();
             double[] R_array = new double[] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1 };
