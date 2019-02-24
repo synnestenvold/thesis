@@ -6,7 +6,7 @@ function K = creationOfStiffnessMatrix ()
 
 % k = ksi, e = eta, z = zeta
 
-syms k real, syms e real, syms z real, syms a real, syms b real, syms c real
+syms k real, syms e real, syms z real, syms lx real, syms ly real, syms lz real
 
 
 %Shape functions
@@ -25,9 +25,9 @@ dN = sym(zeros(3,8));
 
 %Differentiation shape funcctions in natural coordinates
 for i = 1 : length(N)
-    dN(1,i) = diff(N(i),k)/a;
-    dN(2,i) = diff(N(i),e)/b;
-    dN(3,i) = diff(N(i),z)/c;
+    dN(1,i) = diff(N(i),k)/lx;
+    dN(2,i) = diff(N(i),e)/ly;
+    dN(3,i) = diff(N(i),z)/lz;
 end
 
 B = sym(zeros(6,24));
@@ -91,16 +91,40 @@ K = int(K,e,-1,1);
 K = int(K,z,-1,1);
 
 %Multiply with abc for convertion to cartessian coordinates
-K = a*b*c*K;
+K = lx*ly*lz*K;
+
+% Printing stiffness matrix to textfile
+[rows, columns] = size(K);
+
+fileID = fopen('stivhet2.txt','w');
+
+for i=1:rows
+  fprintf (fileID,'{');
+  for j = 1:columns
+     if (j < columns)
+         fprintf(fileID,'%s, ',char(vpa(K(i,j),2)));
+     else
+         fprintf(fileID,'%s',char(vpa(K(i,j),2)));
+     end
+      
+  end
+  if(i<rows)
+    fprintf (fileID,'},\n');
+  else
+    fprintf (fileID,'},');
+  end
+end
+
+fclose(fileID);
 
 
 %%%CHECK:
 % Inserting values to compare with other stiffness-matrices.
 E = 10;
 nu = 0.3;
-a = 10;
-b = 10;
-c = 10;
+lx = 10;
+ly = 10;
+lz = 10;
 
 %Constitutive matrix
 val = E/((1+nu)*(1-2*nu));
