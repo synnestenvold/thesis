@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+//using MathNet.Numerics.LinearAlgebra;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -29,9 +30,9 @@ namespace MeshBox
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBrepParameter("Brep", "B", "Inupt Brep as a cube", GH_ParamAccess.item);
-            pManager.AddNumberParameter("U Count", "U", "Number of quads in U direction", GH_ParamAccess.item, 1.0);
-            pManager.AddNumberParameter("V Count", "V", "Number of quads in V direction", GH_ParamAccess.item, 1.0);
-            pManager.AddNumberParameter("W Count", "W", "Number of quads in W direction", GH_ParamAccess.item, 1.0);
+            pManager.AddNumberParameter("U Count", "U", "Number of quads in U direction", GH_ParamAccess.item, 1);
+            pManager.AddNumberParameter("V Count", "V", "Number of quads in V direction", GH_ParamAccess.item, 1);
+            pManager.AddNumberParameter("W Count", "W", "Number of quads in W direction", GH_ParamAccess.item, 1);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -49,9 +50,9 @@ namespace MeshBox
             // First, we need to retrieve all data from the input parameters.
             // We'll start by declaring variables and assigning them starting values.
             Brep brp = new Brep();
-            double u = 1.0;
-            double v = 1.0;
-            double w = 1.0;
+            double u = 1;
+            double v = 1;
+            double w = 1;
 
             // Then we need to access the input parameters individually. 
             // When data cannot be extracted from a parameter, we should abort this method.
@@ -60,19 +61,46 @@ namespace MeshBox
             if (!DA.GetData(2, ref v)) return;
             if (!DA.GetData(3, ref w)) return;
 
-            // We should now validate the data and warn the user if invalid data is supplied.
-            if (u < 1.0 || v < 1.0 || w < 1.0)
+            if (u < 1 || v < 1 || w < 1)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One of the input parameters is less than one.");
                 return;
             }
 
-            Brep brp = new Brep();
+            List<Brep> breps = CreateNewBreps(brp, u, v, w);
 
-            Curve spiral = CreateSpiral(plane, radius0, radius1, turns);
+            DA.SetDataList(0, breps);
+        }
 
-            // Finally assign the spiral to the output parameter.
-            DA.SetData(0, spiral);
+        private List<Brep> CreateNewBreps(Brep brp, double u, double v, double w)
+        {
+            Point3d[] nodes = brp.DuplicateVertices();
+            double lx = nodes[0].DistanceTo(nodes[1]);
+            double ly = nodes[0].DistanceTo(nodes[3]);
+            double lz = nodes[0].DistanceTo(nodes[4]);
+
+            double lx_new = lx / u;
+            double ly_new = lx / v;
+            double lz_new = lx / w;
+            List<Brep> breps = new List<Brep>();
+
+            for (int i = 0; i < u; i++)
+            {
+                for (int j = 0; j < v; j++)
+                {
+                    for (int k = 0; k < w; k++)
+                    {
+                        Interval x = new Interval(lx_new*i, lx_new*(i+1));
+                        Interval y = new Interval(ly_new*j, ly_new*(j+1));
+                        Interval z = new Interval(lz_new*k, lz_new*(k+1));
+                        Box box_new = new Box(Plane.WorldXY, x, y, z);
+                        Brep brep_new = box_new.ToBrep();
+                        breps.Add(brep_new);
+
+                    }
+                }
+            }
+            return breps;
         }
 
         /// <summary>
