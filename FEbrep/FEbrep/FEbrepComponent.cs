@@ -42,9 +42,9 @@ namespace FEbrep
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Node 1", "1", "Displacement, stress and strain for node 1", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Node 2", "2", "Displacement, stress and strain for node 2", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Node 3", "3", "Displacement, stress and strain for node 3", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.list);
 
         }
         /// <summary>
@@ -90,9 +90,9 @@ namespace FEbrep
             //TODO: Fix tree structure, we want a list with 3 components: three deformations in a list, stress and strain.
             //List<List<double>> list = new List<List<double>> { u1, { 5 }, { 5 } };
             //DA.SetDataList(0, u1);
-            DA.SetData(0, u[0]);
-            DA.SetData(1, u[1]);
-            DA.SetData(2, u[2]);
+            DA.SetDataList(0, u);
+            DA.SetDataList(1, strain);
+            DA.SetDataList(2, stress);
      
             /*
             GH_Boolean => Boolean

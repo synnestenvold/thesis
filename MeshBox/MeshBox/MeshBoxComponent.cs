@@ -96,7 +96,6 @@ namespace MeshBox
                         Box box_new = new Box(Plane.WorldXY, x, y, z);
                         Brep brep_new = box_new.ToBrep();
                         breps.Add(brep_new);
-
                     }
                 }
             }
@@ -114,10 +113,6 @@ namespace MeshBox
             get { return GH_Exposure.primary; }
         }
 
-        /// <summary>
-        /// Provides an Icon for every component that will be visible in the User Interface.
-        /// Icons need to be 24x24 pixels.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
@@ -128,11 +123,6 @@ namespace MeshBox
             }
         }
 
-        /// <summary>
-        /// Each component must have a unique Guid to identify it. 
-        /// It is vital this Guid doesn't change otherwise old ghx files 
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return new Guid("b0c2516b-1b1a-4e27-a2e5-6c4e01655683"); }
