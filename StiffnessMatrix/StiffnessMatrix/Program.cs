@@ -163,20 +163,25 @@ namespace StiffnessMatrix
                     
                 }
             }
-
+            
             for (int i = 0; i < Ke.RowCount; i++)
             {
                 for (int j = 0; j < Ke.ColumnCount; j++)
                 {
-                    Console.Write(Ke[i, j]);
+                    Console.Write("{0:0.00}", Ke[i, j]);
                     Console.Write("| ");
+
+       
                 }
                 Console.WriteLine();
             }
             Console.WriteLine();
+            Console.WriteLine();
 
 
-            Console.ReadKey();
+
+
+
             return Ke;
             
         }
@@ -191,8 +196,17 @@ namespace StiffnessMatrix
 
         static void Main(string[] args)
         {
-            StiffnessMatrix s = new StiffnessMatrix(10, 1, 5, 5, 5);
-            s.createMatrix();
+            Matrix<double> Ke = Matrix<double>.Build.Dense(24, 24);
+
+            StiffnessMatrix s = new StiffnessMatrix(10, 0.3, 20, 20, 20);
+            Ke = s.createMatrix();
+
+           
+
+            Assembly a = new Assembly();
+            a.assemblyMatrix(Ke);
+
+            
 
         }
 

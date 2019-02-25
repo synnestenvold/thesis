@@ -1,4 +1,4 @@
-function K = creationOfStiffnessMatrix ()
+function T = creationOfStiffnessMatrix ()
 % Computing the stiffness matrix for a brick element. 8 noded hexahedron
 % element giving a 24x24 stiffness matrix. The shape functions are
 % converted to natural coordinates and following the general way of
