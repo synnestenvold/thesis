@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using MathNet.Numerics.LinearAlgebra;
+using Grasshopper;
+using Grasshopper.Kernel.Data;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -31,9 +33,8 @@ namespace MeshBox
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Breps", "B", "List of new Breps", GH_ParamAccess.list);
-            //pManager.AddNumberParameter("Connectivity", "C", "Connectivity matrix", GH_ParamAccess.list);
-
+            pManager.AddNumberParameter("Nodes", "N", "List of new node numbering", GH_ParamAccess.tree);
+         
         }
 
         /// <summary>
@@ -69,7 +70,16 @@ namespace MeshBox
 
             List<List<int>> global_numbering = CreateNewBreps(brp, u, v, w);
 
-            //DA.SetDataList(0, global_nodes);
+            
+            DataTree<int> tree = new DataTree<int>();
+            int i = 0;
+            foreach (List<int> innerList in global_numbering)
+            {
+                tree.AddRange(innerList, new GH_Path(new int[] { 0, i }));
+                i++;
+            }
+
+            DA.SetDataTree(0, tree);
         }
 
         private List<List<int>> CreateNewBreps(Brep brp, double u, double v, double w)
