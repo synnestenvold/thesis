@@ -26,7 +26,7 @@ namespace FEbrep
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddNumberParameter("Breps from MeshBox", "B", "Input Brep as a cube", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Nodes", "N", "List of new node numbering", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Lengths", "L", "lx, ly and lz for each cube", GH_ParamAccess.list);
         }
 
