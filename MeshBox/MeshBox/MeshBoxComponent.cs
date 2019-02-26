@@ -34,7 +34,8 @@ namespace MeshBox
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddNumberParameter("Nodes", "N", "List of new node numbering", GH_ParamAccess.tree);
-         
+            pManager.AddNumberParameter("Lengths", "L", "lx, ly and lz for the cubes", GH_ParamAccess.list);
+
         }
 
         /// <summary>
@@ -44,23 +45,15 @@ namespace MeshBox
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            // First, we need to retrieve all data from the input parameters.
-            // We'll start by declaring variables and assigning them starting values.
             Brep brp = new Brep();
             double u = 1;
             double v = 1;
             double w = 1;
-            
-       
 
-            // Then we need to access the input parameters individually. 
-            // When data cannot be extracted from a parameter, we should abort this method.
             if (!DA.GetData(0, ref brp)) return;
             if (!DA.GetData(1, ref u)) return;
             if (!DA.GetData(2, ref v)) return;
             if (!DA.GetData(3, ref w)) return;
-
-            //Point3d[] global_nodes = brp.DuplicateVertices();
 
             if (u < 1 || v < 1 || w < 1)
             {
@@ -68,9 +61,13 @@ namespace MeshBox
                 return;
             }
 
-            List<List<int>> global_numbering = CreateNewBreps(brp, u, v, w);
+            Point3d[] nodes = brp.DuplicateVertices();
+            double lx_new = (nodes[0].DistanceTo(nodes[1]))/u;
+            double ly_new = (nodes[0].DistanceTo(nodes[3]))/v;
+            double lz_new = (nodes[0].DistanceTo(nodes[4]))/w;
+            List<double> lengths = new List<double> { lx_new, ly_new, lz_new };
 
-            
+            List<List<int>> global_numbering = CreateNewBreps(brp, u, v, w);
             DataTree<int> tree = new DataTree<int>();
             int i = 0;
             foreach (List<int> innerList in global_numbering)
@@ -78,8 +75,9 @@ namespace MeshBox
                 tree.AddRange(innerList, new GH_Path(new int[] { 0, i }));
                 i++;
             }
-
+            
             DA.SetDataTree(0, tree);
+            DA.SetDataList(1, lengths);
         }
 
         private List<List<int>> CreateNewBreps(Brep brp, double u, double v, double w)

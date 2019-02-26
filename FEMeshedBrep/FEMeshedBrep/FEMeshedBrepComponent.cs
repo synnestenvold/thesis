@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using MathNet.Numerics.LinearAlgebra;
+using Grasshopper;
+using Grasshopper.Kernel.Data;
+using System.Collections;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -23,7 +26,8 @@ namespace FEbrep
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddBrepParameter("Breps from MeshBox", "B", "Input Brep as a cube", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Breps from MeshBox", "B", "Input Brep as a cube", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Lengths", "L", "lx, ly and lz for each cube", GH_ParamAccess.list);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -33,27 +37,32 @@ namespace FEbrep
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.list);
 
         }
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
-        /// to store data in output parameters.</param>
-        /// 
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<Curve> listaCrv = new List<Curve>();
+        
+            Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Number> tree = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Number>();
+            List<double> lengths = new List<double>();
 
-            Brep brp = new Brep();
-            Point3d[] array = new Point3d[8];
+            if (!DA.GetDataTree(0, out tree)) return;
+            if (!DA.GetDataList(1, lengths)) return;
+            
+            double lx = lengths[0];
+            double ly = lengths[1];
+            double lz = lengths[2];
 
-            if (!DA.GetData(0, ref brp)) return;
+            //Create K_tot
 
-            array = brp.DuplicateVertices();
+            for (int i = 0; i< tree.PathCount; i++)
+            {
+                IList node_list = tree.get_Branch(i);
 
-            double lx = array[0].DistanceTo(array[1]);
-            double ly = array[0].DistanceTo(array[3]);
-            double lz = array[0].DistanceTo(array[4]);
+
+                //TODO: Move all that you need into this for-loop
+                //K_tot = K_tot + Ke.....
+                
+            }
+            
 
             StiffnessMatrix2 K_new = new StiffnessMatrix2(10, 0.3, lx, ly, lz);
             Matrix<double> Ke = K_new.CreateMatrix(); //a dense matrix stored in an array, column major.
@@ -106,7 +115,7 @@ namespace FEbrep
 
         public override Guid ComponentGuid
         {
-            get { return new Guid("88eb5711-a923-44d9-af91-eb976d7b191e"); }
+            get { return new Guid("bf579881-ce88-48cf-9d76-3329422f8a25"); }
         }
     }
 }
