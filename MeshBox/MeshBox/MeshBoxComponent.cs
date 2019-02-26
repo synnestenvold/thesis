@@ -128,7 +128,7 @@ namespace MeshBox
                     {
                         if (brep_nodes[n].Equals(global_nodes[m])) //compare the point to the global node list
                         {
-                            brep_numbering.Add(m + 1); //and add the global node-index to the list
+                            brep_numbering.Add(m); //and add the global node-index to the list
                         }
                     }
                 }
