@@ -11,22 +11,22 @@ namespace StiffnessMatrix
     class Assembly
     {
 
-        public Matrix<double> assemblyMatrix(Matrix<double> Ke, int[] C_)
+        public Matrix<double> assemblyMatrix(Matrix<double> Ke, List<int> C)
         {
-           
+            
             Matrix<double> K = Matrix<double>.Build.Dense(81, 81);
-            int[] C = C_;
+            
+            
 
 
-            for (int i = 0; i<C.Length; i++)
+            for (int i = 0; i<C.Count; i++)
             {
-                for(int j = 0; j<C.Length; j++)
+                for(int j = 0; j<C.Count; j++)
                 {
 
-                    //int a = C[i];
-                    //int b = C[j];
+                    int a = C[i];
+                    int b = C[j];
 
-                    //Console.WriteLine("Ci: " + a + " Cj: " + b);
 
                     //Inserting 3x3 stiffness matri
                     for (int k = 0; k < 3; k++)
@@ -34,14 +34,14 @@ namespace StiffnessMatrix
                         for (int e = 0; e<3; e++)
                         {
                             K[3 * C[i] + k, 3 * C[j] + e] = Ke[3 * i + k, 3 * j + e];
-                            //Console.WriteLine("Ki: " + (3 * a + k) + " Kj: " + (3 *b + e) + " Kei: " + (3 * i + k) + " Kej: " + (3 * j + e)); 
+                            Console.WriteLine("K: (" + (3 * a + k)+","+ (3 *b + e) +") = " +"K: (" + (3 * i + k) +","+(3 * j + e)+")"); 
                         }
                     }
                 }
             }
 
 
-            
+            /*
             for (int i = 0; i < K.RowCount; i++)
 
             {
@@ -55,10 +55,15 @@ namespace StiffnessMatrix
                 Console.WriteLine();
             }
             Console.WriteLine();
+            */
 
             Console.ReadKey();
             return K;
-        }
+        
+        
+            
 
+           
+        }
     }
 }

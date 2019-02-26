@@ -201,9 +201,9 @@ namespace StiffnessMatrix
             StiffnessMatrix s = new StiffnessMatrix(10, 0.3, 20, 20, 20);
             Ke = s.createMatrix();
 
-            int[] C = new int[8]
+            List<int> C = new List<int>
              {
-                0,1,8,7,9,10,17,16
+                0,1,4,3,9,10,13,12
              };
 
             Assembly a = new Assembly();

@@ -11,16 +11,14 @@ namespace FEMeshedBrep
     class Assembly_StiffnessMatrix
     {
 
-        public Matrix<double> assemblyMatrix(Matrix<double> Ke, int[] C_)
+        public Matrix<double> assemblyMatrix(Matrix<double> Ke, List<int> C)
         {
 
             Matrix<double> K = Matrix<double>.Build.Dense(81, 81);
-            int[] C = C_;
 
-
-            for (int i = 0; i < C.Length; i++)
+            for (int i = 0; i < C.Count; i++)
             {
-                for (int j = 0; j < C.Length; j++)
+                for (int j = 0; j < C.Count; j++)
                 {
 
                     //Inserting 3x3 stiffness matri

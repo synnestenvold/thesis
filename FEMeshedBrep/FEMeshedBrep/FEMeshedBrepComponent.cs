@@ -13,7 +13,7 @@ using System.Collections;
 // folder in Grasshopper.
 // You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
-namespace FEbrep
+namespace FEMeshedBrep
 {
     public class FEbrepComponent : GH_Component
     {
@@ -51,26 +51,33 @@ namespace FEbrep
             double ly = lengths[1];
             double lz = lengths[2];
 
+            StiffnessMatrix2 sm = new StiffnessMatrix2(10, 0.3, lx, ly, lz);
+            Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
+
             //Create K_tot
+            Matrix<double> K_i = Matrix<double>.Build.Dense(81, 81);
+            Matrix<double> K_tot = Matrix<double>.Build.Dense(81, 81);
+
+            Matrix<double> K_e = sm.CreateMatrix(); //a dense matrix stored in an array, column major.
 
             for (int i = 0; i< tree.PathCount; i++)
             {
-                IList node_list = tree.get_Branch(i);
+                List<int> connectedNodes = (List<int>)tree.get_Branch(i);
 
+                K_i = aSM.assemblyMatrix(K_e, connectedNodes);
 
-                //TODO: Move all that you need into this for-loop
-                //K_tot = K_tot + Ke.....
+                K_tot = K_tot + K_i;
                 
             }
             
 
-            StiffnessMatrix2 K_new = new StiffnessMatrix2(10, 0.3, lx, ly, lz);
-            Matrix<double> Ke = K_new.CreateMatrix(); //a dense matrix stored in an array, column major.
-            Matrix<double> Ke_inverse = Ke.Inverse();
+            
+           
+            Matrix<double> K_tot_inverse = K_tot.Inverse();
             double[] R_array = new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1 };
             var V = Vector<double>.Build;
             var R = V.DenseOfArray(R_array);
-            Vector<double> u = Ke_inverse.Multiply(R);
+            Vector<double> u = K_tot_inverse.Multiply(R);
             double[] u1 = new double[] { u[0], u[1], u[2] };
 
             //Finding strain
