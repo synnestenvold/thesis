@@ -100,7 +100,7 @@ namespace MeshBox
                 {
                     for (int i = 0; i <= w; i++)
                     {
-                        if (i < u && j < v && k < w)
+                        if (i < w && j < v && k < u)
                         {
                             Interval x = new Interval(lx_new * i, lx_new * (i + 1));
                             Interval y = new Interval(ly_new * j, ly_new * (j + 1));
