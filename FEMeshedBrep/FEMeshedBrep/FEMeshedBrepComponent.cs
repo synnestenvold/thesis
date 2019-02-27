@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -7,6 +8,8 @@ using MathNet.Numerics.LinearAlgebra;
 using Grasshopper;
 using Grasshopper.Kernel.Data;
 using System.Collections;
+using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Data;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -26,7 +29,7 @@ namespace FEMeshedBrep
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddNumberParameter("Nodes", "N", "List of new node numbering", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Nodes", "N", "List of new node numbering", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Lengths", "L", "lx, ly and lz for each cube", GH_ParamAccess.list);
         }
 
@@ -41,7 +44,7 @@ namespace FEMeshedBrep
         protected override void SolveInstance(IGH_DataAccess DA)
         {
         
-            Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Number> tree = new Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Number>();
+            GH_Structure<GH_Integer> tree = new GH_Structure<GH_Integer>();
             List<double> lengths = new List<double>();
 
             if (!DA.GetDataTree(0, out tree)) return;
@@ -57,12 +60,15 @@ namespace FEMeshedBrep
             //Create K_tot
             Matrix<double> K_i = Matrix<double>.Build.Dense(81, 81);
             Matrix<double> K_tot = Matrix<double>.Build.Dense(81, 81);
+        
+          
 
             Matrix<double> K_e = sm.CreateMatrix(); //a dense matrix stored in an array, column major.
 
             for (int i = 0; i< tree.PathCount; i++)
             {
-                List<int> connectedNodes = (List<int>)tree.get_Branch(i);
+                List<GH_Integer> connectedNodes = (List<GH_Integer>)tree.get_Branch(i);
+        
 
                 K_i = aSM.assemblyMatrix(K_e, connectedNodes);
 
@@ -74,7 +80,11 @@ namespace FEMeshedBrep
             
            
             Matrix<double> K_tot_inverse = K_tot.Inverse();
-            double[] R_array = new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1 };
+            //double[] R_array = new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1 };
+            double[] R_array = new double[81];
+            Array.Clear(R_array, 0, R_array.Length);
+
+
             var V = Vector<double>.Build;
             var R = V.DenseOfArray(R_array);
             Vector<double> u = K_tot_inverse.Multiply(R);

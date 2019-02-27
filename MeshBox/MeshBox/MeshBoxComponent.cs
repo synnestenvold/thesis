@@ -33,7 +33,7 @@ namespace MeshBox
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Nodes", "N", "List of new node numbering", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Nodes", "N", "List of new node numbering", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Lengths", "L", "lx, ly and lz for the cubes", GH_ParamAccess.list);
 
         }
@@ -70,6 +70,7 @@ namespace MeshBox
             List<List<int>> global_numbering = CreateNewBreps(brp, u, v, w);
             DataTree<int> tree = new DataTree<int>();
             int i = 0;
+
             foreach (List<int> innerList in global_numbering)
             {
                 tree.AddRange(innerList, new GH_Path(new int[] { 0, i }));

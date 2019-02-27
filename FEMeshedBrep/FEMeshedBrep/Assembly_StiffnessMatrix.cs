@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using Grasshopper.Kernel.Types;
 
 namespace FEMeshedBrep
 {
     class Assembly_StiffnessMatrix
     {
 
-        public Matrix<double> assemblyMatrix(Matrix<double> Ke, List<int> C)
+        public Matrix<double> assemblyMatrix(Matrix<double> Ke, List<GH_Integer> C)
         {
 
             Matrix<double> K = Matrix<double>.Build.Dense(81, 81);
