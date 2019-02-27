@@ -74,6 +74,7 @@
     <Compile Include="FEMeshedBrepInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StiffnessMatrix2.cs" />
+    <Compile Include="StrainCalc.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

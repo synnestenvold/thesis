@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using MathNet.Numerics.LinearAlgebra;
 using Grasshopper;
+using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Data;
 
 // In order to load the result of this wizard, you will also need to
@@ -76,7 +77,8 @@ namespace MeshBox
                 tree.AddRange(innerList, new GH_Path(new int[] { 0, i }));
                 i++;
             }
-            
+
+
             DA.SetDataTree(0, tree);
             DA.SetDataList(1, lengths);
         }
