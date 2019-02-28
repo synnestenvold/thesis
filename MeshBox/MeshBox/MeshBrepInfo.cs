@@ -2,15 +2,15 @@
 using System.Drawing;
 using Grasshopper.Kernel;
 
-namespace MeshBox
+namespace MeshBrep
 {
-    public class MeshBoxInfo : GH_AssemblyInfo
+    public class MeshBrepInfo : GH_AssemblyInfo
     {
         public override string Name
         {
             get
             {
-                return "MeshBox";
+                return "MeshBrep";
             }
         }
         public override Bitmap Icon

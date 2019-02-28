@@ -3,23 +3,17 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using MathNet.Numerics.LinearAlgebra;
 using Grasshopper;
-using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Data;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
 namespace MeshBox
 {
-    public class MeshBoxComponent : GH_Component
+    public class MeshBrepComponent : GH_Component
     {
   
-        public MeshBoxComponent()
-          : base("MeshBox", "MeshB",
+        public MeshBrepComponent()
+          : base("MeshBrep", "MeshB",
               "Description",
               "Category3", "Subcategory3")
         {
@@ -39,11 +33,6 @@ namespace MeshBox
 
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
-        /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Brep brp = new Brep();
@@ -56,46 +45,44 @@ namespace MeshBox
             if (!DA.GetData(2, ref v)) return;
             if (!DA.GetData(3, ref w)) return;
 
-            if (u < 1 || v < 1 || w < 1)
+            if (u < 1 || v < 1 || w < 1) //None of the sides can be divided in less than one part
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "One of the input parameters is less than one.");
                 return;
             }
 
+            //Finding the length of the new elements
             Point3d[] nodes = brp.DuplicateVertices();
             double lx_new = (nodes[0].DistanceTo(nodes[1]))/u;
             double ly_new = (nodes[0].DistanceTo(nodes[3]))/v;
             double lz_new = (nodes[0].DistanceTo(nodes[4]))/w;
             List<double> lengths = new List<double> { lx_new, ly_new, lz_new };
 
-            List<List<int>> global_numbering = CreateNewBreps(brp, u, v, w);
+            //
+            List<List<int>> global_numbering = CreateNewBreps(brp, u, v, w, lx_new, ly_new, lz_new);
             DataTree<int> tree = new DataTree<int>();
             int i = 0;
 
+            //Create a tree structure of the list of new brep-nodes
             foreach (List<int> innerList in global_numbering)
             {
                 tree.AddRange(innerList, new GH_Path(new int[] { 0, i }));
                 i++;
             }
-
-
+            
             DA.SetDataTree(0, tree);
             DA.SetDataList(1, lengths);
         }
 
-        private List<List<int>> CreateNewBreps(Brep brp, double u, double v, double w)
+        private List<List<int>> CreateNewBreps(Brep brp, double u, double v, double w, double lx_new, double ly_new, double lz_new)
         {
-            Point3d[] nodes = brp.DuplicateVertices();
-            double lx = nodes[0].DistanceTo(nodes[1]);
-            double ly = nodes[0].DistanceTo(nodes[3]);
-            double lz = nodes[0].DistanceTo(nodes[4]);
+            //Creating a list of brep-elements
+            List<Brep> brep_elem = new List<Brep>();
 
-            double lx_new = lx / u;
-            double ly_new = lx / v;
-            double lz_new = lx / w;
-            List<Brep> breps = new List<Brep>();
-            List<Point3d> global_nodes = new List<Point3d>();
+            //Creating list of the coordinates of the big cube structure
+            List<Point3d> all_nodes = new List<Point3d>();
 
+            //Create brep-elements
             for (int k = 0; k <= u; k++)
             {
                 for (int j = 0; j <= v; j++)
@@ -109,42 +96,38 @@ namespace MeshBox
                             Interval z = new Interval(lz_new * k, lz_new * (k + 1));
                             Box box_new = new Box(Plane.WorldXY, x, y, z);
                             Brep brep_new = box_new.ToBrep();
-                            breps.Add(brep_new); //Adds the smaller breps to the list
+                            brep_elem.Add(brep_new); //Adds the smaller breps to the list
                         }
                         
+                        
                         Point3d node = new Point3d(lx_new*i, ly_new*j, lz_new*k);
-                        global_nodes.Add(node); //Adds each point to the list of global nodes
+                        all_nodes.Add(node); //Adds each point to the list of nodes
                     }
                 }
             }
+            //We also want to relation between the local nodes in the brep-elements and the global nodes
             List<List<int>> global_numbering = new List<List<int>>();
 
-            for (int b = 0; b< breps.Count; b++) //for each smaller brep...
+            for (int b = 0; b< brep_elem.Count; b++) //For each smaller brep...
             {
-                Point3d[] brep_nodes = breps[b].DuplicateVertices();
+                Point3d[] brep_nodes = brep_elem[b].DuplicateVertices();
                 List<int> brep_numbering = new List<int>();
-                for (int n = 0; n < brep_nodes.Length; n++) //and each node in the smaller brep...
+                for (int n = 0; n < brep_nodes.Length; n++) //And each node in the smaller brep...
                 {
-                    for (int m = 0; m < global_nodes.Count; m++)
+                    for (int m = 0; m < all_nodes.Count; m++)
                     {
-                        if (brep_nodes[n].Equals(global_nodes[m])) //compare the point to the global node list
+                        if (brep_nodes[n].Equals(all_nodes[m])) //Compare the local node to the global node list
                         {
-                            brep_numbering.Add(m); //and add the global node-index to the list
+                            brep_numbering.Add(m); //And add the global node-index to the list. NB: Starts at 0, not 1.
                         }
                     }
                 }
-                global_numbering.Add(brep_numbering); //putting all the lists in a list
+                global_numbering.Add(brep_numbering); //Putting all the lists in a list
             }
 
             return global_numbering;
         }
 
-        /// <summary>
-        /// The Exposure property controls where in the panel a component icon 
-        /// will appear. There are seven possible locations (primary to septenary), 
-        /// each of which can be combined with the GH_Exposure.obscure flag, which 
-        /// ensures the component will only be visible on panel dropdowns.
-        /// </summary>
         public override GH_Exposure Exposure
         {
             get { return GH_Exposure.primary; }

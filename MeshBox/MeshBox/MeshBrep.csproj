@@ -64,8 +64,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MeshBoxComponent.cs" />
-    <Compile Include="MeshBoxInfo.cs" />
+    <Compile Include="MeshBrepComponent.cs" />
+    <Compile Include="MeshBrepInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
