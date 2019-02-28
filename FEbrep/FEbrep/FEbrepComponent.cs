@@ -69,15 +69,6 @@ namespace FEbrep
             DA.SetDataList(0, u);
             DA.SetDataList(1, strain);
             DA.SetDataList(2, stress);
-     
-            /*
-            GH_Boolean => Boolean
-            GH_Integer => int
-            GH_Number => double
-            GH_Vector => Vector3d
-            GH_Matrix => Matrix
-            GH_Surface => Brep
-            */
         }
 
         protected override System.Drawing.Bitmap Icon

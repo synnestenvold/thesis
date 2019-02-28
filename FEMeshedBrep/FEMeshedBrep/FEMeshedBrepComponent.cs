@@ -95,6 +95,20 @@ namespace FEMeshedBrep
 
             Matrix<double> K_tot_inverse = K_tot.Inverse();
             //double[] R_array = new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1 };
+              
+            for (int i = 0; i < K_tot.RowCount; i++)
+
+            {
+                Console.WriteLine("Row: " + (i+1));
+                for (int j = 0; j < K_tot.ColumnCount; j++)
+                {
+                    Console.Write("{0:0.00}", K_tot[i, j]);
+                    Console.Write("| ");
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+            
             double[] R_array = new double[sizeOfM];
             Array.Clear(R_array, 0, R_array.Length);
 

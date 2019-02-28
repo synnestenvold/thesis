@@ -66,22 +66,8 @@ namespace FEbrep
                 {-(ly*(d12 - d55))/12, -(lx*(d23 + d66))/6, -lx*ly*lz*(d66/(9*(ly*ly)) - d55/(18*(lx*lx)) + d33/(9*(lz*lz))), (ly*(d12 + d55))/12, -(lx*(d23 + d66))/12, -lx*ly*lz*(d55/(18*(lx*lx)) + d66/(18*(ly*ly)) + d33/(18*(lz*lz))), (ly*(d12 + d55))/6, (lx*(d23 - d66))/12, -lx*ly*lz*(d55/(9*(lx*lx)) - d66/(18*(ly*ly)) + d33/(9*(lz*lz))), -(ly*(d12 - d55))/6, (lx*(d23 - d66))/6, lx*ly*lz*(d55/(9*(lx*lx)) + d66/(9*(ly*ly)) - (2*d33)/(9*(lz*lz))), -(ly*(d12 + d55))/12, -(lx*(d23 - d66))/6, lx*ly*lz*(d55/(9*(lx*lx)) - (2*d66)/(9*(ly*ly)) + d33/(9*(lz*lz))), (ly*(d12 - d55))/12, -(lx*(d23 - d66))/12, -lx*ly*lz*(d55/(9*(lx*lx)) + d66/(9*(ly*ly)) - d33/(18*(lz*lz))), (ly*(d12 - d55))/6, (lx*(d23 + d66))/12, lx*ly*lz*(d66/(9*(ly*ly)) - (2*d55)/(9*(lx*lx)) + d33/(9*(lz*lz))), -(ly*(d12 + d55))/6, (lx*(d23 + d66))/6, lx*ly*lz*((2*d55)/(9*(lx*lx)) + (2*d66)/(9*(ly*ly)) + (2*d33)/(9*(lz*lz)))},
 
             });
-
+            
             return Ke;
-
-            /*
-            for (int i = 0; i < Ke.RowCount; i++)
-            {
-                for (int j = 0; j < Ke.ColumnCount; j++)
-                {
-                    Console.Write(Ke[i, j]);
-                    Console.Write("| ");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-            Console.ReadKey();
-            */
         }
 
         public double[,] fillZeros(double[,] array)
