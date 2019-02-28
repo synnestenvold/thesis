@@ -70,7 +70,6 @@ namespace FEbrep
             return Ke;
 
             /*
-
             for (int i = 0; i < Ke.RowCount; i++)
             {
                 for (int j = 0; j < Ke.ColumnCount; j++)
@@ -81,30 +80,20 @@ namespace FEbrep
                 Console.WriteLine();
             }
             Console.WriteLine();
-
-
             Console.ReadKey();
-
             */
-
-
         }
 
         public double[,] fillZeros(double[,] array)
         {
-
             Array.Clear(array, 0, array.Length);
-
             return array;
         }
-
 
         static void Main(string[] args)
         {
             StiffnessMatrix2 s = new StiffnessMatrix2(10, 0.3, 10, 10, 10);
             s.CreateMatrix();
-
-
         }
 
 
