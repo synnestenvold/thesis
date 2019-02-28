@@ -6,7 +6,6 @@ using Rhino.Geometry;
 using MathNet.Numerics.LinearAlgebra;
 
 //This solution is outdated. Use FEMeshedBrep instead.
-
 namespace FEbrep
 {
     public class FEbrepComponent : GH_Component
