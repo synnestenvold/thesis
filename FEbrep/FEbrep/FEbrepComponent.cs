@@ -48,7 +48,7 @@ namespace FEbrep
             Matrix<double> Ke_inverse = Ke.Inverse();
 
             //Force vector R
-            double[] R_array = new double[] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1 };
+            double[] R_array = new double[] { 10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
             var V = Vector<double>.Build;
             var R = V.DenseOfArray(R_array);
 
