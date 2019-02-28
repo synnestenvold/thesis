@@ -15,7 +15,7 @@ namespace FEMeshedBrep
         {
 
             Vector <double> strain = Vector<double>.Build.Dense(6);
-            Vector<double> u_e = Vector<double>.Build.Dense(6);
+            Vector<double> u_e = Vector<double>.Build.Dense(24);
      
 
             for (int i = 0; i < connectivity.Count; i++)
@@ -26,7 +26,8 @@ namespace FEMeshedBrep
                 }
 
             }
-           
+
+            strain = B_e.Multiply(u_e);
 
             return strain;
         }

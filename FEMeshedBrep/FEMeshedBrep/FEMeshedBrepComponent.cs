@@ -36,8 +36,8 @@ namespace FEMeshedBrep
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
 
         }
 
@@ -85,7 +85,7 @@ namespace FEMeshedBrep
             //Matrix<double> B_tot = Matrix<double>.Build.Dense(6, sizeOfM);
 
             Matrix<double> K_e = sm.CreateMatrix(); //a dense matrix stored in an array, column major.
-            //Matrix<double> B_e = bm.CreateMatrix();
+            Matrix<double> B_e = bm.CreateMatrix();
 
            
 
@@ -95,8 +95,6 @@ namespace FEMeshedBrep
 
                 K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
                 K_tot = K_tot + K_i;
-                //B_i = aSM.assemblyMatrix(B_e, connectedNodes);
-                //B_tot = B_tot + B_i;
 
             }
 
@@ -111,14 +109,30 @@ namespace FEMeshedBrep
 
             var V = Vector<double>.Build;
             var R = V.DenseOfArray(R_array);
+
             Vector<double> u = K_tot_inverse.Multiply(R);
 
+            Cmatrix C_new = new Cmatrix(10, 0.3);
+            Matrix<double> C = C_new.CreateMatrix();
+
+
+
+            StrainCalc sC = new StrainCalc();
+            Vector<double> strain = Vector<double>.Build.Dense(6);
+            Vector<double> stress = Vector<double>.Build.Dense(6);
+
+            DataTree<double> treeStrain = new DataTree<double>();
+            DataTree<double> treeStress = new DataTree<double>();
+            //For calculating the strains and stress
             for (int i = 0; i < tree.PathCount; i++)
             {
                 List<GH_Integer> connectedNodes = (List<GH_Integer>)tree.get_Branch(i);
 
-                //B_i = aSM.assemblyMatrix(B_e, connectedNodes);
-                //B_tot = B_tot + B_i;
+                strain = sC.calcStress(B_e, u, connectedNodes);
+                treeStrain.AddRange(strain, new GH_Path(new int[] { 0, i }));
+
+                stress = C.Multiply(strain);
+                treeStress.AddRange(stress, new GH_Path(new int[] { 0, i }));
 
             }
 
@@ -131,15 +145,14 @@ namespace FEMeshedBrep
             //Vector<double> strain = B_tot.Multiply(u);
 
             //Finding stress
-            Cmatrix C_new = new Cmatrix(10, 0.3);
-            Matrix<double> C = C_new.CreateMatrix();
+            
             //Vector<double> stress = C.Multiply(strain);
             //TODO: Fix tree structure, we want a list with 3 components: three deformations in a list, stress and strain.
             //List<List<double>> list = new List<List<double>> { u1, { 5 }, { 5 } };
             //DA.SetDataList(0, u1);
             DA.SetDataList(0, u);
-            //DA.SetDataList(1, strain);
-            //DA.SetDataList(2, stress);
+            DA.SetDataTree(1, treeStrain);
+            DA.SetDataTree(2, treeStress);
   
 
             /*
