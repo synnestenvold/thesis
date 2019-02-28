@@ -22,7 +22,7 @@ namespace FEMeshedBrep
                 for (int j = 0; j < connectivity.Count; j++)
                 {
 
-                    //Inserting 3x3 stiffness matri
+                    //Inserting 3x3 stiffness matrix
                     for (int k = 0; k < 3; k++)
                     {
                         for (int e = 0; e < 3; e++)

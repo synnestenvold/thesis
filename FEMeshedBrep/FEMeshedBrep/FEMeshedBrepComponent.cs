@@ -11,10 +11,6 @@ using System.Collections;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Data;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
 namespace FEMeshedBrep
 {
@@ -38,12 +34,11 @@ namespace FEMeshedBrep
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.list);
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
-
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-        
+      
             GH_Structure<GH_Integer> tree = new GH_Structure<GH_Integer>();
             List<double> lengths = new List<double>();
 
@@ -54,6 +49,7 @@ namespace FEMeshedBrep
             double ly = lengths[1];
             double lz = lengths[2];
 
+            //Finding stiffness matrix for all the small elements, assuming E=10 and nu=0.3
             StiffnessMatrix2 sm = new StiffnessMatrix2(10, 0.3, lx, ly, lz);
             Bmatrix bm = new Bmatrix(lx, ly, lz);
             Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
@@ -76,8 +72,7 @@ namespace FEMeshedBrep
             }
 
             int sizeOfM = 3 * (max + 1);
-
-
+            
             //Create K_tot
             Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
             Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
@@ -105,8 +100,7 @@ namespace FEMeshedBrep
 
             R_array[0] = 1000;
             R_array[18] = -1000;
-
-
+            
             var V = Vector<double>.Build;
             var R = V.DenseOfArray(R_array);
 
@@ -114,15 +108,14 @@ namespace FEMeshedBrep
 
             Cmatrix C_new = new Cmatrix(10, 0.3);
             Matrix<double> C = C_new.CreateMatrix();
-
-
-
+            
             StrainCalc sC = new StrainCalc();
             Vector<double> strain = Vector<double>.Build.Dense(6);
             Vector<double> stress = Vector<double>.Build.Dense(6);
 
             DataTree<double> treeStrain = new DataTree<double>();
             DataTree<double> treeStress = new DataTree<double>();
+
             //For calculating the strains and stress
             for (int i = 0; i < tree.PathCount; i++)
             {
@@ -135,26 +128,16 @@ namespace FEMeshedBrep
                 treeStress.AddRange(stress, new GH_Path(new int[] { 0, i }));
 
             }
-
-
-
-            double[] u1 = new double[] { u[0], u[1], u[2] };
-
             //Finding strain
-            
             //Vector<double> strain = B_tot.Multiply(u);
 
             //Finding stress
-            
             //Vector<double> stress = C.Multiply(strain);
-            //TODO: Fix tree structure, we want a list with 3 components: three deformations in a list, stress and strain.
-            //List<List<double>> list = new List<List<double>> { u1, { 5 }, { 5 } };
-            //DA.SetDataList(0, u1);
+     
             DA.SetDataList(0, u);
             DA.SetDataTree(1, treeStrain);
             DA.SetDataTree(2, treeStress);
   
-
             /*
             GH_Boolean => Boolean
             GH_Integer => int
