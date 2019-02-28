@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MeshBox")]
+[assembly: AssemblyTitle("MeshBrep")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MeshBox")]
+[assembly: AssemblyProduct("MeshBrep")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4658afd1-55ac-426e-b7b0-eff6d9a51102")]
+[assembly: Guid("d31d9699-8534-41b8-9cc4-3af3b08c1bfc")]
 
 // Version information for an assembly consists of the following four values:
 //

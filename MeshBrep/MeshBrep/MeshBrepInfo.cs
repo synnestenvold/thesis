@@ -33,7 +33,7 @@ namespace MeshBrep
         {
             get
             {
-                return new Guid("1941b861-0e11-48ca-a878-c16328191eae");
+                return new Guid("12fdba69-c88d-404f-9c79-07818a41c14b");
             }
         }
 

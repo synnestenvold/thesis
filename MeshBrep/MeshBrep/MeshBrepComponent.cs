@@ -11,7 +11,7 @@ namespace MeshBox
 {
     public class MeshBrepComponent : GH_Component
     {
-  
+
         public MeshBrepComponent()
           : base("MeshBrep", "MeshB",
               "Description",
@@ -53,9 +53,9 @@ namespace MeshBox
 
             //Finding the length of the new elements
             Point3d[] nodes = brp.DuplicateVertices();
-            double lx_new = (nodes[0].DistanceTo(nodes[1]))/u;
-            double ly_new = (nodes[0].DistanceTo(nodes[3]))/v;
-            double lz_new = (nodes[0].DistanceTo(nodes[4]))/w;
+            double lx_new = (nodes[0].DistanceTo(nodes[1])) / u;
+            double ly_new = (nodes[0].DistanceTo(nodes[3])) / v;
+            double lz_new = (nodes[0].DistanceTo(nodes[4])) / w;
             List<double> lengths = new List<double> { lx_new, ly_new, lz_new };
 
             //
@@ -69,7 +69,7 @@ namespace MeshBox
                 tree.AddRange(innerList, new GH_Path(new int[] { 0, i }));
                 i++;
             }
-            
+
             DA.SetDataTree(0, tree);
             DA.SetDataList(1, lengths);
         }
@@ -98,9 +98,9 @@ namespace MeshBox
                             Brep brep_new = box_new.ToBrep();
                             brep_elem.Add(brep_new); //Adds the smaller breps to the list
                         }
-                        
-                        
-                        Point3d node = new Point3d(lx_new*i, ly_new*j, lz_new*k);
+
+
+                        Point3d node = new Point3d(lx_new * i, ly_new * j, lz_new * k);
                         all_nodes.Add(node); //Adds each point to the list of nodes
                     }
                 }
@@ -108,7 +108,7 @@ namespace MeshBox
             //We also want to relation between the local nodes in the brep-elements and the global nodes
             List<List<int>> global_numbering = new List<List<int>>();
 
-            for (int b = 0; b< brep_elem.Count; b++) //For each smaller brep...
+            for (int b = 0; b < brep_elem.Count; b++) //For each smaller brep...
             {
                 Point3d[] brep_nodes = brep_elem[b].DuplicateVertices();
                 List<int> brep_numbering = new List<int>();
@@ -145,7 +145,7 @@ namespace MeshBox
 
         public override Guid ComponentGuid
         {
-            get { return new Guid("b0c2516b-1b1a-4e27-a2e5-6c4e01655683"); }
+            get { return new Guid("ceb23bca-cd95-49ab-9580-01f32e152c2c"); }
         }
     }
 }

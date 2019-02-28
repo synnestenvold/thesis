@@ -2,7 +2,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
-namespace FEMeshedBrep
+namespace FEbrep
 {
     class StiffnessMatrix2
     {
