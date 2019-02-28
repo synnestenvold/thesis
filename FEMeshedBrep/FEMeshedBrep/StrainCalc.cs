@@ -22,7 +22,8 @@ namespace FEMeshedBrep
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    u_e.Add(u[connectivity[i].Value * 3 + j]);
+                    //u_e.Add(u[connectivity[i].Value * 3 + j]);
+                    u_e[3 * i + j] = u[connectivity[i].Value * 3 + j];
                 }
 
             }
@@ -30,6 +31,7 @@ namespace FEMeshedBrep
             strain = B_e.Multiply(u_e);
 
             return strain;
+            
         }
         
 

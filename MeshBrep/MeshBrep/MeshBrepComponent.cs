@@ -28,7 +28,7 @@ namespace MeshBox
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Nodes", "N", "List of new node numbering", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Nodes", "N", "List of new node numbering for each cube", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Lengths", "L", "lx, ly and lz for the cubes", GH_ParamAccess.list);
 
         }
