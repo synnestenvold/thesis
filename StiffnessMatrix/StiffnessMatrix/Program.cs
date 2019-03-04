@@ -176,7 +176,7 @@ namespace StiffnessMatrix
             };
 
             Assembly a = new Assembly();
-            a.assemblyMatrix(Ke,C);
+            //a.assemblyMatrix(Ke,C);
         }
 
 
