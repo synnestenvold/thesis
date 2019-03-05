@@ -58,12 +58,15 @@ namespace MeshTBrep
             //Finding the length of the new elements
             Point3d[] nodes = brp.DuplicateVertices();
             Curve[] edges = brp.DuplicateEdgeCurves();
+
+            //For hver brep u*v*w, finner den lengdene og regner ut nye i x y og z retning?? Antar vi dette
+
             double lx_new = (nodes[0].DistanceTo(nodes[1])) / u;
             double ly_new = (nodes[0].DistanceTo(nodes[3])) / v;
             double lz_new = (nodes[0].DistanceTo(nodes[4])) / w;
             List<double> lengths = new List<double> { lx_new, ly_new, lz_new };
 
-            //
+            //Heretter er det vel kanskje likt, bare at boksene lages en og en med nye lengder
             List<List<int>> global_numbering = CreateNewBreps(brp, u, v, w, lx_new, ly_new, lz_new);
             DataTree<int> tree = new DataTree<int>();
             DataTree<int> tree_lengths = new DataTree<int>();
