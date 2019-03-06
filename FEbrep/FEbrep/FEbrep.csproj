@@ -73,6 +73,7 @@
     </Compile>
     <Compile Include="StiffnessMatrix.cs" />
     <Compile Include="StiffnessMatrix2.cs" />
+    <Compile Include="StiffnessMatrix3.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

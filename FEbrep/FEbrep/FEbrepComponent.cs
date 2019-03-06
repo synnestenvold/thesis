@@ -6,6 +6,7 @@ using Rhino.Geometry;
 using MathNet.Numerics.LinearAlgebra;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Data;
+using System.Linq;
 
 //This solution is outdated. Use FEMeshedBrep instead.
 namespace FEbrep
@@ -36,22 +37,46 @@ namespace FEbrep
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Brep brp = new Brep();
-            Point3d[] array = new Point3d[8];
+            Point3d point = new Point3d(0, 0, 0);
+
+
+            
             List<GH_Integer> bcNodes = new List<GH_Integer>();
+            Point3d[] array = new Point3d[8];
+            List<Point3d> pList = Enumerable.Repeat(point, 8).ToList();
 
             if (!DA.GetData(0, ref brp)) return;
             if (!DA.GetDataList(1, bcNodes)) return;
 
             //Finding lengths of the Brep
             array = brp.DuplicateVertices();
-            double lx = array[0].DistanceTo(array[1]);
-            double ly = array[0].DistanceTo(array[3]);
-            double lz = array[0].DistanceTo(array[4]);
+
+
+            ///// Sorting points into similar for every brep taking in
+            for (int i = 0; i < array.Length; i++)
+            {
+                pList[i] = array[i];
+            }
+
+            pList = sortList(pList);
+
+            //Finding center of brep
+            VolumeMassProperties vmp = VolumeMassProperties.Compute(brp);
+            Point3d centroid = vmp.Centroid;
+
+            double lx = pList[0].DistanceTo(pList[1]);
+            double ly = pList[0].DistanceTo(pList[3]);
+            double lz = pList[0].DistanceTo(pList[4]);
+
 
             //Creating K, using the StiffnessMatrix2 class, with the lengths as input
+            
+            //StiffnessMatrix K_new = new StiffnessMatrix(10, 0.3, lx, ly,lz);
             StiffnessMatrix2 K_new = new StiffnessMatrix2(10, 0.3, lx, ly, lz);
-            Matrix<double> Ke = K_new.CreateMatrix(); //A dense matrix stored in an array, column major.
+            //StiffnessMatrix3 K_new = new StiffnessMatrix3(10, 0.3, pList,centroid);
 
+            Matrix<double> Ke = K_new.CreateMatrix(); //A dense matrix stored in an array, column major.
+            
             //Boundary condition
             //int[] bcNodes = new int[] { 0,1,2,3,4,5,6,7,8,9,10,11 };
             Ke = applyBC(Ke, bcNodes);
@@ -107,6 +132,25 @@ namespace FEbrep
             }
 
             return K;
+        }
+
+        public List<Point3d> sortList(List<Point3d> pList)
+        {
+            Point3d point = new Point3d(0, 0, 0);
+            List<Point3d> pListCorrect = Enumerable.Repeat(point, 8).ToList();
+
+            pList.Sort();
+
+            pListCorrect[0] = pList[0];
+            pListCorrect[1] = pList[4];
+            pListCorrect[2] = pList[6];
+            pListCorrect[3] = pList[2];
+            pListCorrect[4] = pList[1];
+            pListCorrect[5] = pList[5];
+            pListCorrect[6] = pList[7];
+            pListCorrect[7] = pList[3];
+
+            return pListCorrect;
         }
 
         protected override System.Drawing.Bitmap Icon
