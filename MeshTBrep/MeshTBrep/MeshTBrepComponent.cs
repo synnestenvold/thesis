@@ -68,11 +68,24 @@ namespace MeshTBrep
 
             Point3d[] sortedNodes = sortNodes(nodes, centroid);
 
-            List<Point3d> points = CreateNewBreps(sortedNodes, u, v, w);
+            List<List<Point3d>> points = CreateNewBreps(sortedNodes, u, v, w);
+            //List < Point3d > points = CreateNewBreps(sortedNodes, u, v, w);
+
+            DataTree<Point3d> tree = new DataTree<Point3d>();
+            int i = 0;
+
+            
+            //Create a tree structure of the list of new brep-nodes
+            foreach (List<Point3d> innerList in points)
+            {
+                tree.AddRange(innerList, new GH_Path(new int[] { 0, i }));
+                i++;
+            }
+            
 
 
             DA.SetDataList(0, sortedNodes);
-            DA.SetDataList(1, points);
+            DA.SetDataTree(1, tree);
             //DA.SetDataList(2, angles);
 
         }
@@ -127,10 +140,10 @@ namespace MeshTBrep
             return sortedNodes;
         }
 
-        //private List<List<int>> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
-        private List<Point3d> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
+        private List<List<Point3d>> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
+        //private List<Point3d> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
         {
-            List<List<int>> global_numbering = new List<List<int>>();
+
 
             /*
             Line uLine1 = new Line(nodes[0], nodes[1]);
@@ -197,6 +210,7 @@ namespace MeshTBrep
 
 
 
+            /*
 
             double lx1_new = (nodes[0].DistanceTo(nodes[1])) / u;
             double lx2_new = (nodes[3].DistanceTo(nodes[2])) / u;
@@ -209,96 +223,122 @@ namespace MeshTBrep
             Vector3d vec_x3 = (nodes[5] - nodes[4]) / (nodes[4].DistanceTo(nodes[5]));
             Vector3d vec_x4 = (nodes[6] - nodes[7]) / (nodes[7].DistanceTo(nodes[6]));
 
-            
+            */
+
+            double lz1_new = (nodes[0].DistanceTo(nodes[4])) / w;
+            double lz2_new = (nodes[1].DistanceTo(nodes[5])) / w;
+            double lz3_new = (nodes[2].DistanceTo(nodes[6])) / w;
+            double lz4_new = (nodes[3].DistanceTo(nodes[7])) / w;
+
+            Vector3d vec_z1 = (nodes[4] - nodes[0]) / (nodes[0].DistanceTo(nodes[4]));
+            Vector3d vec_z2 = (nodes[5] - nodes[1]) / (nodes[1].DistanceTo(nodes[5]));
+            Vector3d vec_z3 = (nodes[6] - nodes[2]) / (nodes[2].DistanceTo(nodes[6]));
+            Vector3d vec_z4 = (nodes[7] - nodes[3]) / (nodes[3].DistanceTo(nodes[7]));
+
             List<Point3d> points = new List<Point3d>();
 
 
-            for(int i = 0; i < u+1; i++)
+            for (int i = 0; i <= w; i++)
             {
                 //Lager punkt i u-retning
-                Point3d p1_u = new Point3d(nodes[0].X + lx1_new * i * vec_x1.X, nodes[0].Y + lx1_new * vec_x1.Y * i, nodes[0].Z + lx1_new * vec_x1.Z * i);
-                Point3d p2_u = new Point3d(nodes[3].X + lx2_new * i * vec_x2.X, nodes[3].Y + lx2_new * vec_x2.Y * i, nodes[3].Z + lx2_new * vec_x2.Z * i);
+                Point3d p1_w = new Point3d(nodes[0].X + lz1_new * i * vec_z1.X, nodes[0].Y + lz1_new * vec_z1.Y * i, nodes[0].Z + lz1_new * vec_z1.Z * i);
+                Point3d p2_w = new Point3d(nodes[1].X + lz2_new * i * vec_z2.X, nodes[1].Y + lz2_new * vec_z2.Y * i, nodes[1].Z + lz2_new * vec_z2.Z * i);
 
-                Point3d p3_u = new Point3d(nodes[4].X + lx3_new * i * vec_x3.X, nodes[4].Y + lx3_new * vec_x3.Y * i, nodes[4].Z + lx3_new * vec_x3.Z * i);
-                Point3d p4_u = new Point3d(nodes[7].X + lx4_new * i * vec_x4.X, nodes[7].Y + lx4_new * vec_x4.Y * i, nodes[7].Z + lx4_new * vec_x4.Z * i);
+                Point3d p3_w = new Point3d(nodes[2].X + lz3_new * i * vec_z3.X, nodes[2].Y + lz3_new * vec_z3.Y * i, nodes[2].Z + lz3_new * vec_z3.Z * i);
+                Point3d p4_w = new Point3d(nodes[3].X + lz4_new * i * vec_z4.X, nodes[3].Y + lz4_new * vec_z4.Y * i, nodes[3].Z + lz4_new * vec_z4.Z * i);
 
-                Vector3d vecV1 = (p2_u - p1_u) / (p1_u.DistanceTo(p2_u));
-                Vector3d vecV2 = (p4_u - p3_u) / (p3_u.DistanceTo(p4_u));
+                Vector3d vecV1 = (p4_w - p1_w) / (p1_w.DistanceTo(p4_w));
+                Vector3d vecV2 = (p3_w - p2_w) / (p2_w.DistanceTo(p3_w));
 
-                Double length_v1 = p1_u.DistanceTo(p2_u) / v;
-                Double length_v2 = p3_u.DistanceTo(p4_u) / v;
+                Double length_v1 = p1_w.DistanceTo(p4_w) / v;
+                Double length_v2 = p2_w.DistanceTo(p3_w) / v;
 
-                for (int j = 0; j < v+1; j++)
-                {
-                    Point3d p1_v = new Point3d(p1_u.X + length_v1 * j * vecV1.X, p1_u.Y + length_v1 * j * vecV1.Y, p1_u.Z + length_v1 * j * vecV1.Z);
-                    Point3d p2_v = new Point3d(p3_u.X + length_v2 * j * vecV2.X, p3_u.Y + length_v2 * j * vecV2.Y, p3_u.Z + length_v2 * j * vecV2.Z);
-
-                    Vector3d vecW1 = (p2_v - p1_v) / (p1_v.DistanceTo(p2_v));
-
-                    Double length_W1 = p1_v.DistanceTo(p2_v) / w;
-
-
-                    for (int k = 0; k < w+1; k++)
-                    {
-                        Point3d p1_w = new Point3d(p1_v.X + length_W1 * k * vecW1.X, p1_v.Y + length_W1 * k * vecW1.Y, p1_v.Z + length_W1 * k * vecW1.Z);
-                        points.Add(p1_w);
-
-                    }
-                }
-            }
-
-
-
-
-
-            /*
-            for (int k = 0; k <= u; k++)
-            {
-                for (int j = 0; j<= v; j++)
-                {
-                    for (int i = 0; i <= w; i++)
-                    {
-                        Point3d p1 = new Point3d(nodes[0].X + lx1_new * i * vec_x1.X, nodes[0].Y + lx1_new * vec_x1.Y * i, nodes[0].Z + lx1_new * vec_x1.Z * i);
-                        Point3d p2 = new Point3d(nodes[0].X + lx1_new * (i+1) * vec_x1.X, nodes[0].Y + lx1_new * vec_x1.Y * (i+1), nodes[0].Z + lx1_new * vec_x1.Z * (i+1));
-                        Point3d p4 = new Point3d(nodes[0].X + ly1_new * j
-                    }
-                }
-            }
-
-
-            for (int k = 0; k <= u; k++)
-            {
                 for (int j = 0; j <= v; j++)
                 {
-                    for (int i = 0; i <= w; i++)
+                    Point3d p1_v = new Point3d(p1_w.X + length_v1 * j * vecV1.X, p1_w.Y + length_v1 * j * vecV1.Y, p1_w.Z + length_v1 * j * vecV1.Z);
+                    Point3d p2_v = new Point3d(p2_w.X + length_v2 * j * vecV2.X, p2_w.Y + length_v2 * j * vecV2.Y, p2_w.Z + length_v2 * j * vecV2.Z);
+
+                    Vector3d vec_u1 = (p2_v - p1_v) / (p1_v.DistanceTo(p2_v));
+
+                    Double length_u1 = p1_v.DistanceTo(p2_v) / u;
+
+
+                    for (int k = 0; k <= u; k++)
                     {
-                        if (i < w && j < v && k < u)
-                        {
+                        Point3d p1_u = new Point3d(p1_v.X + length_u1 * k * vec_u1.X, p1_v.Y + length_u1 * k * vec_u1.Y, p1_v.Z + length_u1 * k * vec_u1.Z);
+                        points.Add(p1_u);
 
-                            Point3d p1 = 
-
-
-
-                            Interval x = new Interval(lx_new * i, lx_new * (i + 1));
-                            Interval y = new Interval(ly_new * j, ly_new * (j + 1));
-                            Interval z = new Interval(lz_new * k, lz_new * (k + 1));
-                            Box box_new = new Box(Plane.WorldXY, x, y, z);
-                            Brep brep_new = box_new.ToBrep();
-                            brep_elem.Add(brep_new); //Adds the smaller breps to the list
-                            brep.add()
-                        }
-
-
-                        Point3d node = new Point3d(lx_new * i, ly_new * j, lz_new * k);
-                        all_nodes.Add(node); //Adds each point to the list of nodes
                     }
                 }
             }
-            */
+
+            List<List<int>> global_numbering = new List<List<int>>();
+
+            List<List<Point3d>> points_brep = new List<List<Point3d>>();
 
 
-            return points;
-        }
+            //So much shitty code. Just trying to make it work:)))((:
+
+            List<int> listJumpOne = new List<int>();
+            List<int> listJumpUp = new List<int>();
+
+            for (int i = 0; i < w; i++)
+            {
+                for (int j = 0; j < v - 1; j++)
+                {
+                    listJumpOne.Add((u - 1) + j * (u + 1) + (u + 1) * (v + 1) * i);
+                }
+
+            }
+
+
+            for (int i = 0; i < w; i++)
+            {
+                listJumpUp.Add(u * v + (u - 2) + (u + 1) * (v + 1) * i);
+            }
+
+
+
+            int c = 0;
+
+            for (int j = 0; j < u * v * w; j++)
+            {
+                Console.WriteLine("CUBE: " + (j + 1));
+
+                List<Point3d> brp = new List<Point3d>();
+                brp.Add(points[c]);
+                brp.Add(points[c + 1]);
+                brp.Add(points[(u + 1) + (c + 1)]);
+                brp.Add(points[(u + 1) + (c)]);
+                brp.Add(points[(u + 1) * (v + 1) + c]);
+                brp.Add(points[(u + 1) * (v + 1) + (c + 1)]);
+                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (c + 1)]);
+                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (c)]);
+
+                points_brep.Add(brp);
+
+
+
+                if (listJumpOne.Contains(c))
+                {
+                    c += 1;
+                }
+
+
+                if (listJumpUp.Contains(c))
+                {
+                    c += (u + 2);
+                }
+
+                c++;
+            }
+
+
+
+
+            return points_brep;
+        }    
+
 
         public override GH_Exposure Exposure
         {
