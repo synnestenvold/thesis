@@ -15,7 +15,10 @@ namespace MeshTBrep
 {
     public class MeshTBrepComponent : GH_Component
     {
-        //Test
+
+        
+
+
         public MeshTBrepComponent()
           : base("MeshTBrep", "MeshTBrep",
               "Description",
@@ -34,9 +37,9 @@ namespace MeshTBrep
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             //pManager.AddIntegerParameter("Nodes", "N", "List of new node numbering for each cube", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Lengths", "P", "lx, ly and lz for the cubes", GH_ParamAccess.list);
-            pManager.AddPointParameter("Lengths", "C", "lx, ly and lz for the cubes", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Lengths", "A", "lx, ly and lz for the cubes", GH_ParamAccess.list);
+            pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
+            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
+            
 
         }
 
@@ -60,33 +63,38 @@ namespace MeshTBrep
 
             //Finding the length of the new elements
             Point3d[] nodes = brp.DuplicateVertices();
-            Curve[] edges = brp.DuplicateEdgeCurves();
-
             VolumeMassProperties vmp = VolumeMassProperties.Compute(brp);
             Point3d centroid = vmp.Centroid;
 
 
-            Point3d[] sortedNodes = sortNodes(nodes, centroid);
+            Point3d[] sortedNodes = sortNodes(nodes, centroid); //Sorting nodes so its introduced similar for every kind of 8 noded brep.
 
-            List<List<Point3d>> points = CreateNewBreps(sortedNodes, u, v, w);
-            //List < Point3d > points = CreateNewBreps(sortedNodes, u, v, w);
+            var tuple = CreateNewBreps(sortedNodes, u, v, w); // Getting corner nodes and connectivity matrix
+            List<List<Point3d>> points = tuple.Item1;
+            List<List<int>> connectivity = tuple.Item2;
 
-            DataTree<Point3d> tree = new DataTree<Point3d>();
+            DataTree<Point3d> treePoints = new DataTree<Point3d>();
+            DataTree<int> treeIndexes = new DataTree<int>();
+
             int i = 0;
-
-            
-            //Create a tree structure of the list of new brep-nodes
+            //Create a tree structure of the list of new brep-nodes with cartesian coordinates
             foreach (List<Point3d> innerList in points)
             {
-                tree.AddRange(innerList, new GH_Path(new int[] { 0, i }));
+                treePoints.AddRange(innerList, new GH_Path(new int[] { 0, i }));
                 i++;
             }
-            
 
+            i = 0;
 
-            DA.SetDataList(0, sortedNodes);
-            DA.SetDataTree(1, tree);
-            //DA.SetDataList(2, angles);
+            //Create a tree structure of the list of new brep-nodes with indexes
+            foreach (List<int> innerList in connectivity)
+            {
+                treeIndexes.AddRange(innerList, new GH_Path(new int[] { 0, i }));
+                i++;
+            }
+
+            DA.SetDataTree(0, treeIndexes);
+            DA.SetDataTree(1, treePoints);
 
         }
 
@@ -99,6 +107,7 @@ namespace MeshTBrep
             double[] lowerAngles = new double[nodes.Length / 2];
             double[] upperAngles = new double[nodes.Length / 2];
 
+            //Dividing in lower and upper nodes.
             for (int i = 0; i < nodes.Length / 2; i++)
             {
                 lowerNodes[i] = nodes[i];
@@ -122,9 +131,6 @@ namespace MeshTBrep
 
             Array.Sort(upperAngles, upperNodes);
 
-            //IEnumerable<Point3d> sortedNodes = lowerNodes.Union(upperNodes);
-
-            
             Point3d[] sortedNodes = new Point3d[8];
             
             sortedNodes[0] = lowerNodes[0];
@@ -139,92 +145,14 @@ namespace MeshTBrep
 
             return sortedNodes;
         }
-
-        private List<List<Point3d>> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
-        //private List<Point3d> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
+     
+        private Tuple<List<List<Point3d>>, List<List<int>>> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
         {
 
+            List<List<int>> global_numbering = new List<List<int>>();
+            List<List<Point3d>> points_brep = new List<List<Point3d>>();
 
-            /*
-            Line uLine1 = new Line(nodes[0], nodes[1]);
-            Line uLine2 = new Line(nodes[2], nodes[3]);
-            Line uLine3 = new Line(nodes[4], nodes[5]);
-            Line uLine4 = new Line(nodes[6], nodes[7]);
-
-            Line vLine1 = new Line(nodes[0], nodes[3]);
-            Line vLine2 = new Line(nodes[1], nodes[2]);
-            Line vLine3 = new Line(nodes[4], nodes[7]);
-            Line vLine4 = new Line(nodes[5], nodes[6]);
-
-            Line wLine1 = new Line(nodes[0], nodes[3]);
-            Line wLine2 = new Line(nodes[1], nodes[4]);
-            Line wLine3 = new Line(nodes[2], nodes[5]);
-            Line wLine4 = new Line(nodes[3], nodes[7]);
-
-
-            */
-
-            /*
-
-         double ly1_new = (nodes[0].DistanceTo(nodes[3])) / v;
-         double ly2_new = (nodes[1].DistanceTo(nodes[2])) / v;
-         double ly3_new = (nodes[4].DistanceTo(nodes[7])) / v;
-         double ly4_new = (nodes[5].DistanceTo(nodes[6])) / v;
-
-         double lz1_new = (nodes[0].DistanceTo(nodes[4])) / w;
-         double lz2_new = (nodes[1].DistanceTo(nodes[5])) / w;
-         double lz3_new = (nodes[2].DistanceTo(nodes[6])) / w;
-         double lz4_new = (nodes[3].DistanceTo(nodes[7])) / w;
-
-         */
-
-            /*
-            Vector3d vec_y1 = nodes[0] - nodes[3] / (nodes[0].DistanceTo(nodes[3]));
-            Vector3d vec_y2 = nodes[1] - nodes[2] / (nodes[1].DistanceTo(nodes[2]));
-            Vector3d vec_y3 = nodes[4] - nodes[7] / (nodes[4].DistanceTo(nodes[7]));
-            Vector3d vec_y4 = nodes[5] - nodes[6] / (nodes[5].DistanceTo(nodes[6]));
-
-            Vector3d vec_z1 = nodes[0] - nodes[4] / (nodes[0].DistanceTo(nodes[4]));
-            Vector3d vec_z2 = nodes[1] - nodes[5] / (nodes[1].DistanceTo(nodes[5]));
-            Vector3d vec_z3 = nodes[2] - nodes[6] / (nodes[2].DistanceTo(nodes[6]));
-            Vector3d vec_z4 = nodes[3] - nodes[7] / (nodes[3].DistanceTo(nodes[7]));
-            */
-
-
-            /*
-            List<Point3d> lx1 = new List<Point3d>(u + 1);
-            List<Point3d> lx2 = new List<Point3d>(u + 1);
-            List<Point3d> lx3 = new List<Point3d>(u + 1);
-            List<Point3d> lx4 = new List<Point3d>(u + 1);
-
-            List<Point3d> ly1 = new List<Point3d>(v + 1);
-            List<Point3d> ly2 = new List<Point3d>(v + 1);
-            List<Point3d> ly3 = new List<Point3d>(v + 1);
-            List<Point3d> ly4 = new List<Point3d>(v + 1);
-
-            List<Point3d> lz1 = new List<Point3d>(w + 1);
-            List<Point3d> lz2 = new List<Point3d>(w + 1);
-            List<Point3d> lz3 = new List<Point3d>(w + 1);
-            List<Point3d> lz4 = new List<Point3d>(w + 1);
-            */
-
-
-
-            /*
-
-            double lx1_new = (nodes[0].DistanceTo(nodes[1])) / u;
-            double lx2_new = (nodes[3].DistanceTo(nodes[2])) / u;
-            double lx3_new = (nodes[4].DistanceTo(nodes[5])) / u;
-            double lx4_new = (nodes[7].DistanceTo(nodes[6])) / u;
-
-         
-            Vector3d vec_x1 = (nodes[1] - nodes[0]) / (nodes[0].DistanceTo(nodes[1]));
-            Vector3d vec_x2 = (nodes[2] - nodes[3]) / (nodes[3].DistanceTo(nodes[2]));
-            Vector3d vec_x3 = (nodes[5] - nodes[4]) / (nodes[4].DistanceTo(nodes[5]));
-            Vector3d vec_x4 = (nodes[6] - nodes[7]) / (nodes[7].DistanceTo(nodes[6]));
-
-            */
-
+            //Distances in w-direction after dividing in w elements
             double lz1_new = (nodes[0].DistanceTo(nodes[4])) / w;
             double lz2_new = (nodes[1].DistanceTo(nodes[5])) / w;
             double lz3_new = (nodes[2].DistanceTo(nodes[6])) / w;
@@ -240,7 +168,7 @@ namespace MeshTBrep
 
             for (int i = 0; i <= w; i++)
             {
-                //Lager punkt i u-retning
+                //Creating points in w-directoin
                 Point3d p1_w = new Point3d(nodes[0].X + lz1_new * i * vec_z1.X, nodes[0].Y + lz1_new * vec_z1.Y * i, nodes[0].Z + lz1_new * vec_z1.Z * i);
                 Point3d p2_w = new Point3d(nodes[1].X + lz2_new * i * vec_z2.X, nodes[1].Y + lz2_new * vec_z2.Y * i, nodes[1].Z + lz2_new * vec_z2.Z * i);
 
@@ -255,6 +183,7 @@ namespace MeshTBrep
 
                 for (int j = 0; j <= v; j++)
                 {
+                    //Creating points in v-direction
                     Point3d p1_v = new Point3d(p1_w.X + length_v1 * j * vecV1.X, p1_w.Y + length_v1 * j * vecV1.Y, p1_w.Z + length_v1 * j * vecV1.Z);
                     Point3d p2_v = new Point3d(p2_w.X + length_v2 * j * vecV2.X, p2_w.Y + length_v2 * j * vecV2.Y, p2_w.Z + length_v2 * j * vecV2.Z);
 
@@ -265,6 +194,7 @@ namespace MeshTBrep
 
                     for (int k = 0; k <= u; k++)
                     {
+                        //Creating points in u-direction and adding them to the global nodes.
                         Point3d p1_u = new Point3d(p1_v.X + length_u1 * k * vec_u1.X, p1_v.Y + length_u1 * k * vec_u1.Y, p1_v.Z + length_u1 * k * vec_u1.Z);
                         points.Add(p1_u);
 
@@ -272,16 +202,16 @@ namespace MeshTBrep
                 }
             }
 
-            List<List<int>> global_numbering = new List<List<int>>();
 
-            List<List<Point3d>> points_brep = new List<List<Point3d>>();
+            // Putting together the breps:
+
+            //*******So much shitty code. Just trying to make it work:)))((:
+
+            List<int> listJumpOne = new List<int>(); // List with points where it must move in v-direction
+            List<int> listJumpUp = new List<int>(); // List with points where it must move upwards w-direction
 
 
-            //So much shitty code. Just trying to make it work:)))((:
-
-            List<int> listJumpOne = new List<int>();
-            List<int> listJumpUp = new List<int>();
-
+            //Finding indexes for jumping in v-direction
             for (int i = 0; i < w; i++)
             {
                 for (int j = 0; j < v - 1; j++)
@@ -291,59 +221,61 @@ namespace MeshTBrep
 
             }
 
-
+            //Finding indexes for jumping in w-direction
             for (int i = 0; i < w; i++)
             {
-                listJumpUp.Add(u * v + (u - 2) + (u + 1) * (v + 1) * i);
+                listJumpUp.Add((u + 1) * (v + 1) - (u + 1) - 2 + (u + 1) * (v + 1) * i);
             }
 
-
-
-            int c = 0;
-
-            for (int j = 0; j < u * v * w; j++)
+            int index = 0;
+            
+            for (int i = 0; i < u * v * w; i++) // Creating u*v*w new breps having the 8 corner points
             {
-                Console.WriteLine("CUBE: " + (j + 1));
-
+    
                 List<Point3d> brp = new List<Point3d>();
-                brp.Add(points[c]);
-                brp.Add(points[c + 1]);
-                brp.Add(points[(u + 1) + (c + 1)]);
-                brp.Add(points[(u + 1) + (c)]);
-                brp.Add(points[(u + 1) * (v + 1) + c]);
-                brp.Add(points[(u + 1) * (v + 1) + (c + 1)]);
-                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (c + 1)]);
-                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (c)]);
+
+                //Putting together the 8 points to make the brep
+                brp.Add(points[index]);
+                brp.Add(points[index + 1]);
+                brp.Add(points[(u + 1) + (index + 1)]);
+                brp.Add(points[(u + 1) + (index)]);
+                brp.Add(points[(u + 1) * (v + 1) + index]);
+                brp.Add(points[(u + 1) * (v + 1) + (index + 1)]);
+                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (index + 1)]);
+                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (index)]);
 
                 points_brep.Add(brp);
 
+                //Showing the connectivity between local and global nodes
+                List<int> connectivity = new List<int>();
+                connectivity.Add(index);
+                connectivity.Add(index + 1);
+                connectivity.Add((u + 1) + (index + 1));
+                connectivity.Add((u + 1) + (index));
+                connectivity.Add((u + 1) * (v + 1) + index);
+                connectivity.Add((u + 1) * (v + 1) + (index + 1));
+                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index + 1));
+                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index));
 
+                global_numbering.Add(connectivity);
 
-                if (listJumpOne.Contains(c))
+                if (listJumpOne.Contains(index)) //Checking if we need to move to next row
                 {
-                    c += 1;
+                    index += 1;
                 }
 
 
-                if (listJumpUp.Contains(c))
+                if (listJumpUp.Contains(index)) //Checking if we need to move to next level
                 {
-                    c += (u + 2);
+                    index += (u + 2);
                 }
 
-                c++;
+                index++;
             }
 
-
-
-
-            return points_brep;
+            return Tuple.Create(points_brep,global_numbering);
+           
         }    
-
-
-        public override GH_Exposure Exposure
-        {
-            get { return GH_Exposure.primary; }
-        }
 
         protected override System.Drawing.Bitmap Icon
         {
