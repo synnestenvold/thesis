@@ -24,7 +24,27 @@ namespace FEMeshTBrep
 
         }
 
-        public Matrix<double> CreateMatrix(List<Point3d> pList, Point3d centroid)
+        public Point3d findCentroid(List<GH_Point> pList)
+        {
+          
+            // HAVE TO FIND CENTROID CORRECTLY. NOT WORKING RIGHT NOW
+            double c_x = 0;
+            double c_y = 0;
+            double c_z = 0;
+
+            foreach (GH_Point p in pList)
+            {
+                c_x += p.Value.X;
+                c_y += p.Value.Y;
+                c_z += p.Value.Z;
+            }
+
+            Point3d centroid = new Point3d(c_x / 8, c_y / 8, c_z / 8);
+
+            return centroid;
+        }
+
+        public Matrix<double> CreateMatrix(List<GH_Point> pList)
 
         {
             //double[,] array = new double[6, 4];
@@ -55,10 +75,11 @@ namespace FEMeshTBrep
 
             Point3d point = new Point3d(0, 0, 0);
             List<Point3d> pNatural = Enumerable.Repeat(point, 8).ToList();
+            Point3d centroid = findCentroid(pList);
 
             for (int i = 0; i < pList.Count; i++)
             {
-                Point3d pointA = new Point3d(pList[i].X - centroid.X, pList[i].Y - centroid.Y, pList[i].Z - centroid.Z);
+                Point3d pointA = new Point3d(pList[i].Value.X - centroid.X, pList[i].Value.Y - centroid.Y, pList[i].Value.Z - centroid.Z);
                 pNatural[i] = pointA;
 
             }

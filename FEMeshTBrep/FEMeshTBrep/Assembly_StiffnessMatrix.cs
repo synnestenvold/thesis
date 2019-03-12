@@ -7,7 +7,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using Grasshopper.Kernel.Types;
 
-namespace FEMeshedBrep
+namespace FEMeshTBrep
 {
     class Assembly_StiffnessMatrix
     {
