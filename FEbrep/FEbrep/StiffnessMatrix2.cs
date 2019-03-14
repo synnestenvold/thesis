@@ -78,8 +78,8 @@ namespace FEbrep
 
         static void Main(string[] args)
         {
-            StiffnessMatrix2 s = new StiffnessMatrix2(10, 0.3, 10, 10, 10);
-            s.CreateMatrix();
+            //StiffnessMatrix2 s = new StiffnessMatrix2(10, 0.3, 10, 10, 10);
+            //s.CreateMatrix();
         }
 
 

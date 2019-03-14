@@ -107,7 +107,7 @@ namespace FEMeshedBrep
 
             //Force vector R
             double[] R_array = new double[sizeOfM];
-            R_array[12] = 10;
+            R_array[56] = -1;
             var V = Vector<double>.Build;
             var R = V.DenseOfArray(R_array);
 

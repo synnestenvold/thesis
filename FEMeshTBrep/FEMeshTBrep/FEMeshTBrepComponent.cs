@@ -54,8 +54,8 @@ namespace FEMeshTBrep
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.list);
-            //pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
-            //pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
 
         }
 
@@ -103,16 +103,19 @@ namespace FEMeshTBrep
         Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
         Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
 
-         //a dense matrix stored in an array, column major.
-        //Matrix<double> B_e = bm.CreateMatrix();
-        
+            //a dense matrix stored in an array, column major.
+            //Matrix<double> B_e = bm.CreateMatrix();
+
+            List <Matrix<Double>> B_matrixes = new List<Matrix<Double>>();
 
         for (int i = 0; i < treeConnectivity.PathCount; i++)
         {
             List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
             List<GH_Point>connectedPoints = (List<GH_Point>)treePoints.get_Branch(i);
 
-            Matrix<double> K_e = sm.CreateMatrix(connectedPoints);
+            var tuple = sm.CreateMatrix(connectedPoints);
+            Matrix<double> K_e = tuple.Item1;
+            B_matrixes.Add(tuple.Item2);
 
             K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
             K_tot = K_tot + K_i;
@@ -126,7 +129,7 @@ namespace FEMeshTBrep
 
         //Force vector R
         double[] R_array = new double[sizeOfM];
-        R_array[12] = 10;
+        R_array[56] = -1;
         var V = Vector<double>.Build;
         var R = V.DenseOfArray(R_array);
 
@@ -145,13 +148,13 @@ namespace FEMeshTBrep
         DataTree<double> treeStrain = new DataTree<double>();
         DataTree<double> treeStress = new DataTree<double>();
 
-        /*
+        
         //For calculating the strains and stress
-        for (int i = 0; i < tree.PathCount; i++)
+        for (int i = 0; i < treeConnectivity.PathCount; i++)
         {
-            List<GH_Integer> connectedNodes = (List<GH_Integer>)tree.get_Branch(i);
+            List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
 
-            strain = sC.calcStrain(B_e, u, connectedNodes);
+            strain = sC.calcStrain(B_matrixes[i], u, connectedNodes);
             treeStrain.AddRange(strain, new GH_Path(new int[] { 0, i }));
 
             stress = C.Multiply(strain);
@@ -163,12 +166,11 @@ namespace FEMeshTBrep
 
         //Finding stress
         //Vector<double> stress = C.Multiply(strain);
-        */
             
 
             DA.SetDataList(0, u);
-            //DA.SetDataTree(1, treeStrain);
-            //DA.SetDataTree(2, treeStress);
+            DA.SetDataTree(1, treeStrain);
+            DA.SetDataTree(2, treeStress);
 
 
 

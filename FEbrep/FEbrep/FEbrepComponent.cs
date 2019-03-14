@@ -51,7 +51,7 @@ namespace FEbrep
             //Finding lengths of the Brep
             array = brp.DuplicateVertices();
 
-
+            /*
             ///// Sorting points into similar for every brep taking in
             for (int i = 0; i < array.Length; i++)
             {
@@ -59,21 +59,22 @@ namespace FEbrep
             }
 
             pList = sortList(pList);
+            */
 
             //Finding center of brep
             VolumeMassProperties vmp = VolumeMassProperties.Compute(brp);
             Point3d centroid = vmp.Centroid;
 
-            double lx = pList[0].DistanceTo(pList[1]);
-            double ly = pList[0].DistanceTo(pList[3]);
-            double lz = pList[0].DistanceTo(pList[4]);
+            double lx = array[0].DistanceTo(array[1]);
+            double ly = array[0].DistanceTo(array[3]);
+            double lz = array[0].DistanceTo(array[4]);
 
 
             //Creating K, using the StiffnessMatrix2 class, with the lengths as input
             
-            //StiffnessMatrix K_new = new StiffnessMatrix(10, 0.3, lx, ly,lz);
-            StiffnessMatrix2 K_new = new StiffnessMatrix2(210000, 0.3, lx, ly, lz);
-            //StiffnessMatrix3 K_new = new StiffnessMatrix3(10, 0.3, pList,centroid);
+            //StiffnessMatrix K_new = new StiffnessMatrix(210000, 0.3, lx, ly,lz);
+            StiffnessMatrix2 K_new = new StiffnessMatrix2(10, 0.3, lx, ly, lz);
+            //StiffnessMatrix3 K_new = new StiffnessMatrix3(210000, 0.3, pList,centroid);
 
             Matrix<double> Ke = K_new.CreateMatrix(); //A dense matrix stored in an array, column major.
             
@@ -83,14 +84,19 @@ namespace FEbrep
 
             Matrix<double> Ke_inverse = Ke.Inverse();
 
+            
+
             //Force vector R
-            double[] R_array = new double[] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0 };
+            double[] R_array = new double[] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1 };
             var V = Vector<double>.Build;
             var R = V.DenseOfArray(R_array);
+            
             
 
             //Caluculation of the displacement vector u
             Vector<double> u = Ke_inverse.Multiply(R);
+
+            Vector<Double> f_test = Ke.Multiply(u);
 
             //Finding strain using the B matrix
             Bmatrix B_new = new Bmatrix(lx, ly, lz);
@@ -98,12 +104,12 @@ namespace FEbrep
             Vector<double> strain = B.Multiply(u);
 
             //Finding stress using the C matrix
-            Cmatrix C_new = new Cmatrix(10, 0.3);
+            Cmatrix C_new = new Cmatrix(210000, 0.3);
             Matrix<double> C = C_new.CreateMatrix();
             Vector<double> stress = C.Multiply(strain);
 
             DA.SetDataList(0, u);
-            DA.SetDataList(1, strain);
+            DA.SetDataList(1, f_test);
             DA.SetDataList(2, stress);
 
         }
@@ -134,6 +140,7 @@ namespace FEbrep
             return K;
         }
 
+        
         public List<Point3d> sortList(List<Point3d> pList)
         {
             Point3d point = new Point3d(0, 0, 0);
