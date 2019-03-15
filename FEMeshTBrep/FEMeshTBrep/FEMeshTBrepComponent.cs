@@ -9,6 +9,7 @@ using Grasshopper;
 using Grasshopper.Kernel.Data;
 using System.Collections;
 using Grasshopper.Kernel.Types;
+using System.Linq;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -46,6 +47,7 @@ namespace FEMeshTBrep
             pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
             pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Boundary conditions", "BC", "Nodes that are constrained", GH_ParamAccess.list);
+            pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -56,6 +58,7 @@ namespace FEMeshTBrep
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.list);
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
+           
 
         }
 
@@ -69,104 +72,120 @@ namespace FEMeshTBrep
             GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
             GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
             List<GH_Integer> bcNodes = new List<GH_Integer>();
+            List<string> loadtxt = new List<string>();
+            
 
             if (!DA.GetDataTree(0, out treeConnectivity)) return;
             if (!DA.GetDataTree(1, out treePoints)) return;
             if (!DA.GetDataList(2, bcNodes)) return;
+            if (!DA.GetDataList(3, loadtxt)) return;
 
 
-        //Finding stiffness matrix for all the small elements, assuming E=10 and nu=0.3
-        StiffnessMatrix sm = new StiffnessMatrix(E, nu);
-        //Bmatrix bm = new Bmatrix(lx, ly, lz);
-        Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
+            //Finding stiffness matrix for all the small elements, assuming E=10 and nu=0.3
+            StiffnessMatrix sm = new StiffnessMatrix(E, nu);
+            //Bmatrix bm = new Bmatrix(lx, ly, lz);
+            Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
 
-        // Temporary way of finding the size of stiffness matrix and B matrix
-        int max = 0;
+            // Temporary way of finding the size of stiffness matrix and B matrix
+            int max = 0;
 
-        for (int i = 0; i < treeConnectivity.PathCount; i++)
-        {
-            List<GH_Integer> cNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-
-            for (int j = 0; j < cNodes.Count; j++)
+            for (int i = 0; i < treeConnectivity.PathCount; i++)
             {
-                if (cNodes[j].Value > max)
+                List<GH_Integer> cNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
+
+                for (int j = 0; j < cNodes.Count; j++)
                 {
-                    max = cNodes[j].Value;
+                    if (cNodes[j].Value > max)
+                    {
+                        max = cNodes[j].Value;
+                    }
                 }
+
             }
 
-        }
+            int sizeOfM = 3 * (max + 1);
 
-        int sizeOfM = 3 * (max + 1);
-
-        //Create K_tot
-        Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
-        Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
+            //Create K_tot
+            Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
+            Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
 
             //a dense matrix stored in an array, column major.
             //Matrix<double> B_e = bm.CreateMatrix();
 
-            List <Matrix<Double>> B_matrixes = new List<Matrix<Double>>();
+            List<Matrix<Double>> B_matrixes = new List<Matrix<Double>>();
+          
+            Point3d point = new Point3d(0, 0, 0);
+            List<Point3d> pointList = Enumerable.Repeat(point, sizeOfM/3).ToList();
 
-        for (int i = 0; i < treeConnectivity.PathCount; i++)
-        {
-            List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-            List<GH_Point>connectedPoints = (List<GH_Point>)treePoints.get_Branch(i);
+            for (int i = 0; i < treeConnectivity.PathCount; i++)
+            {
+                List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
+                List<GH_Point> connectedPoints = (List<GH_Point>)treePoints.get_Branch(i);
 
-            var tuple = sm.CreateMatrix(connectedPoints);
-            Matrix<double> K_e = tuple.Item1;
-            B_matrixes.Add(tuple.Item2);
+                var tuple = sm.CreateMatrix(connectedPoints);
+                Matrix<double> K_e = tuple.Item1;
+                B_matrixes.Add(tuple.Item2);
 
-            K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
-            K_tot = K_tot + K_i;
+                K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
+                K_tot = K_tot + K_i;
 
-        }
-        //Boundary condition
+                for(int j = 0; j < connectedNodes.Count; j++ )
+                {
+                    pointList[connectedNodes[j].Value] = connectedPoints[j].Value;
+                }
 
-        K_tot = applyBC(K_tot, bcNodes);
-
-        Matrix<double> K_tot_inverse = K_tot.Inverse();
-
-        //Force vector R
-        double[] R_array = new double[sizeOfM];
-        R_array[56] = -1;
-        var V = Vector<double>.Build;
-        var R = V.DenseOfArray(R_array);
-
-
-        //Caluculation of the displacement vector u
-        Vector<double> u = K_tot_inverse.Multiply(R);
-
-
-        Cmatrix C_new = new Cmatrix(E, nu);
-        Matrix<double> C = C_new.CreateMatrix();
-
-        StrainCalc sC = new StrainCalc();
-        Vector<double> strain = Vector<double>.Build.Dense(6);
-        Vector<double> stress = Vector<double>.Build.Dense(6);
-
-        DataTree<double> treeStrain = new DataTree<double>();
-        DataTree<double> treeStress = new DataTree<double>();
-
-        
-        //For calculating the strains and stress
-        for (int i = 0; i < treeConnectivity.PathCount; i++)
-        {
-            List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-
-            strain = sC.calcStrain(B_matrixes[i], u, connectedNodes);
-            treeStrain.AddRange(strain, new GH_Path(new int[] { 0, i }));
-
-            stress = C.Multiply(strain);
-            treeStress.AddRange(stress, new GH_Path(new int[] { 0, i }));
-
-        }
-        //Finding strain
-        //Vector<double> strain = B_tot.Multiply(u);
-
-        //Finding stress
-        //Vector<double> stress = C.Multiply(strain);
+            }
             
+            //Check if stiffness matrix is symmetric
+            if (!IsSymmetric(K_tot)) //Some error thing
+
+            //Boundary condition
+            K_tot = applyBC(K_tot, bcNodes);
+
+            Matrix<double> K_tot_inverse = K_tot.Inverse();
+
+            //Force vector R
+            double[] R_array = new double[sizeOfM];
+
+            R_array = setLoads(R_array, loadtxt);
+            //R_array[56] = -1;
+            var V = Vector<double>.Build;
+            var R = V.DenseOfArray(R_array);
+
+
+            //Caluculation of the displacement vector u
+            Vector<double> u = K_tot_inverse.Multiply(R);
+
+
+            Cmatrix C_new = new Cmatrix(E, nu);
+            Matrix<double> C = C_new.CreateMatrix();
+
+            StrainCalc sC = new StrainCalc();
+            Vector<double> strain = Vector<double>.Build.Dense(6);
+            Vector<double> stress = Vector<double>.Build.Dense(6);
+
+            DataTree<double> treeStrain = new DataTree<double>();
+            DataTree<double> treeStress = new DataTree<double>();
+
+
+            //For calculating the strains and stress
+            for (int i = 0; i < treeConnectivity.PathCount; i++)
+            {
+                List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
+
+                strain = sC.calcStrain(B_matrixes[i], u, connectedNodes);
+                treeStrain.AddRange(strain, new GH_Path(new int[] { 0, i }));
+
+                stress = C.Multiply(strain);
+                treeStress.AddRange(stress, new GH_Path(new int[] { 0, i }));
+
+            }
+            //Finding strain
+            //Vector<double> strain = B_tot.Multiply(u);
+
+            //Finding stress
+            //Vector<double> stress = C.Multiply(strain);
+
 
             DA.SetDataList(0, u);
             DA.SetDataTree(1, treeStrain);
@@ -210,6 +229,38 @@ namespace FEMeshTBrep
 
             return K;
         }
+
+        public double[] setLoads(double[] R_array, List<String> loadtxt)
+        {
+            for (int i = 0; i < loadtxt.Count; i++)
+            {
+                string coordstr = (loadtxt[i].Split(',')[0]);
+                string loadstr = (loadtxt[i].Split(',')[1]);
+
+                int index = Int32.Parse(coordstr);
+                double load = Math.Round(double.Parse(loadstr));
+
+                R_array[index] = load;
+            }
+
+            return R_array;
+        }
+
+        private static bool IsSymmetric(Matrix<Double> K)
+        {
+
+            for (int i = 0; i<K.RowCount; i++)
+            {
+                for (int j = 0; j<i; j++)
+                {
+                    if (K[i, j] != K[j, i])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+         }
 
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.
