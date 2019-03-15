@@ -73,7 +73,7 @@ namespace FEbrep
             //Creating K, using the StiffnessMatrix2 class, with the lengths as input
             
             //StiffnessMatrix K_new = new StiffnessMatrix(210000, 0.3, lx, ly,lz);
-            StiffnessMatrix2 K_new = new StiffnessMatrix2(10, 0.3, lx, ly, lz);
+            StiffnessMatrix2 K_new = new StiffnessMatrix2(210000, 0.3, lx, ly, lz);
             //StiffnessMatrix3 K_new = new StiffnessMatrix3(210000, 0.3, pList,centroid);
 
             Matrix<double> Ke = K_new.CreateMatrix(); //A dense matrix stored in an array, column major.
