@@ -29,7 +29,7 @@ namespace FEMeshTBrep
         /// </summary>
         /// 
 
-        double E = 10;
+        double E = 210000;
         double nu = 0.3;
 
         public FEMeshTBrepComponent()
@@ -185,7 +185,9 @@ namespace FEMeshTBrep
                 }
             }
             return true;
-         }        public int FindSizeOfM(GH_Structure<GH_Integer> treeConnectivity)
+         }
+
+        public int FindSizeOfM(GH_Structure<GH_Integer> treeConnectivity)
         {
             int max = 0;
 
@@ -205,7 +207,9 @@ namespace FEMeshTBrep
             int sizeOfM = 3 * (max + 1);
 
             return sizeOfM;
-        }        public Matrix<Double> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
+        }
+
+        public Matrix<Double> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
         {
             Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
             Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
@@ -241,7 +245,8 @@ namespace FEMeshTBrep
             //if (!IsSymmetric(K_tot)) return null; // Some error thing.
 
             return K_tot;
-        }
+        }
+
         public DataTree<double> CalcStrain(GH_Structure<GH_Integer> treeConnectivity, Vector<double> u, Matrix<Double> B)
         {
             DataTree<double> treeStrain = new DataTree<double>();
