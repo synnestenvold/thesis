@@ -34,7 +34,6 @@ namespace SetBC
         {
             pManager.AddPointParameter("Points", "P", "Points for inserting BC", GH_ParamAccess.list);
             pManager.AddTextParameter("Restained translations", "BC", "Restained translation in the way (0,0,0)", GH_ParamAccess.item,"(0,0,0)");
-            pManager.AddPointParameter("Points", "PALLL", "Points for inserting BC", GH_ParamAccess.list);
 
         }
 
@@ -62,13 +61,12 @@ namespace SetBC
             
             if (!DA.GetDataList(0, points)) return;
             if (!DA.GetData(1, ref restrains)) return;
-            if (!DA.GetDataList(0, AllPoints)) return;
 
             string pointString;
 
             foreach (Point3d p in points)
             {
-                pointString = "(" + p.X.ToString() + "," + p.Y.ToString() + "," + p.Z.ToString() + ")";
+                pointString =  p.X.ToString() + "," + p.Y.ToString() + "," + p.Z.ToString();
 
                 pointsString.Add(pointString);
             }
@@ -80,42 +78,9 @@ namespace SetBC
                 pointBC.Add(s + ";" + restrains);
             }
 
-            List<int> output = getBC(pointBC, AllPoints);
-
             DA.SetDataList(0, pointBC);
         }
 
-
-        public List<int> getBC (List<string> pointBC, List<Point3d> points)
-        {
-            List<int> BC = new List<int>();
-            List<Point3d> BCPoints = new List<Point3d>();
-
-            foreach (string s in pointBC)
-            {
-                string coordinate = (s.Split(';'))[0];
-                string iBC = (s.Split(';'))[1];
-
-                string[] coord = (coordinate.Split(','));
-                string[] iBCs = (iBC.Split(','));
-
-                BCPoints.Add(new Point3d(Math.Round(double.Parse(coord[0]), 4), Math.Round(double.Parse(coord[1]), 4), Math.Round(double.Parse(coord[2]), 4)));                pointValues.Add(Math.Round(double.Parse(iLoads[0]), 4));
-                pointValues.Add(Math.Round(double.Parse(iLoads[1]), 4));
-                pointValues.Add(Math.Round(double.Parse(iLoads[2]), 4));
-            }
-
-            foreach (Point3d p in points)
-            {
-                int i = points.IndexOf(p);
-                int j = loadPoints.IndexOf(p);
-
-                loads[i * 3 + 0] = pointValues[j * 3 + 0];
-                loads[i * 3 + 1] = pointValues[j * 3 + 1];
-                loads[i * 3 + 2] = pointValues[j * 3 + 2];
-            }
-
-            return BC;
-        }
 
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.

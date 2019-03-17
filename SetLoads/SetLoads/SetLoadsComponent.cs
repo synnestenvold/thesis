@@ -35,7 +35,6 @@ namespace SetLoads
         {
             pManager.AddVectorParameter("Force vector", "V", "Direction and load amount in kN", GH_ParamAccess.item);
             pManager.AddPointParameter("Points", "P", "Points for loading", GH_ParamAccess.list);
-            pManager.AddPointParameter("Points", "PALL", "Points for loading", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -61,7 +60,6 @@ namespace SetLoads
 
             if (!DA.GetData(0, ref forceVec)) return;
             if (!DA.GetDataList(1, points)) return;
-            if (!DA.GetDataList(2, AllPoints)) return;
 
             string pointString;
 
@@ -81,56 +79,12 @@ namespace SetLoads
                 pointLoads.Add(s + ";" + vector);
             }
 
-            List<double> output = AssignLoads(pointLoads, AllPoints);
+            //List<double> output = AssignLoads(pointLoads, AllPoints);
 
-            DA.SetDataList(0, output);
+            DA.SetDataList(0, pointLoads);
         }
 
-        public List<double> AssignLoads(List<string> pointLoads, List<Point3d> points)
-        {
-            List<double> loadCoord = new List<double>();
-            List<double> pointValues = new List<double>();
-            List<double> loads = new List<double>(points.Count*3);
-
-            for (int i = 0; i < points.Count*3; i++)
-            {
-                loads.Add(0);
-            }
-
-            List<double> pointList = Enumerable.Repeat(0d, points.Count*3).ToList();
-
-            foreach (string s in pointLoads)
-            {
-                string coordinate = (s.Split(';'))[0];
-                string iLoad = (s.Split(';'))[1];
-
-                string[] coord = (coordinate.Split(','));
-                string[] iLoads = (iLoad.Split(','));
-
-                //loadPoints.Add(new Point3d(Math.Round(double.Parse(coord[0]), 4), Math.Round(double.Parse(coord[1]), 4), Math.Round(double.Parse(coord[2]), 4)));                loadCoord.Add(Math.Round(double.Parse(coord[0])));                loadCoord.Add(Math.Round(double.Parse(coord[1])));                loadCoord.Add(Math.Round(double.Parse(coord[2])));                pointValues.Add(Math.Round(double.Parse(iLoads[0])));
-                pointValues.Add(Math.Round(double.Parse(iLoads[1])));
-                pointValues.Add(Math.Round(double.Parse(iLoads[2])));
-            }
-
-            int index = 0;
-
-            foreach (Point3d p in points)
-            {
-
-                for(int j = 0; j <loadCoord.Count/3; j++)
-                {
-                    if(loadCoord[3*j] == p.X && loadCoord[3*j+1] == p.Y && loadCoord[3*j+2] == p.Z)
-                    {
-                        loads[index] = pointValues[3*j];
-                        loads[index+1] = pointValues[3*j+1];
-                        loads[index+2] = pointValues[3*j+2];
-                    }
-                }
-                index += 3;
-            }
-
-            return loads;
-        }
+        
 
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.
