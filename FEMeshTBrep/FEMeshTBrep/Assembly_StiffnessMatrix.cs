@@ -27,7 +27,7 @@ namespace FEMeshTBrep
                     {
                         for (int e = 0; e < 3; e++)
                         {
-                            K[3 * connectivity[i].Value + k, 3 * connectivity[j].Value + e] = K_e[3 * i + k, 3 * j + e];
+                            K[3 * connectivity[i].Value + k, 3 * connectivity[j].Value + e] = Math.Round(K_e[3 * i + k, 3 * j + e], 4);
 
                         }
                     }

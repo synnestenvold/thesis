@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Assembly_StiffnessMatrix.cs" />
     <Compile Include="Bmatrix.cs" />
+    <Compile Include="Deformations.cs" />
     <Compile Include="Cmatrix.cs" />
     <Compile Include="FEMeshTBrepComponent.cs" />
     <Compile Include="FEMeshTBrepInfo.cs" />

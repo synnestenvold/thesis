@@ -29,7 +29,7 @@ namespace FEMeshTBrep
         /// </summary>
         /// 
 
-        double E = 10;
+        double E = 210000;
         double nu = 0.3;
 
         public FEMeshTBrepComponent()
@@ -99,7 +99,11 @@ namespace FEMeshTBrep
             var R = V.DenseOfArray(R_array);
 
             //Caluculation of the displacement vector u
-            Vector<double> u = K_tot_inverse.Multiply(R);
+            //Vector<double> u = K_tot_inverse.Multiply(R);
+
+            //Trying with cholesky
+            Deformations def = new Deformations(K_tot, R_array);
+            List<double> u = def.Cholesky_Banachiewicz();
 
             
             //Calculatin strains for each node. Not working correctly now.
