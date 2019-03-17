@@ -3,21 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace FEMeshTBrep
 {
     class Deformations
     {
-        private double[,] m = new double[0,0];
+        private double[,] m;
         private List<double> load = new List<double>();
+        private int rows = 0;
+        private int cols = 0;
 
-        public Deformations(double[,] _m, List<double> _load)
+        public Deformations(Matrix<double> _m, double[] _load)
         {
-            m = _m;
-            load = _load;
+            //må gjøre om fra Matrix<double> til double[,]
+            rows = _m.RowCount;
+            cols = _m.ColumnCount;
+            m = new double[rows,cols];
+            for ( int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    m[i, j] = _m[i, j];
+                }
+            }
+            //må gjøre om fra double[] til List<double>
+            for (int k = 0; k < _load.Length; k++)
+            {
+                load.Add(_load[k]);
+            }
         
         }
-        public List<double> Cholesky_Banachiewicz(double[,] m, List<double> load)
+        public List<double> Cholesky_Banachiewicz()
         {
             double[,] A = m;
             List<double> load1 = load;
