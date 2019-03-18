@@ -39,9 +39,6 @@ namespace FEMeshTBrep
         {
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
@@ -50,23 +47,14 @@ namespace FEMeshTBrep
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
         }
 
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.list);
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
 
-
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
-        /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
@@ -155,7 +143,13 @@ namespace FEMeshTBrep
 
                 string[] coord = (coordinate.Split(','));
                 string[] iBCs = (iBC.Split(','));
-                BCPoints.Add(Math.Round(double.Parse(coord[0])));                BCPoints.Add(Math.Round(double.Parse(coord[1])));                BCPoints.Add(Math.Round(double.Parse(coord[2])));                restrains.Add(int.Parse(iBCs[0]));
+
+
+                BCPoints.Add(Math.Round(double.Parse(coord[0])));
+                BCPoints.Add(Math.Round(double.Parse(coord[1])));
+                BCPoints.Add(Math.Round(double.Parse(coord[2])));
+
+                restrains.Add(int.Parse(iBCs[0]));
                 restrains.Add(int.Parse(iBCs[1]));
                 restrains.Add(int.Parse(iBCs[2]));
             }
@@ -222,7 +216,11 @@ namespace FEMeshTBrep
                 string[] coord = (coordinate.Split(','));
                 string[] iLoads = (iLoad.Split(','));
 
-                loadCoord.Add(Math.Round(double.Parse(coord[0])));                loadCoord.Add(Math.Round(double.Parse(coord[1])));                loadCoord.Add(Math.Round(double.Parse(coord[2])));                pointValues.Add(Math.Round(double.Parse(iLoads[0])));
+                loadCoord.Add(Math.Round(double.Parse(coord[0])));
+                loadCoord.Add(Math.Round(double.Parse(coord[1])));
+                loadCoord.Add(Math.Round(double.Parse(coord[2])));
+
+                pointValues.Add(Math.Round(double.Parse(iLoads[0])));
                 pointValues.Add(Math.Round(double.Parse(iLoads[1])));
                 pointValues.Add(Math.Round(double.Parse(iLoads[2])));
             }
