@@ -21,7 +21,7 @@ namespace SetBC
         /// new tabs/panels will automatically be created.
         /// </summary>
         public SetBCComponent()
-          : base("Load component for FEA", "Loads",
+          : base("BC component for FEA", "BC",
               "Description",
               "Category3", "BC")
         {

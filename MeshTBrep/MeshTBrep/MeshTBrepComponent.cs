@@ -70,6 +70,7 @@ namespace MeshTBrep
             Point3d[] sortedNodes = sortNodes(nodes, centroid); //Sorting nodes so its introduced similar for every kind of 8 noded brep.
 
             var tuple = CreateNewBreps(sortedNodes, u, v, w); // Getting corner nodes and connectivity matrix
+
             List<List<Point3d>> points = tuple.Item1;
             List<List<int>> connectivity = tuple.Item2;
 
