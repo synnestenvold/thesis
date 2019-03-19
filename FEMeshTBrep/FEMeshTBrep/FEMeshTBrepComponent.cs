@@ -1,34 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using MathNet.Numerics.LinearAlgebra;
 using Grasshopper;
 using Grasshopper.Kernel.Data;
-using System.Collections;
 using Grasshopper.Kernel.Types;
 using System.Linq;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
 namespace FEMeshTBrep
 {
     public class FEMeshTBrepComponent : GH_Component
     {
-        /// <summary>
-        /// Each implementation of GH_Component must provide a public 
-        /// constructor without any arguments.
-        /// Category represents the Tab in which the component will appear, 
-        /// Subcategory the panel. If you use non-existing tab or panel names, 
-        /// new tabs/panels will automatically be created.
-        /// </summary>
-        /// 
-
+       
         double E = 210000;
         double nu = 0.3;
 
@@ -130,9 +116,6 @@ namespace FEMeshTBrep
              
             }
             
-
-                
-        
             DA.SetDataList(0, u);
             DA.SetDataTree(1, strain_node);
             DA.SetDataTree(2, stress_node);
