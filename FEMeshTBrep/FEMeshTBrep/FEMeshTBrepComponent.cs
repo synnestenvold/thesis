@@ -164,9 +164,9 @@ namespace FEMeshTBrep
                 string[] iBCs = (iBC.Split(','));
 
 
-                BCPoints.Add(Math.Round(double.Parse(coord[0]),2));
-                BCPoints.Add(Math.Round(double.Parse(coord[1]),2));
-                BCPoints.Add(Math.Round(double.Parse(coord[2]),2));
+                BCPoints.Add(Math.Round(double.Parse(coord[0]),8));
+                BCPoints.Add(Math.Round(double.Parse(coord[1]),8));
+                BCPoints.Add(Math.Round(double.Parse(coord[2]),8));
 
                 restrains.Add(int.Parse(iBCs[0]));
                 restrains.Add(int.Parse(iBCs[1]));
@@ -180,7 +180,7 @@ namespace FEMeshTBrep
 
                 for (int j = 0; j < BCPoints.Count / 3; j++)
                 {
-                    if (BCPoints[3 * j] == p.X && BCPoints[3 * j + 1] == p.Y && BCPoints[3 * j + 2] == p.Z)
+                    if (BCPoints[3 * j] == Math.Round(p.X,8) && BCPoints[3 * j + 1] == Math.Round(p.Y,8) && BCPoints[3 * j + 2] == Math.Round(p.Z,8))
                     {
                         BC.Add(index);
                         BC.Add(index + 1);
@@ -235,13 +235,13 @@ namespace FEMeshTBrep
                 string[] coord = (coordinate.Split(','));
                 string[] iLoads = (iLoad.Split(','));
 
-                loadCoord.Add(Math.Round(double.Parse(coord[0]),2));
-                loadCoord.Add(Math.Round(double.Parse(coord[1]),2));
-                loadCoord.Add(Math.Round(double.Parse(coord[2]),2));
+                loadCoord.Add(Math.Round(double.Parse(coord[0]),8));
+                loadCoord.Add(Math.Round(double.Parse(coord[1]),8));
+                loadCoord.Add(Math.Round(double.Parse(coord[2]),8));
 
-                pointValues.Add(Math.Round(double.Parse(iLoads[0]),2));
-                pointValues.Add(Math.Round(double.Parse(iLoads[1]),2));
-                pointValues.Add(Math.Round(double.Parse(iLoads[2]),2));
+                pointValues.Add(Math.Round(double.Parse(iLoads[0]),8));
+                pointValues.Add(Math.Round(double.Parse(iLoads[1]),8));
+                pointValues.Add(Math.Round(double.Parse(iLoads[2]),8));
             }
 
             int index = 0;
@@ -251,7 +251,7 @@ namespace FEMeshTBrep
 
                 for (int j = 0; j < loadCoord.Count / 3; j++)
                 {
-                    if (loadCoord[3 * j] == p.X && loadCoord[3 * j + 1] == p.Y && loadCoord[3 * j + 2] == p.Z)
+                    if (loadCoord[3 * j] == Math.Round(p.X,8) && loadCoord[3 * j + 1] == Math.Round(p.Y,8) && loadCoord[3 * j + 2] == Math.Round(p.Z,8))
                     {
                         loads[index] = pointValues[3 * j];
                         loads[index + 1] = pointValues[3 * j + 1];
