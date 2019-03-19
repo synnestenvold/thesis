@@ -32,21 +32,18 @@ namespace SetUniLoad
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddVectorParameter("Force vector", "V", "Direction and load amount in kN", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Force vector", "V", "Direction and load amount in kN/m", GH_ParamAccess.item);
             pManager.AddBrepParameter("Surface", "S", "Surface for loading", GH_ParamAccess.item);
             pManager.AddIntegerParameter("u-divisions", "U", "U-division", GH_ParamAccess.item);
             pManager.AddIntegerParameter("v-divisions", "V", "V-division", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             //pManager.AddTextParameter("Uniformloads", "UL", "Loads in point, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
-            pManager.AddPointParameter("v-divisions", "V", "V-division", GH_ParamAccess.list);
-            pManager.AddPointParameter("v-divisions", "V", "V-division", GH_ParamAccess.list);
-            pManager.AddPointParameter("v-divisions", "V", "V-division", GH_ParamAccess.list);
+            pManager.AddTextParameter("Loaded points", "LP", "Loads in point, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
+            //pManager.AddPointParameter("Line points", "Line P", "Line points", GH_ParamAccess.list);
+            //pManager.AddPointParameter("Corner points", "Corner P", "Corner points", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -64,7 +61,6 @@ namespace SetUniLoad
 
             Point3d[] vertices = new Point3d[4];
 
-            List<string> pointsString = new List<string>();
 
             if (!DA.GetData(0, ref forceVec)) return;
             if (!DA.GetData(1, ref brep)) return;
@@ -133,11 +129,68 @@ namespace SetUniLoad
                 }
             }
 
+            //DISTRIBUTING LOAD TO POINTS FOUND
+            double pointsCount = 4*centerPoints.Count + cornerPoints.Count + 2*linePoints.Count;
+            double forceValue = (forceVec.Z) / pointsCount;
+
+            List<string> centerPointsString = new List<string>();
+            List<string> linePointsString = new List<string>();
+            List<string> cornerPointsString = new List<string>();
+
+            List<string> pointLoads = new List<string>();
+            
+            //Center
+            foreach (Point3d p in centerPoints)
+            {
+                string pointString = p.X.ToString() + "," + p.Y.ToString() + "," + p.Z.ToString();
+                centerPointsString.Add(pointString);
+            }
+            string centerVector = 4*(forceVec.X)/pointsCount + "," + 4*(forceVec.Y)/pointsCount + "," + 4*(forceVec.Z)/pointsCount;
+
+            List<string> centerPointLoads = new List<string>();
+            foreach (string s in centerPointsString)
+            {
+                centerPointLoads.Add(s + ";" + centerVector);
+            }
+
+            //Line
+            foreach (Point3d p in linePoints)
+            {
+                string pointString = p.X.ToString() + "," + p.Y.ToString() + "," + p.Z.ToString();
+                linePointsString.Add(pointString);
+            }
+            string lineVector = 2 * (forceVec.X) / pointsCount + "," + 2 * (forceVec.Y) / pointsCount + "," + 2 * (forceVec.Z) / pointsCount;
+
+            List<string> linePointLoads = new List<string>();
+            foreach (string s in linePointsString)
+            {
+                linePointLoads.Add(s + ";" + lineVector);
+            }
+
+            //Corner
+            foreach (Point3d p in cornerPoints)
+            {
+                string pointString = p.X.ToString() + "," + p.Y.ToString() + "," + p.Z.ToString();
+                cornerPointsString.Add(pointString);
+            }
+            string cornerVector = (forceVec.X) / pointsCount + "," + (forceVec.Y) / pointsCount + "," + (forceVec.Z) / pointsCount;
+
+            List<string> cornerPointLoads = new List<string>();
+            foreach (string s in cornerPointsString)
+            {
+                cornerPointLoads.Add(s + ";" + cornerVector);
+            }
+
+            pointLoads.AddRange(centerPointLoads);
+            pointLoads.AddRange(linePointLoads);
+            pointLoads.AddRange(cornerPointLoads);
+
+            DA.SetDataList(0, pointLoads);
 
             //DA.SetDataList(0, loads);
-            DA.SetDataList(0, centerPoints);
-            DA.SetDataList(1, linePoints);
-            DA.SetDataList(2, vertices);
+            //DA.SetDataList(0, centerPoints);
+            //DA.SetDataList(1, linePoints);
+            //DA.SetDataList(2, vertices);
 
 
         }
