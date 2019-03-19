@@ -44,14 +44,14 @@ namespace FEMeshTBrep
             return centroid;
         }
 
-        public Tuple<Matrix<double>, Matrix<Double>> CreateMatrix(List<GH_Point> pList)
+        public Tuple<Matrix<double>, List<Matrix<Double>>> CreateMatrix(List<GH_Point> pList)
 
         {
             //double[,] array = new double[6, 4];
             //array = fillZeros(array);
 
             Matrix<double> Ke = Matrix<double>.Build.Dense(24, 24);
-            Matrix<double> Be = Matrix<double>.Build.Dense(6, 24);
+            List<Matrix<double>> Be = new List<Matrix<double>>();
 
 
             //3D Constitutive matrix: C
@@ -183,14 +183,24 @@ namespace FEMeshTBrep
                         }
 
                         
+                        Be.Add(B);
+                        
                         //Adding the stiffness matrix. Ke = Ke + B'*C*B*Det(JacobiMatrix)
                         Ke = Ke.Add(B.Transpose().Multiply(C).Multiply(B).Multiply(JacobiMatrix.Determinant()));
-                        Be = Be.Add(B);
+                       // Be = Be.Add(B);
 
                     }
 
                 }
             }
+
+            Matrix<double> B_2 = Be[2];
+            Be[2] = Be[3];
+            Be[3] = B_2;
+            Matrix<double> B_6 = Be[6];
+            Be[6] = Be[7];
+            Be[7] = B_6;
+
 
             return Tuple.Create(Ke, Be);
 

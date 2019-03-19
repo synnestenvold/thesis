@@ -11,28 +11,29 @@ namespace FEMeshTBrep
 {
     class StrainCalc
     {
-        public Vector<double> calcStrain(Matrix<double> B_e, Vector<double> u, List<GH_Integer> connectivity)
+        public List<Vector<double>> calcStrain(List<Matrix<double>> B_e, List<double> u, List<GH_Integer> c_e)
         {
-
-            Vector<double> strain = Vector<double>.Build.Dense(6);
+            
+            List<Vector<double>> strain = new List<Vector<double>>();
             Vector<double> u_e = Vector<double>.Build.Dense(24);
 
 
-            for (int i = 0; i < connectivity.Count; i++)
+            for (int i = 0; i < c_e.Count; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    u_e[3 * i + j] = u[connectivity[i].Value * 3 + j];
+                    u_e[3 * i + j] = u[c_e[i].Value * 3 + j];
                 }
-
             }
 
-            strain = B_e.Multiply(u_e);
+            for (int j=0; j< B_e.Count; j++)
+            {
+                strain.Add(B_e[j].Multiply(u_e));
+            }
 
             return strain;
 
         }
-
-
+        
     }
 }

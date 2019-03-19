@@ -52,6 +52,7 @@ namespace FEMeshTBrep
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.list);
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
+            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.list);
 
         }
 
@@ -76,7 +77,11 @@ namespace FEMeshTBrep
             List<Point3d> globalPoints = CreatePointList(treeConnectivity, treePoints, sizeOfM);
 
             //Create K_tot
-            Matrix<double> K_tot = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM);
+            var tuple = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM);
+            Matrix<double> K_tot = tuple.Item1;
+
+            //B_all
+            List<List<Matrix<double>>> B_all = tuple.Item2;
 
             //Create boundary condition list
             List<int> bcNodes = CreateBCList(bctxt, globalPoints);
@@ -102,23 +107,37 @@ namespace FEMeshTBrep
             Deformations def = new Deformations(K_tot, R_array);
             List<double> u = def.Cholesky_Banachiewicz();
 
-
             //Calculatin strains for each node. Not working correctly now.
-            //DataTree<double> treeStrain = CalcStrain();
-
-            //Calculating stresses based on strain. Not working correctly now.    
-            //DataTree<double> treeStress = CalcStress(DataTree<double> treeStrain)
-
+            //Calculating stresses based on strain. Not working correctly now.
+            List<Matrix<double>> B_e = new List<Matrix<double>>();
+            List<GH_Integer> c_e = new List<GH_Integer>();
+            DataTree<double> strain_node = new DataTree<double>();
+            DataTree<double> stress_node = new DataTree<double>();
+            Cmatrix C = new Cmatrix(E, nu);
+            Matrix<double> C_matrix = C.CreateMatrix();
+            for (int i = 0; i<B_all.Count; i++)
+            { 
+                B_e = B_all[i];
+                c_e = (List<GH_Integer>) treeConnectivity.get_Branch(i);
+                List<Vector<double>> calcedStrain = CalcStrain(c_e, u, B_e);
+                List<Vector<double>> calcedStress = CalcStress(calcedStrain, C_matrix);
+                for (int j = 0; j < calcedStrain.Count; j++)
+                {
+                    strain_node.AddRange(calcedStrain[j], new GH_Path(new int[] { 0, i, j }));
+                    stress_node.AddRange(calcedStress[j], new GH_Path(new int[] { 0, i, j }));
+                }
           
+             
+            }
+            
 
+                
+        
             DA.SetDataList(0, u);
-
-            //DA.SetDataTree(1, treeStrain);
-            //DA.SetDataTree(2, treeStress);
-
-
-
-
+            DA.SetDataTree(1, strain_node);
+            DA.SetDataTree(2, stress_node);
+            DA.SetDataList(3, globalPoints);
+            
             /*
             GH_Boolean => Boolean
             GH_Integer => int
@@ -145,9 +164,9 @@ namespace FEMeshTBrep
                 string[] iBCs = (iBC.Split(','));
 
 
-                BCPoints.Add(Math.Round(double.Parse(coord[0])));
-                BCPoints.Add(Math.Round(double.Parse(coord[1])));
-                BCPoints.Add(Math.Round(double.Parse(coord[2])));
+                BCPoints.Add(Math.Round(double.Parse(coord[0]),2));
+                BCPoints.Add(Math.Round(double.Parse(coord[1]),2));
+                BCPoints.Add(Math.Round(double.Parse(coord[2]),2));
 
                 restrains.Add(int.Parse(iBCs[0]));
                 restrains.Add(int.Parse(iBCs[1]));
@@ -216,13 +235,13 @@ namespace FEMeshTBrep
                 string[] coord = (coordinate.Split(','));
                 string[] iLoads = (iLoad.Split(','));
 
-                loadCoord.Add(Math.Round(double.Parse(coord[0])));
-                loadCoord.Add(Math.Round(double.Parse(coord[1])));
-                loadCoord.Add(Math.Round(double.Parse(coord[2])));
+                loadCoord.Add(Math.Round(double.Parse(coord[0]),2));
+                loadCoord.Add(Math.Round(double.Parse(coord[1]),2));
+                loadCoord.Add(Math.Round(double.Parse(coord[2]),2));
 
-                pointValues.Add(Math.Round(double.Parse(iLoads[0])));
-                pointValues.Add(Math.Round(double.Parse(iLoads[1])));
-                pointValues.Add(Math.Round(double.Parse(iLoads[2])));
+                pointValues.Add(Math.Round(double.Parse(iLoads[0]),2));
+                pointValues.Add(Math.Round(double.Parse(iLoads[1]),2));
+                pointValues.Add(Math.Round(double.Parse(iLoads[2]),2));
             }
 
             int index = 0;
@@ -304,11 +323,12 @@ namespace FEMeshTBrep
             return sizeOfM;
         }
 
-        public Matrix<Double> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
+        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
         {
             Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
             Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
-            List<Matrix<Double>> B_matrixes = new List<Matrix<Double>>();
+            List<Matrix<Double>> B_e = new List<Matrix<Double>>();
+            List<List<Matrix<double>>> B_all = new List<List<Matrix<double>>>();
             StiffnessMatrix sm = new StiffnessMatrix(E, nu);
             Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
 
@@ -322,21 +342,20 @@ namespace FEMeshTBrep
 
                 var tuple = sm.CreateMatrix(connectedPoints);
                 Matrix<double> K_e = tuple.Item1;
-                B_matrixes.Add(tuple.Item2);
-
+                B_e = tuple.Item2;
+                B_all.Add(B_e);
                 K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
                 K_tot = K_tot + K_i;
-
-
+                
             }
-
+            
             //Check if stiffness matrix is symmetric
             //if (!IsSymmetric(K_tot)) return null; // Some error thing.
 
-            return K_tot;
+            return Tuple.Create(K_tot, B_all);
         }
 
-        public DataTree<double> CalcStrain(GH_Structure<GH_Integer> treeConnectivity, Vector<double> u, Matrix<Double> B)
+        public List<Vector<double>> CalcStrain(List<GH_Integer> c_e, List<double> u, List<Matrix<Double>> B_e)
         {
             DataTree<double> treeStrain = new DataTree<double>();
 
@@ -344,36 +363,38 @@ namespace FEMeshTBrep
             Matrix<double> C = C_new.CreateMatrix();
 
             StrainCalc sC = new StrainCalc();
-            Vector<double> strain = Vector<double>.Build.Dense(6);
+            List<Vector<double>> strain = new List<Vector<double>>();
             //Vector<double> stress = Vector<double>.Build.Dense(6);
 
             //For calculating the strains and stress
-            for (int i = 0; i < treeConnectivity.PathCount; i++)
+            strain = sC.calcStrain(B_e, u, c_e);
+
+            for (int i = 0; i<strain.Count; i++)
             {
-                List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-
-                //strain = sC.calcStrain(B_matrixes[i], u, connectedNodes);
-                treeStrain.AddRange(strain, new GH_Path(new int[] { 0, i }));
-
+                treeStrain.AddRange(strain[i], new GH_Path(new int[] { 0, i }));
+            }
+            
                 //stress = C.Multiply(strain);
                 //treeStress.AddRange(stress, new GH_Path(new int[] { 0, i }));
 
+            return strain;
+        }
+
+        public List<Vector<double>> CalcStress(List<Vector<double>> calcedStrain, Matrix<double> C_matrix)
+        {
+            
+            DataTree<double> treeStress = new DataTree<double>();
+            List<Vector<double>> calcedStress = new List<Vector<double>>();
+            for (int i = 0; i < calcedStrain.Count; i++)
+            {
+                calcedStress.Add(C_matrix.Multiply(calcedStrain[i]));
+     
             }
 
-            return treeStrain;
+            return calcedStress;
         }
 
-        public DataTree<double> CalcStress()
-        {
-            DataTree<double> treeStress = new DataTree<double>();
-
-            return treeStress;
-        }
-
-        /// <summary>
-        /// Provides an Icon for every component that will be visible in the User Interface.
-        /// Icons need to be 24x24 pixels.
-        /// </summary>
+      
         protected override System.Drawing.Bitmap Icon
         {
             get
@@ -384,11 +405,6 @@ namespace FEMeshTBrep
             }
         }
 
-        /// <summary>
-        /// Each component must have a unique Guid to identify it. 
-        /// It is vital this Guid doesn't change otherwise old ghx files 
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return new Guid("cec65985-58a5-4ff1-a238-e4761e0abbeb"); }
