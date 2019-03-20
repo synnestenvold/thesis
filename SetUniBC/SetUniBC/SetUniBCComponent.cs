@@ -30,7 +30,7 @@ namespace SetUniBC
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBrepParameter("Surface", "S", "Surface for BC", GH_ParamAccess.item);
-            pManager.AddTextParameter("Restained translations", "BC", "Restained translation in the way (0,0,0)", GH_ParamAccess.item, "(0,0,0)");
+            pManager.AddTextParameter("Restained translations", "BC", "Restained translation in the way (0,0,0)", GH_ParamAccess.item, "0,0,0");
             pManager.AddIntegerParameter("u-divisions", "U", "U-division", GH_ParamAccess.item);
             pManager.AddIntegerParameter("v-divisions", "V", "V-division", GH_ParamAccess.item);
         }

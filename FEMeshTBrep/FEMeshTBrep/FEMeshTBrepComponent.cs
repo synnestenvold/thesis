@@ -31,6 +31,7 @@ namespace FEMeshTBrep
             pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
             pManager.AddTextParameter("Boundary conditions", "BC", "Nodes that are constrained", GH_ParamAccess.list);
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
+            pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list, new List<string>() { });
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -48,14 +49,15 @@ namespace FEMeshTBrep
             GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
+            List<string> deftxt = new List<string>();
             
-
             if (!DA.GetDataTree(0, out treeConnectivity)) return;
             if (!DA.GetDataTree(1, out treePoints)) return;
             if (!DA.GetDataList(2, bctxt)) return;
             if (!DA.GetDataList(3, loadtxt)) return;
+            if (!DA.GetDataList(4, deftxt)) return;
 
-            
+
             // Temporary way of finding the size of stiffness matrix and B matrix
             int sizeOfM = FindSizeOfM(treeConnectivity);
 
@@ -69,32 +71,72 @@ namespace FEMeshTBrep
             //B_all
             List<List<Matrix<double>>> B_all = tuple.Item2;
 
-            //Create boundary condition list
-            List<int> bcNodes = CreateBCList(bctxt, globalPoints);
+            //Create boundary condition list AND predeformations
+            var tupleBC = CreateBCList(bctxt, globalPoints);
+            List<int> bcNodes = tupleBC.Item1;
 
-            //Apply boundary condition
+            var tupleDef = CreateBCList(deftxt, globalPoints);
+            List<int> predefNodes = tupleDef.Item1;
+            bcNodes.AddRange(predefNodes);
+
+            List<double> predef = tupleDef.Item2;
+
+            //Apply boundary condition and predeformations
             K_tot = ApplyBC(K_tot, bcNodes);
+
+            //Needs to take the predefs into account
+            Vector<double> R_def = Vector<double>.Build.Dense(sizeOfM);
+
+            if (deftxt.Any())
+            {
+                //Pick the parts of K that are prescribed a deformation
+                Matrix<double> K_red = Matrix<double>.Build.Dense(sizeOfM, predefNodes.Count);
+                int n = 0;
+                foreach (int dof in predefNodes)
+                {
+                    for (int j = 0; j<sizeOfM; j++)
+                    {
+                        K_red[j, n] = K_tot[j, dof];
+                    }
+                    
+                    n++;
+                }
+
+                //Create a vector of the deformations
+                Vector<double> d = Vector<double>.Build.Dense(predefNodes.Count);
+                for (int i = 0; i < predefNodes.Count; i++){
+                    d[i] = predef[i];
+                }
+
+                //Multiply this with K_red
+                R_def = K_red.Multiply(d);
+           
+            }
 
             //Inverting K matrix
             Matrix<double> K_tot_inverse = K_tot.Inverse();
 
-            //Force vector R
-
-            
             //double[] R_array = SetLoads(sizeOfM, loadtxt);
             double[] R_array = AssignLoads(loadtxt, globalPoints);
             var V = Vector<double>.Build;
-            var R = V.DenseOfArray(R_array);
+            var R = (V.DenseOfArray(R_array)).Subtract(R_def);
+
+            double[] R_array_def = new double[sizeOfM];
+            
+            //for testing
+            for (int j = 0; j<sizeOfM; j++)
+            {
+                R_array_def[j] = R[j];
+            }
 
             //Caluculation of the displacement vector u
             //Vector<double> u = K_tot_inverse.Multiply(R);
 
             //Trying with cholesky
-            Deformations def = new Deformations(K_tot, R_array);
+            Deformations def = new Deformations(K_tot, R_array_def);
             List<double> u = def.Cholesky_Banachiewicz();
 
-            //Calculatin strains for each node. Not working correctly now.
-            //Calculating stresses based on strain. Not working correctly now.
+            //Calculatin strains for each node and stresses based on strain. 
             List<Matrix<double>> B_e = new List<Matrix<double>>();
             List<GH_Integer> c_e = new List<GH_Integer>();
             DataTree<double> strain_node = new DataTree<double>();
@@ -132,11 +174,11 @@ namespace FEMeshTBrep
 
         }
 
-        public List<int> CreateBCList(List<string> bctxt, List<Point3d> points)
+        public Tuple<List<int>, List<double>> CreateBCList(List<string> bctxt, List<Point3d> points)
         {
             List<int> BC = new List<int>();
             List<double> BCPoints = new List<double>();
-            List<int> restrains = new List<int>();
+            List<double> restrains = new List<double>();
 
             foreach (string s in bctxt)
             {
@@ -151,9 +193,9 @@ namespace FEMeshTBrep
                 BCPoints.Add(Math.Round(double.Parse(coord[1]),8));
                 BCPoints.Add(Math.Round(double.Parse(coord[2]),8));
 
-                restrains.Add(int.Parse(iBCs[0]));
-                restrains.Add(int.Parse(iBCs[1]));
-                restrains.Add(int.Parse(iBCs[2]));
+                restrains.Add(Math.Round(double.Parse(iBCs[0]),8));
+                restrains.Add(Math.Round(double.Parse(iBCs[1]),8));
+                restrains.Add(Math.Round(double.Parse(iBCs[2]),8));
             }
 
             int index = 0;
@@ -174,7 +216,7 @@ namespace FEMeshTBrep
                 index += 3;
             }
 
-            return BC;
+            return Tuple.Create(BC, restrains);
         }
 
         public Matrix<double> ApplyBC(Matrix<double> K, List<int> bcNodes)
@@ -245,6 +287,12 @@ namespace FEMeshTBrep
             }
 
             return loads;
+        }
+
+        public Matrix<double> ApplyPreDef(Matrix<double> K, List<int> preDefNodes)
+        {
+
+            return K;
         }
 
         public List<Point3d> CreatePointList(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)

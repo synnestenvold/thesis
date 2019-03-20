@@ -15,10 +15,7 @@ namespace MeshTBrep
 {
     public class MeshTBrepComponent : GH_Component
     {
-
         
-
-
         public MeshTBrepComponent()
           : base("MeshTBrep", "MeshTBrep",
               "Description",
