@@ -40,7 +40,8 @@ namespace FEMeshTBrep
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
             pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.list);
-
+            pManager.AddNumberParameter("TEST", "Test", "Stress vector", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("TEST", "Test", "Stress vector", GH_ParamAccess.tree);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -143,6 +144,10 @@ namespace FEMeshTBrep
             DataTree<double> stress_node = new DataTree<double>();
             Cmatrix C = new Cmatrix(E, nu);
             Matrix<double> C_matrix = C.CreateMatrix();
+
+
+            List<List<Vector<double>>> strain = new List<List<Vector<double>>>();
+            List<List<Vector<double>>> stress = new List<List<Vector<double>>>();
             for (int i = 0; i<B_all.Count; i++)
             { 
                 B_e = B_all[i];
@@ -154,15 +159,31 @@ namespace FEMeshTBrep
                     strain_node.AddRange(calcedStrain[j], new GH_Path(new int[] { 0, i, j }));
                     stress_node.AddRange(calcedStress[j], new GH_Path(new int[] { 0, i, j }));
                 }
-          
+
+                strain.Add(calcedStrain);
+                stress.Add(calcedStress);
              
             }
-            
+
+            DataTree<double> strainTree = new DataTree<double>();
+            DataTree<double> stressTree = new DataTree<double>();
+
+            List<List<double>> globalStrain = FindGlobalStrain(strain, treeConnectivity, sizeOfM);
+            List<List<double>> globalStress = FindGlobalStrain(stress, treeConnectivity, sizeOfM);
+
+            for (int i = 0; i < globalStrain.Count; i++)
+            {
+                strainTree.AddRange(globalStrain[i], new GH_Path(new int[] { 0, i }));
+                stressTree.AddRange(globalStress[i], new GH_Path(new int[] { 0, i }));
+            }
+
             DA.SetDataList(0, u);
             DA.SetDataTree(1, strain_node);
             DA.SetDataTree(2, stress_node);
             DA.SetDataList(3, globalPoints);
-            
+            DA.SetDataTree(4, strainTree);
+            DA.SetDataTree(5, stressTree);
+
             /*
             GH_Boolean => Boolean
             GH_Integer => int
@@ -172,6 +193,59 @@ namespace FEMeshTBrep
             GH_Surface => Brep
             */
 
+        }
+
+        public List<List<double>> CalcStress(List<List<double>> globalStrain, Matrix<double> Cmatrix)
+        {
+            List<List<double>> globalStress = new List<List<double>>();
+
+            for(int i = 0; i < globalStrain.Count; i++)
+            {
+                ///TODO
+            }
+
+            return globalStress;
+        }
+
+            
+
+        public List<List<double>> FindGlobalStrain(List<List<Vector<double>>> strain, GH_Structure<GH_Integer> treeConnectivity, int sizeOfM)
+        {
+            List<List<double>> globalStrain = new List<List<double>>();
+            
+
+            for (int i = 0; i < sizeOfM/3; i++)
+            {
+                List<double> nodeStrain = Enumerable.Repeat(0d, 6).ToList();
+                globalStrain.Add(nodeStrain);
+            }
+
+            for (int i = 0; i < treeConnectivity.PathCount; i++) //For each element
+            {
+                List<GH_Integer> cNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
+                for(int j = 0; j < cNodes.Count; j++)
+                {
+                    List<double> TList = globalStrain[cNodes[j].Value];
+                    for (int k = 0; k < 6; k++)
+                    {
+                     
+
+                        if(globalStrain[cNodes[j].Value][k] == 0)
+                        {
+                            globalStrain[cNodes[j].Value][k] = strain[i][j][k];
+                        }
+                        else
+                        {
+                            globalStrain[cNodes[j].Value][k] = (globalStrain[cNodes[j].Value][k] + strain[i][j][k])/2;
+                        }
+                        
+                        //globalStrain[cNodes[j].Value][k] = strain[i][j][k];
+
+                    }
+                }
+            }
+
+            return globalStrain;
         }
 
         public Tuple<List<int>, List<double>> CreateBCList(List<string> bctxt, List<Point3d> points)
