@@ -31,7 +31,8 @@ namespace FEMeshTBrep
             pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
             pManager.AddTextParameter("Boundary conditions", "BC", "Nodes that are constrained", GH_ParamAccess.list);
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
-            pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list, new List<string>() { });
+            pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
+            pManager[4].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -78,47 +79,26 @@ namespace FEMeshTBrep
 
             var tupleDef = CreateBCList(deftxt, globalPoints);
             List<int> predefNodes = tupleDef.Item1;
-            bcNodes.AddRange(predefNodes);
-
+            
             List<double> predef = tupleDef.Item2;
 
             //Apply boundary condition and predeformations
             K_tot = ApplyBC(K_tot, bcNodes);
+            K_tot = ApplyBC(K_tot, predefNodes);
 
             //Needs to take the predefs into account
             Vector<double> R_def = Vector<double>.Build.Dense(sizeOfM);
 
             if (deftxt.Any())
             {
-                //Pick the parts of K that are prescribed a deformation
-                Matrix<double> K_red = Matrix<double>.Build.Dense(sizeOfM, predefNodes.Count);
-                int n = 0;
-                foreach (int dof in predefNodes)
-                {
-                    for (int j = 0; j<sizeOfM; j++)
-                    {
-                        K_red[j, n] = K_tot[j, dof];
-                    }
-                    
-                    n++;
-                }
-
-                //Create a vector of the deformations
-                Vector<double> d = Vector<double>.Build.Dense(predefNodes.Count);
-                for (int i = 0; i < predefNodes.Count; i++){
-                    d[i] = predef[i];
-                }
-
-                //Multiply this with K_red
-                R_def = K_red.Multiply(d);
-           
+                R_def = ApplyPreDef(K_tot, predefNodes, predef, sizeOfM);
             }
 
             //Inverting K matrix
             Matrix<double> K_tot_inverse = K_tot.Inverse();
 
             //double[] R_array = SetLoads(sizeOfM, loadtxt);
-            double[] R_array = AssignLoads(loadtxt, globalPoints);
+            double[] R_array = AssignLoadsAndBC(loadtxt, bcNodes, globalPoints);
             var V = Vector<double>.Build;
             var R = (V.DenseOfArray(R_array)).Subtract(R_def);
 
@@ -183,16 +163,7 @@ namespace FEMeshTBrep
             DA.SetDataList(3, globalPoints);
             DA.SetDataTree(4, strainTree);
             DA.SetDataTree(5, stressTree);
-
-            /*
-            GH_Boolean => Boolean
-            GH_Integer => int
-            GH_Number => double
-            GH_Vector => Vector3d
-            GH_Matrix => Matrix
-            GH_Surface => Brep
-            */
-
+            
         }
 
         public List<List<double>> CalcStress(List<List<double>> globalStrain, Matrix<double> Cmatrix)
@@ -206,9 +177,7 @@ namespace FEMeshTBrep
 
             return globalStress;
         }
-
-            
-
+        
         public List<List<double>> FindGlobalStrain(List<List<Vector<double>>> strain, GH_Structure<GH_Integer> treeConnectivity, int sizeOfM)
         {
             List<List<double>> globalStrain = new List<List<double>>();
@@ -319,7 +288,7 @@ namespace FEMeshTBrep
             return K;
         }
 
-        public double[] AssignLoads(List<string> pointLoads, List<Point3d> points)
+        public double[] AssignLoadsAndBC(List<string> pointLoads, List<int> bcNodes, List<Point3d> points)
         {
             List<double> loadCoord = new List<double>();
             List<double> pointValues = new List<double>();
@@ -359,14 +328,41 @@ namespace FEMeshTBrep
                 }
                 index += 3;
             }
+            //Corresponding value in R is set to 0 if it is a BC here. Ref page 309 in FEM book.
+            foreach (int bc in bcNodes)
+            {
+                loads[bc] = 0;
+            }
 
             return loads;
         }
 
-        public Matrix<double> ApplyPreDef(Matrix<double> K, List<int> preDefNodes)
+        public Vector<double> ApplyPreDef(Matrix<double> K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
         {
+            //Pick the parts of K that are prescribed a deformation
+            Matrix<double> K_red = Matrix<double>.Build.Dense(sizeOfM, predefNodes.Count);
+            int n = 0;
+            foreach (int dof in predefNodes)
+            {
+                for (int j = 0; j < sizeOfM; j++)
+                {
+                    K_red[j, n] = K_tot[j, dof];
+                }
 
-            return K;
+                n++;
+            }
+
+            //Create a vector of the deformations
+            Vector<double> d = Vector<double>.Build.Dense(predefNodes.Count);
+            for (int i = 0; i < predefNodes.Count; i++)
+            {
+                d[i] = predef[i];
+            }
+
+            //Multiply this with K_red
+            Vector<double> R_def = K_red.Multiply(d);
+
+            return R_def;
         }
 
         public List<Point3d> CreatePointList(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
