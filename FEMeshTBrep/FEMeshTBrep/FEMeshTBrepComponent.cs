@@ -161,7 +161,6 @@ namespace FEMeshTBrep
             DA.SetDataTree(1, strainTree);
             DA.SetDataTree(2, stressTree);
             DA.SetDataList(3, globalPoints);
-<<<<<<< HEAD
 
 
             /*
@@ -173,11 +172,6 @@ namespace FEMeshTBrep
             GH_Surface => Brep
             */
 
-=======
-            DA.SetDataTree(4, strainTree);
-            DA.SetDataTree(5, stressTree);
-            
->>>>>>> 4b8f16e8809fcbe7ad4e6fdb5c925b80d173ec2f
         }
 
         public List<Vector<double>> CalcStress(List<List<double>> globalStrain, Matrix<double> Cmatrix)
