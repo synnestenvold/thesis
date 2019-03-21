@@ -40,8 +40,6 @@ namespace FEMeshTBrep
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
             pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.list);
-            pManager.AddNumberParameter("TEST", "Test", "Stress vector", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("TEST", "Test", "Stress vector", GH_ParamAccess.tree);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -169,7 +167,9 @@ namespace FEMeshTBrep
             DataTree<double> stressTree = new DataTree<double>();
 
             List<List<double>> globalStrain = FindGlobalStrain(strain, treeConnectivity, sizeOfM);
-            List<List<double>> globalStress = FindGlobalStrain(stress, treeConnectivity, sizeOfM);
+
+
+            List<Vector<double>> globalStress = CalcStress(globalStrain, C_matrix);
 
             for (int i = 0; i < globalStrain.Count; i++)
             {
@@ -178,11 +178,10 @@ namespace FEMeshTBrep
             }
 
             DA.SetDataList(0, u);
-            DA.SetDataTree(1, strain_node);
-            DA.SetDataTree(2, stress_node);
+            DA.SetDataTree(1, strainTree);
+            DA.SetDataTree(2, stressTree);
             DA.SetDataList(3, globalPoints);
-            DA.SetDataTree(4, strainTree);
-            DA.SetDataTree(5, stressTree);
+
 
             /*
             GH_Boolean => Boolean
@@ -195,13 +194,15 @@ namespace FEMeshTBrep
 
         }
 
-        public List<List<double>> CalcStress(List<List<double>> globalStrain, Matrix<double> Cmatrix)
+        public List<Vector<double>> CalcStress(List<List<double>> globalStrain, Matrix<double> Cmatrix)
         {
-            List<List<double>> globalStress = new List<List<double>>();
+            List<Vector<double>> globalStress = new List<Vector<double>>();
+            
 
             for(int i = 0; i < globalStrain.Count; i++)
             {
-                ///TODO
+                Vector<double> strainVec = Vector<double>.Build.Dense(globalStrain[i].ToArray());
+                globalStress.Add(Cmatrix.Multiply(strainVec));
             }
 
             return globalStress;
@@ -273,6 +274,7 @@ namespace FEMeshTBrep
             }
 
             int index = 0;
+
 
             foreach (Point3d p in points)
             {
