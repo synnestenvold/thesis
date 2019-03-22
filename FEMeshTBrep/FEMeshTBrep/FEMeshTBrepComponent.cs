@@ -37,7 +37,7 @@ namespace FEMeshTBrep
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
             pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.list);
@@ -115,6 +115,21 @@ namespace FEMeshTBrep
             Deformations def = new Deformations(K_tot, R_array_def);
             List<double> u = def.Cholesky_Banachiewicz();
 
+            DataTree<double> defTree = new DataTree<double>();
+            int n = 0;
+            for (int i = 0; i < u.Count; i+=3)
+            {
+                List<double> u_node = new List<double>(3);
+                u_node.Add(u[i]);
+                u_node.Add(u[i + 1]);
+                u_node.Add(u[i + 2]);
+                
+                defTree.AddRange(u_node, new GH_Path(new int[] { 0, n }));
+                n++;
+
+            }
+
+            
             //Calculatin strains for each node and stresses based on strain. 
             List<Matrix<double>> B_e = new List<Matrix<double>>();
             List<GH_Integer> c_e = new List<GH_Integer>();
@@ -157,7 +172,7 @@ namespace FEMeshTBrep
                 stressTree.AddRange(globalStress[i], new GH_Path(new int[] { 0, i }));
             }
 
-            DA.SetDataList(0, u);
+            DA.SetDataTree(0, defTree);
             DA.SetDataTree(1, strainTree);
             DA.SetDataTree(2, stressTree);
             DA.SetDataList(3, globalPoints);
