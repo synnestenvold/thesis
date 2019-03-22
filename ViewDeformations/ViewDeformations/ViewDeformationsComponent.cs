@@ -34,9 +34,9 @@ namespace ViewDeformations
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            //pManager.AddPointParameter("Points for new Breps", "P", "Breps in coordinates", GH_ParamAccess.tree);
             pManager.AddGenericParameter("Model", "M", "3d Model", GH_ParamAccess.list);
         }
+
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
@@ -57,37 +57,10 @@ namespace ViewDeformations
 
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef, scale);
-
             breps = CreateNewBrep(treePoints,treeConnect, defVectors);
-              
-            List<Mesh> meshes = new List<Mesh>();
             
-            for (int i = 0; i < treePoints.PathCount; i++)
-            {
-                List<GH_Point> vertices = (List<GH_Point>)treePoints.get_Branch(i);
-                var mesh = new Mesh();
-                
-                foreach (GH_Point p in vertices)
-                {
-                    mesh.Vertices.Add(p.Value);
-                    //mesh.VertexColors.Add(color);
-                }
-
-                mesh.Faces.AddFace(0, 1, 5, 4);
-                mesh.Faces.AddFace(1, 2, 6, 5);
-                mesh.Faces.AddFace(2, 3, 7, 6);
-                mesh.Faces.AddFace(0, 3, 7, 4);
-                mesh.Faces.AddFace(4, 5, 6, 7);
-                mesh.Faces.AddFace(0, 1, 2, 3);
-
-                Brep brep = Brep.CreateFromMesh(mesh, false);
-                //breps.Add(brep);
-                
-            }
-            
-
+            //Coloring
             Color color = Color.White;
-
             for (int i = 0; i < breps.Count; i++)
             {
                 //if (defVectors[i].Length < minDef) color = Color.Green;
@@ -159,11 +132,6 @@ namespace ViewDeformations
             }
         }
 
-        /// <summary>
-        /// Each component must have a unique Guid to identify it. 
-        /// It is vital this Guid doesn't change otherwise old ghx files 
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return new Guid("0391f003-161b-49e1-931b-71ca89c69aa6"); }
