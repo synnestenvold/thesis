@@ -101,8 +101,6 @@ namespace FEMeshTBrep
             var R = (V.DenseOfArray(R_array)).Subtract(R_def);
 
             double[] R_array_def = new double[sizeOfM];
-            
-            //for testing
             for (int j = 0; j<sizeOfM; j++)
             {
                 R_array_def[j] = R[j];
@@ -126,9 +124,7 @@ namespace FEMeshTBrep
                 
                 defTree.AddRange(u_node, new GH_Path(new int[] { 0, n }));
                 n++;
-
             }
-
             
             //Calculatin strains for each node and stresses based on strain. 
             List<Matrix<double>> B_e = new List<Matrix<double>>();
@@ -137,8 +133,7 @@ namespace FEMeshTBrep
             DataTree<double> stress_node = new DataTree<double>();
             Cmatrix C = new Cmatrix(E, nu);
             Matrix<double> C_matrix = C.CreateMatrix();
-
-
+            
             List<List<Vector<double>>> strain = new List<List<Vector<double>>>();
             List<List<Vector<double>>> stress = new List<List<Vector<double>>>();
             for (int i = 0; i<B_all.Count; i++)
