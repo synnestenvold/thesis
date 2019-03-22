@@ -34,6 +34,8 @@ namespace ViewDeformations
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            //Tar utgangspunkt i input-breps, legger til deformasjonen i riktige punkter, og gir ut nye breps. 
+        
         }
 
  
