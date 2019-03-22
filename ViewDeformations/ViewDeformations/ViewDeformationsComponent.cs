@@ -40,10 +40,8 @@ namespace ViewDeformations
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            //Tar utgangspunkt i input-breps, legger til deformasjonen i riktige punkter, og gir ut nye breps. 
-            List<Brep> breps = new List<Brep>(); //liste over nye breps
-            Dictionary<Brep, Color> tmpModels = new Dictionary<Brep, Color>(); //farge de white foreløpig
-
+            List<Brep> breps = new List<Brep>();
+            Dictionary<Brep, Color> tmpModels = new Dictionary<Brep, Color>(); 
             GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
             GH_Structure<GH_Integer> treeConnect = new GH_Structure<GH_Integer>();
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
@@ -53,17 +51,16 @@ namespace ViewDeformations
             if (!DA.GetDataTree(1, out treeConnect)) return;
             if (!DA.GetDataTree(2, out treeDef)) return;
             if (!DA.GetData(3, ref scale)) return;
-
-
+            
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef, scale);
-            breps = CreateNewBrep(treePoints,treeConnect, defVectors);
+            breps = CreateDefBreps(treePoints, treeConnect, defVectors);
             
             //Coloring
             Color color = Color.White;
             for (int i = 0; i < breps.Count; i++)
             {
-                //if (defVectors[i].Length < minDef) color = Color.Green;
+                //if (defVectors[i].Length < limit) color = Color.Green;
                 //else color = Color.Red;
                 tmpModels[breps[i]] = color;
             }
@@ -93,7 +90,7 @@ namespace ViewDeformations
             return vectors;
         }
 
-        public List<Brep> CreateNewBrep(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors)
+        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors)
         {
             List<Brep> breps = new List<Brep>();
             for (int j = 0; j < treePoints.PathCount; j++)
@@ -136,6 +133,7 @@ namespace ViewDeformations
         {
             get { return new Guid("0391f003-161b-49e1-931b-71ca89c69aa6"); }
         }
+
         public override void ExpireSolution(bool recompute)
         {
             models.Clear();
