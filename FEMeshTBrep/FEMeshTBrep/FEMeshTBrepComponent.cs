@@ -93,7 +93,7 @@ namespace FEMeshTBrep
             }
 
             //Inverting K matrix
-            Matrix<double> K_tot_inverse = K_tot.Inverse();
+            //Matrix<double> K_tot_inverse = K_tot.Inverse();
 
             //double[] R_array = SetLoads(sizeOfM, loadtxt);
             double[] R_array = AssignLoadsAndBC(loadtxt, bcNodes, globalPoints);
@@ -467,7 +467,7 @@ namespace FEMeshTBrep
                 B_e = tuple.Item2;
                 B_all.Add(B_e);
                 K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
-                K_tot = K_tot + K_i;
+                K_tot.Add(K_i);
                 
             }
             
