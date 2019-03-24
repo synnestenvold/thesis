@@ -62,7 +62,7 @@ namespace FEMeshTBrep
             int sizeOfM = FindSizeOfM(treeConnectivity);
 
             //List of global points with correct numbering
-            List<Point3d> globalPoints = CreatePointList(treeConnectivity, treePoints, sizeOfM);
+            Point3d[] globalPoints = CreatePointList(treeConnectivity, treePoints, sizeOfM);
 
             //Create K_tot
             var tuple = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM);
@@ -237,7 +237,7 @@ namespace FEMeshTBrep
             return globalStrain;
         }
 
-        public Tuple<List<int>, List<double>> CreateBCList(List<string> bctxt, List<Point3d> points)
+        public Tuple<List<int>, List<double>> CreateBCList(List<string> bctxt, Point3d[] points)
         {
             List<int> BC = new List<int>();
             List<double> BCPoints = new List<double>();
@@ -309,12 +309,12 @@ namespace FEMeshTBrep
             return K;
         }
 
-        public double[] AssignLoadsAndBC(List<string> pointLoads, List<int> bcNodes, List<Point3d> points)
+        public double[] AssignLoadsAndBC(List<string> pointLoads, List<int> bcNodes, Point3d[] points)
         {
             List<double> loadCoord = new List<double>();
             List<double> pointValues = new List<double>();
 
-            double[] loads = new double[points.Count * 3];
+            double[] loads = new double[points.Length * 3];
 
             foreach (string s in pointLoads)
             {
@@ -386,10 +386,11 @@ namespace FEMeshTBrep
             return R_def;
         }
 
-        public List<Point3d> CreatePointList(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
+        public Point3d[] CreatePointList(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
         {
             Point3d point = new Point3d(0, 0, 0);
-            List<Point3d> pointList = Enumerable.Repeat(point, sizeOfM / 3).ToList();
+
+            Point3d[] pointList = new Point3d[sizeOfM / 3];
 
 
             for (int i = 0; i < treeConnectivity.PathCount; i++)
@@ -467,7 +468,7 @@ namespace FEMeshTBrep
                 B_e = tuple.Item2;
                 B_all.Add(B_e);
                 K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
-                K_tot.Add(K_i);
+                K_tot = K_tot + K_i;
                 
             }
             
