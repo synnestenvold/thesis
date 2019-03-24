@@ -14,7 +14,7 @@ namespace FEMeshTBrep
 {
     public class FEMeshTBrepComponent : GH_Component
     {
-
+       
         double E = 210000;
         double nu = 0.3;
 
@@ -50,7 +50,7 @@ namespace FEMeshTBrep
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
             List<string> deftxt = new List<string>();
-
+            
             if (!DA.GetDataTree(0, out treeConnectivity)) return;
             if (!DA.GetDataTree(1, out treePoints)) return;
             if (!DA.GetDataList(2, bctxt)) return;
@@ -66,7 +66,7 @@ namespace FEMeshTBrep
 
             //Create K_tot
             var tuple = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM);
-            Matrix<double> K_tot = tuple.Item1;
+            double[,] K_tot = tuple.Item1;
 
             //B_all
             List<List<Matrix<double>>> B_all = tuple.Item2;
@@ -77,7 +77,7 @@ namespace FEMeshTBrep
 
             var tupleDef = CreateBCList(deftxt, globalPoints);
             List<int> predefNodes = tupleDef.Item1;
-
+            
             List<double> predef = tupleDef.Item2;
 
             //Apply boundary condition and predeformations
@@ -101,7 +101,7 @@ namespace FEMeshTBrep
             var R = (V.DenseOfArray(R_array)).Subtract(R_def);
 
             double[] R_array_def = new double[sizeOfM];
-            for (int j = 0; j < sizeOfM; j++)
+            for (int j = 0; j<sizeOfM; j++)
             {
                 R_array_def[j] = R[j];
             }
@@ -115,17 +115,17 @@ namespace FEMeshTBrep
 
             DataTree<double> defTree = new DataTree<double>();
             int n = 0;
-            for (int i = 0; i < u.Count; i += 3)
+            for (int i = 0; i < u.Count; i+=3)
             {
                 List<double> u_node = new List<double>(3);
                 u_node.Add(u[i]);
                 u_node.Add(u[i + 1]);
                 u_node.Add(u[i + 2]);
-
+                
                 defTree.AddRange(u_node, new GH_Path(new int[] { 0, n }));
                 n++;
             }
-
+            
             //Calculatin strains for each node and stresses based on strain. 
             List<Matrix<double>> B_e = new List<Matrix<double>>();
             List<GH_Integer> c_e = new List<GH_Integer>();
@@ -133,13 +133,13 @@ namespace FEMeshTBrep
             DataTree<double> stress_node = new DataTree<double>();
             Cmatrix C = new Cmatrix(E, nu);
             Matrix<double> C_matrix = C.CreateMatrix();
-
+            
             List<List<Vector<double>>> strain = new List<List<Vector<double>>>();
             List<List<Vector<double>>> stress = new List<List<Vector<double>>>();
-            for (int i = 0; i < B_all.Count; i++)
-            {
+            for (int i = 0; i<B_all.Count; i++)
+            { 
                 B_e = B_all[i];
-                c_e = (List<GH_Integer>)treeConnectivity.get_Branch(i);
+                c_e = (List<GH_Integer>) treeConnectivity.get_Branch(i);
                 List<Vector<double>> calcedStrain = CalcStrain(c_e, u, B_e);
                 List<Vector<double>> calcedStress = CalcStress(calcedStrain, C_matrix);
                 for (int j = 0; j < calcedStrain.Count; j++)
@@ -150,7 +150,7 @@ namespace FEMeshTBrep
 
                 strain.Add(calcedStrain);
                 stress.Add(calcedStress);
-
+             
             }
 
             DataTree<double> strainTree = new DataTree<double>();
@@ -187,9 +187,9 @@ namespace FEMeshTBrep
         public List<Vector<double>> CalcStress(List<List<double>> globalStrain, Matrix<double> Cmatrix)
         {
             List<Vector<double>> globalStress = new List<Vector<double>>();
+            
 
-
-            for (int i = 0; i < globalStrain.Count; i++)
+            for(int i = 0; i < globalStrain.Count; i++)
             {
                 Vector<double> strainVec = Vector<double>.Build.Dense(globalStrain[i].ToArray());
                 globalStress.Add(Cmatrix.Multiply(strainVec));
@@ -197,13 +197,13 @@ namespace FEMeshTBrep
 
             return globalStress;
         }
-
+        
         public List<List<double>> FindGlobalStrain(List<List<Vector<double>>> strain, GH_Structure<GH_Integer> treeConnectivity, int sizeOfM)
         {
             List<List<double>> globalStrain = new List<List<double>>();
+            
 
-
-            for (int i = 0; i < sizeOfM / 3; i++)
+            for (int i = 0; i < sizeOfM/3; i++)
             {
                 List<double> nodeStrain = Enumerable.Repeat(0d, 6).ToList();
                 globalStrain.Add(nodeStrain);
@@ -212,22 +212,22 @@ namespace FEMeshTBrep
             for (int i = 0; i < treeConnectivity.PathCount; i++) //For each element
             {
                 List<GH_Integer> cNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-                for (int j = 0; j < cNodes.Count; j++)
+                for(int j = 0; j < cNodes.Count; j++)
                 {
                     List<double> TList = globalStrain[cNodes[j].Value];
                     for (int k = 0; k < 6; k++)
                     {
+                     
 
-
-                        if (globalStrain[cNodes[j].Value][k] == 0)
+                        if(globalStrain[cNodes[j].Value][k] == 0)
                         {
                             globalStrain[cNodes[j].Value][k] = strain[i][j][k];
                         }
                         else
                         {
-                            globalStrain[cNodes[j].Value][k] = (globalStrain[cNodes[j].Value][k] + strain[i][j][k]) / 2;
+                            globalStrain[cNodes[j].Value][k] = (globalStrain[cNodes[j].Value][k] + strain[i][j][k])/2;
                         }
-
+                        
                         //globalStrain[cNodes[j].Value][k] = strain[i][j][k];
 
                     }
@@ -252,13 +252,13 @@ namespace FEMeshTBrep
                 string[] iBCs = (iBC.Split(','));
 
 
-                BCPoints.Add(Math.Round(double.Parse(coord[0]), 8));
-                BCPoints.Add(Math.Round(double.Parse(coord[1]), 8));
-                BCPoints.Add(Math.Round(double.Parse(coord[2]), 8));
+                BCPoints.Add(Math.Round(double.Parse(coord[0]),8));
+                BCPoints.Add(Math.Round(double.Parse(coord[1]),8));
+                BCPoints.Add(Math.Round(double.Parse(coord[2]),8));
 
-                restrains.Add(Math.Round(double.Parse(iBCs[0]), 8));
-                restrains.Add(Math.Round(double.Parse(iBCs[1]), 8));
-                restrains.Add(Math.Round(double.Parse(iBCs[2]), 8));
+                restrains.Add(Math.Round(double.Parse(iBCs[0]),8));
+                restrains.Add(Math.Round(double.Parse(iBCs[1]),8));
+                restrains.Add(Math.Round(double.Parse(iBCs[2]),8));
             }
 
             int index = 0;
@@ -269,7 +269,7 @@ namespace FEMeshTBrep
 
                 for (int j = 0; j < BCPoints.Count / 3; j++)
                 {
-                    if (BCPoints[3 * j] == Math.Round(p.X, 8) && BCPoints[3 * j + 1] == Math.Round(p.Y, 8) && BCPoints[3 * j + 2] == Math.Round(p.Z, 8))
+                    if (BCPoints[3 * j] == Math.Round(p.X,8) && BCPoints[3 * j + 1] == Math.Round(p.Y,8) && BCPoints[3 * j + 2] == Math.Round(p.Z,8))
                     {
                         BC.Add(index);
                         BC.Add(index + 1);
@@ -283,11 +283,11 @@ namespace FEMeshTBrep
             return Tuple.Create(BC, restrains);
         }
 
-        public Matrix<double> ApplyBC(Matrix<double> K, List<int> bcNodes)
+        public double[,] ApplyBC(double[,] K, List<int> bcNodes)
         {
             for (int i = 0; i < bcNodes.Count; i++)
             {
-                for (int j = 0; j < K.ColumnCount; j++)
+                for (int j = 0; j < K.GetLength(0); j++)
                 {
                     if (bcNodes[i] != j)
                     {
@@ -296,7 +296,7 @@ namespace FEMeshTBrep
 
                 }
 
-                for (int j = 0; j < K.RowCount; j++)
+                for (int j = 0; j < K.GetLength(1); j++)
                 {
                     if (bcNodes[i] != j)
                     {
@@ -324,13 +324,13 @@ namespace FEMeshTBrep
                 string[] coord = (coordinate.Split(','));
                 string[] iLoads = (iLoad.Split(','));
 
-                loadCoord.Add(Math.Round(double.Parse(coord[0]), 8));
-                loadCoord.Add(Math.Round(double.Parse(coord[1]), 8));
-                loadCoord.Add(Math.Round(double.Parse(coord[2]), 8));
+                loadCoord.Add(Math.Round(double.Parse(coord[0]),8));
+                loadCoord.Add(Math.Round(double.Parse(coord[1]),8));
+                loadCoord.Add(Math.Round(double.Parse(coord[2]),8));
 
-                pointValues.Add(Math.Round(double.Parse(iLoads[0]), 8));
-                pointValues.Add(Math.Round(double.Parse(iLoads[1]), 8));
-                pointValues.Add(Math.Round(double.Parse(iLoads[2]), 8));
+                pointValues.Add(Math.Round(double.Parse(iLoads[0]),8));
+                pointValues.Add(Math.Round(double.Parse(iLoads[1]),8));
+                pointValues.Add(Math.Round(double.Parse(iLoads[2]),8));
             }
 
             int index = 0;
@@ -340,7 +340,7 @@ namespace FEMeshTBrep
 
                 for (int j = 0; j < loadCoord.Count / 3; j++)
                 {
-                    if (loadCoord[3 * j] == Math.Round(p.X, 8) && loadCoord[3 * j + 1] == Math.Round(p.Y, 8) && loadCoord[3 * j + 2] == Math.Round(p.Z, 8))
+                    if (loadCoord[3 * j] == Math.Round(p.X,8) && loadCoord[3 * j + 1] == Math.Round(p.Y,8) && loadCoord[3 * j + 2] == Math.Round(p.Z,8))
                     {
                         loads[index] = pointValues[3 * j];
                         loads[index + 1] = pointValues[3 * j + 1];
@@ -358,7 +358,7 @@ namespace FEMeshTBrep
             return loads;
         }
 
-        public Vector<double> ApplyPreDef(Matrix<double> K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
+        public Vector<double> ApplyPreDef(double[,] K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
         {
             //Pick the parts of K that are prescribed a deformation
             Matrix<double> K_red = Matrix<double>.Build.Dense(sizeOfM, predefNodes.Count);
@@ -411,9 +411,9 @@ namespace FEMeshTBrep
         private static bool IsSymmetric(Matrix<Double> K)
         {
 
-            for (int i = 0; i < K.RowCount; i++)
+            for (int i = 0; i<K.RowCount; i++)
             {
-                for (int j = 0; j < i; j++)
+                for (int j = 0; j<i; j++)
                 {
                     if (K[i, j] != K[j, i])
                     {
@@ -422,7 +422,7 @@ namespace FEMeshTBrep
                 }
             }
             return true;
-        }
+         }
 
         public int FindSizeOfM(GH_Structure<GH_Integer> treeConnectivity)
         {
@@ -446,17 +446,19 @@ namespace FEMeshTBrep
             return sizeOfM;
         }
 
-        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
+        public Tuple<double[,], List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
         {
-            Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
-            Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
+            double[,] K_i = new double[sizeOfM, sizeOfM];
+            double[,] K_tot = new double[sizeOfM, sizeOfM];
+            double x = 0;
+            double y = 0;
+
             List<Matrix<Double>> B_e = new List<Matrix<Double>>();
             List<List<Matrix<double>>> B_all = new List<List<Matrix<double>>>();
+
             StiffnessMatrix sm = new StiffnessMatrix(E, nu);
             Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
 
-            Point3d point = new Point3d(0, 0, 0);
-            //List<Point3d> pointList = Enumerable.Repeat(point, sizeOfM/3).ToList();
 
             for (int i = 0; i < treeConnectivity.PathCount; i++)
             {
@@ -468,10 +470,16 @@ namespace FEMeshTBrep
                 B_e = tuple.Item2;
                 B_all.Add(B_e);
                 K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
-                K_tot = K_tot + K_i;
 
+                for (int j = 0; j < sizeOfM; j++){
+                    for(int k = 0; k < sizeOfM; k++)
+                    {
+                        K_tot[j, k] = K_tot[j, k] + K_i[j, k];
+                    }
+                }
+                
             }
-
+            
             //Check if stiffness matrix is symmetric
             //if (!IsSymmetric(K_tot)) return null; // Some error thing.
 
@@ -492,32 +500,32 @@ namespace FEMeshTBrep
             //For calculating the strains and stress
             strain = sC.calcStrain(B_e, u, c_e);
 
-            for (int i = 0; i < strain.Count; i++)
+            for (int i = 0; i<strain.Count; i++)
             {
                 treeStrain.AddRange(strain[i], new GH_Path(new int[] { 0, i }));
             }
-
-            //stress = C.Multiply(strain);
-            //treeStress.AddRange(stress, new GH_Path(new int[] { 0, i }));
+            
+                //stress = C.Multiply(strain);
+                //treeStress.AddRange(stress, new GH_Path(new int[] { 0, i }));
 
             return strain;
         }
 
         public List<Vector<double>> CalcStress(List<Vector<double>> calcedStrain, Matrix<double> C_matrix)
         {
-
+            
             DataTree<double> treeStress = new DataTree<double>();
             List<Vector<double>> calcedStress = new List<Vector<double>>();
             for (int i = 0; i < calcedStrain.Count; i++)
             {
                 calcedStress.Add(C_matrix.Multiply(calcedStrain[i]));
-
+     
             }
 
             return calcedStress;
         }
 
-
+      
         protected override System.Drawing.Bitmap Icon
         {
             get
