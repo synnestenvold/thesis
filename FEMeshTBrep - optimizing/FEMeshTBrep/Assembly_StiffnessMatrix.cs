@@ -12,10 +12,10 @@ namespace FEMeshTBrep
     class Assembly_StiffnessMatrix
     {
 
-        public Matrix<double> assemblyMatrix(Matrix<double> K_e, List<GH_Integer> connectivity, int sizeOfM)
+        public double[,] assemblyMatrix(Matrix<double> K_e, List<GH_Integer> connectivity, int sizeOfM)
         {
 
-            Matrix<double> K = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
+            double[,] K = new double[sizeOfM, sizeOfM];
 
             for (int i = 0; i < connectivity.Count; i++)
             {

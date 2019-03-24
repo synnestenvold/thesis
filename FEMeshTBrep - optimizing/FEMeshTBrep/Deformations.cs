@@ -11,19 +11,10 @@ namespace FEMeshTBrep
         private int rows = 0;
         private int cols = 0;
 
-        public Deformations(Matrix<double> _m, double[] _load)
+        public Deformations(double[,] _m, double[] _load)
         {
             //må gjøre om fra Matrix<double> til double[,]
-            rows = _m.RowCount;
-            cols = _m.ColumnCount;
-            m = new double[rows, cols];
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    m[i, j] = _m[i, j];
-                }
-            }
+            m = _m;
             //må gjøre om fra double[] til List<double>
             for (int k = 0; k < _load.Length; k++)
             {
