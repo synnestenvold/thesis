@@ -130,26 +130,20 @@ namespace FEMeshTBrep
             List<Matrix<double>> B_e = new List<Matrix<double>>();
             List<GH_Integer> c_e = new List<GH_Integer>();
             DataTree<double> strain_node = new DataTree<double>();
-            DataTree<double> stress_node = new DataTree<double>();
+
             Cmatrix C = new Cmatrix(E, nu);
             Matrix<double> C_matrix = C.CreateMatrix();
 
             List<List<Vector<double>>> strain = new List<List<Vector<double>>>();
-            List<List<Vector<double>>> stress = new List<List<Vector<double>>>();
+
             for (int i = 0; i < B_all.Count; i++)
             {
                 B_e = B_all[i];
                 c_e = (List<GH_Integer>)treeConnectivity.get_Branch(i);
                 List<Vector<double>> calcedStrain = CalcStrain(c_e, u, B_e);
-                List<Vector<double>> calcedStress = CalcStress(calcedStrain, C_matrix);
-                for (int j = 0; j < calcedStrain.Count; j++)
-                {
-                    strain_node.AddRange(calcedStrain[j], new GH_Path(new int[] { 0, i, j }));
-                    stress_node.AddRange(calcedStress[j], new GH_Path(new int[] { 0, i, j }));
-                }
 
                 strain.Add(calcedStrain);
-                stress.Add(calcedStress);
+
 
             }
 
@@ -157,8 +151,6 @@ namespace FEMeshTBrep
             DataTree<double> stressTree = new DataTree<double>();
 
             List<List<double>> globalStrain = FindGlobalStrain(strain, treeConnectivity, sizeOfM);
-
-
             List<Vector<double>> globalStress = CalcStress(globalStrain, C_matrix);
 
             for (int i = 0; i < globalStrain.Count; i++)
