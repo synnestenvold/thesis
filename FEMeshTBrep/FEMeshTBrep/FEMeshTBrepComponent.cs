@@ -66,7 +66,7 @@ namespace FEMeshTBrep
 
             //Create K_tot
             var tuple = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM);
-            Matrix<double> K_tot = tuple.Item1;
+            double[,] K_tot = tuple.Item1;
 
             //B_all
             List<List<Matrix<double>>> B_all = tuple.Item2;
@@ -283,11 +283,11 @@ namespace FEMeshTBrep
             return Tuple.Create(BC, restrains);
         }
 
-        public Matrix<double> ApplyBC(Matrix<double> K, List<int> bcNodes)
+        public double[,] ApplyBC(double[,] K, List<int> bcNodes)
         {
             for (int i = 0; i < bcNodes.Count; i++)
             {
-                for (int j = 0; j < K.ColumnCount; j++)
+                for (int j = 0; j < K.GetLength(0); j++)
                 {
                     if (bcNodes[i] != j)
                     {
@@ -296,7 +296,7 @@ namespace FEMeshTBrep
 
                 }
 
-                for (int j = 0; j < K.RowCount; j++)
+                for (int j = 0; j < K.GetLength(1); j++)
                 {
                     if (bcNodes[i] != j)
                     {
@@ -358,7 +358,7 @@ namespace FEMeshTBrep
             return loads;
         }
 
-        public Vector<double> ApplyPreDef(Matrix<double> K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
+        public Vector<double> ApplyPreDef(double[,] K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
         {
             //Pick the parts of K that are prescribed a deformation
             Matrix<double> K_red = Matrix<double>.Build.Dense(sizeOfM, predefNodes.Count);
@@ -446,17 +446,19 @@ namespace FEMeshTBrep
             return sizeOfM;
         }
 
-        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
+        public Tuple<double[,], List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
         {
-            Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
-            Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
+            double[,] K_i = new double[sizeOfM, sizeOfM];
+            double[,] K_tot = new double[sizeOfM, sizeOfM];
+            double x = 0;
+            double y = 0;
+
             List<Matrix<Double>> B_e = new List<Matrix<Double>>();
             List<List<Matrix<double>>> B_all = new List<List<Matrix<double>>>();
+
             StiffnessMatrix sm = new StiffnessMatrix(E, nu);
             Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
 
-            Point3d point = new Point3d(0, 0, 0);
-            //List<Point3d> pointList = Enumerable.Repeat(point, sizeOfM/3).ToList();
 
             for (int i = 0; i < treeConnectivity.PathCount; i++)
             {
@@ -468,7 +470,13 @@ namespace FEMeshTBrep
                 B_e = tuple.Item2;
                 B_all.Add(B_e);
                 K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
-                K_tot = K_tot + K_i;
+
+                for (int j = 0; j < sizeOfM; j++){
+                    for(int k = 0; k < sizeOfM; k++)
+                    {
+                        K_tot[j, k] = K_tot[j, k] + K_i[j, k];
+                    }
+                }
                 
             }
             

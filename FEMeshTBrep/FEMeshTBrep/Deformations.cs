@@ -16,8 +16,8 @@ namespace FEMeshTBrep
             //må gjøre om fra Matrix<double> til double[,]
             rows = _m.RowCount;
             cols = _m.ColumnCount;
-            m = new double[rows,cols];
-            for ( int i = 0; i < rows; i++)
+            m = new double[rows, cols];
+            for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < cols; j++)
                 {
@@ -29,7 +29,7 @@ namespace FEMeshTBrep
             {
                 load.Add(_load[k]);
             }
-        
+
         }
         public List<double> Cholesky_Banachiewicz()
         {
@@ -44,7 +44,7 @@ namespace FEMeshTBrep
                 double[,] L_T = new double[m.GetLength(0), m.GetLength(1)];
 
                 //creation of L and L_transposed matrices
-                for (int i = 0; i<L.GetLength(0); i++)
+                for (int i = 0; i < L.GetLength(0); i++)
                 {
                     for (int j = 0; j <= i; j++)
                     {
@@ -59,8 +59,8 @@ namespace FEMeshTBrep
                             L_T[i, i] = L[i, i];
                         }
                         else
-                        { 
-                            for (int k = 0; k<j; k++)
+                        {
+                            for (int k = 0; k < j; k++)
                             {
                                 L_sum += L[i, k] * L[j, k];
                             }
@@ -88,11 +88,11 @@ namespace FEMeshTBrep
         private List<double> ForwardsSubstitution(List<double> load1, double[,] L)
         {
             List<double> y = new List<double>();
-            for (int i = 0; i<L.GetLength(1); i++)
+            for (int i = 0; i < L.GetLength(1); i++)
             {
                 double L_prev = 0;
 
-                for (int j = 0; j<i; j++)
+                for (int j = 0; j < i; j++)
                 {
                     L_prev += L[i, j] * y[j];
                 }
@@ -114,7 +114,8 @@ namespace FEMeshTBrep
                 x[i] = ((y[i] - L_prev) / L_T[i, i]);
             }
             return x;
-        }        private static bool IsSymmetric(double[,] A)
+        }
+        private static bool IsSymmetric(double[,] A)
         {
             int rowCount = A.GetLength(0);
             for (int i = 0; i < rowCount; i++)
@@ -128,6 +129,6 @@ namespace FEMeshTBrep
                 }
             }
             return true;
-        }
+        }
     }
 }
