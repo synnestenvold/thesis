@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Rhino.Geometry.Collections;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -32,6 +33,7 @@ namespace Centroid
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
+            pManager.AddBrepParameter("Breps", "B", "Brep", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -39,8 +41,8 @@ namespace Centroid
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddBrepParameter("Points for Breps", "P", "Breps in coordinates", GH_ParamAccess.item);
-            pManager.AddPointParameter("Points for Breps", "P", "Breps in coordinates", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Brep", "B", "Brep", GH_ParamAccess.item);
+            pManager.AddPointParameter("Centroid", "C", "Centroid in coordinates", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -50,40 +52,10 @@ namespace Centroid
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<Point3d> points = new List<Point3d>();
+            Brep brep = new Brep();
 
-            points.Add(new Point3d(0, 0, 0));
-            points.Add(new Point3d(5, 0, 0));
-            points.Add(new Point3d(5, 5, 0));
-            points.Add(new Point3d(0, 5, 0));
-            points.Add(new Point3d(0, 0, 5));
-            points.Add(new Point3d(5, 0, 5));
-            points.Add(new Point3d(5, 5, 5));
-            points.Add(new Point3d(0, 5, 5));
+            if (!DA.GetData(0, ref brep)) return;
 
-            Mesh mesh = new Mesh();
-
-            foreach (Point3d p in points)
-            {
-                mesh.Vertices.Add(p);
-            }
-            
-          
-            mesh.Faces.AddFace(0, 1, 2, 3);
-            mesh.Faces.AddFace(4, 5, 6, 7);
-
-            mesh.Faces.AddFace(2, 3, 7, 6);
-            mesh.Faces.AddFace(0, 1, 5, 4);
-            mesh.Faces.AddFace(1, 2, 6, 5);
-
-            mesh.Faces.AddFace(0, 3, 7, 4);
-
-
-            Brep brep = Brep.CreateFromMesh(mesh, true);
-
-            Box b = new Box(Plane.WorldXY, new Interval(0,10), new Interval(0, 10), new Interval(0, 10));
-            Point3d[] pss = brep.DuplicateVertices();
-     
             VolumeMassProperties vmp = VolumeMassProperties.Compute(brep);
             Point3d centroid = vmp.Centroid;
 
@@ -113,7 +85,7 @@ namespace Centroid
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("11d61234-6de4-4471-9f2a-af85b7bbf740"); }
+            get { return new Guid("ff0f3e87-bfee-4066-982b-c03eb44450c7"); }
         }
     }
 }
