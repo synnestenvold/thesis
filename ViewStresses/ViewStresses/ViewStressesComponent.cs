@@ -121,22 +121,29 @@ namespace ViewStresses
             double[] averageValues = AverageValuesStress(treeStress, treeConnect, dir);
             double max = averageValues.Max();
             double min = averageValues.Min();
-            double range = (max - min) / 9;
+            double range = (max - min) / 13;
 
             for (int i = 0; i < breps.Count; i++)
             {
                 if (averageValues[i] < min + range) color = Color.Blue;
-                else if (averageValues[i] < min + 2 * range) color = Color.Aqua;
-                else if (averageValues[i] < min + 3 * range) color = Color.Teal;
-                else if (averageValues[i] < min + 4 * range) color = Color.Olive;
-                else if (averageValues[i] < min + 5 * range) color = Color.Green;
-                else if (averageValues[i] < min + 6 * range) color = Color.Lime;
-                else if (averageValues[i] < min + 7 * range) color = Color.Yellow;
-                else if (averageValues[i] < min + 8 * range) color = Color.Orange;
+                else if (averageValues[i] < min + 2 * range) color = Color.RoyalBlue;
+                else if (averageValues[i] < min + 3 * range) color = Color.DeepSkyBlue;
+                else if (averageValues[i] < min + 4 * range) color = Color.Cyan;
+                else if (averageValues[i] < min + 5 * range) color = Color.PaleGreen;
+                else if (averageValues[i] < min + 6 * range) color = Color.LimeGreen;
+                else if (averageValues[i] < min + 7 * range) color = Color.Lime;
+                else if (averageValues[i] < min + 8 * range) color = Color.Lime;
+                else if (averageValues[i] < min + 9 * range) color = Color.GreenYellow;
+                else if (averageValues[i] < min + 10 * range) color = Color.Yellow;
+                else if (averageValues[i] < min + 11 * range) color = Color.Orange;
+                else if (averageValues[i] < min + 12 * range) color = Color.OrangeRed;
                 else color = Color.Red;
                 tmpModels[breps[i]] = color;
             }
+
             return tmpModels;
+
+    
         }
 
         public double[] AverageValuesStress(GH_Structure<GH_Number> treeStress, GH_Structure<GH_Integer> treeConnect, int dir)
@@ -162,7 +169,6 @@ namespace ViewStresses
         {
             get
             {
-
                 return null;
             }
         }
