@@ -130,6 +130,8 @@ namespace SetUniLoad
 
             //DISTRIBUTING LOAD TO POINTS FOUND
             double pointsCount = 4*centerPoints.Count + cornerPoints.Count + 2*linePoints.Count;
+            double area = brep.GetArea();
+            forceVec = forceVec * area;
             double forceValue = (forceVec.Z) / pointsCount;
 
             List<string> centerPointsString = new List<string>();
