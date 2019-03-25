@@ -3,9 +3,9 @@
 clc
 clear
 
-matrix = load('1x1x1_STIF1.mtx');
-stiffness=matrix(:,5)
-length(stiffness)
+matrix = load('1x1x10_STIF1.mtx');
+stiffness=matrix(:,5);
+length(stiffness);
 l=max(matrix(:,1))*3;
 
 
@@ -45,7 +45,7 @@ for i = 1: length(connectivity)
     
 end
 
-disp(K)
+
 
 
 
