@@ -54,6 +54,7 @@ namespace FEMeshTBrep
             //double[,] array = new double[6, 4];
             //array = fillZeros(array);
 
+            //Matrix<double> Ke_test = Matrix<double>.Build.Sparse(24, 24);
             Matrix<double> Ke = Matrix<double>.Build.Dense(24, 24);
             List<Matrix<double>> Be = new List<Matrix<double>>();
 

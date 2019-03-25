@@ -40,10 +40,7 @@ namespace SetUniLoad
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            //pManager.AddTextParameter("Uniformloads", "UL", "Loads in point, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
             pManager.AddTextParameter("Loaded points", "LP", "Loads in point, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
-            //pManager.AddPointParameter("Line points", "Line P", "Line points", GH_ParamAccess.list);
-            //pManager.AddPointParameter("Corner points", "Corner P", "Corner points", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -188,18 +185,8 @@ namespace SetUniLoad
 
             DA.SetDataList(0, pointLoads);
 
-            //DA.SetDataList(0, loads);
-            //DA.SetDataList(0, centerPoints);
-            //DA.SetDataList(1, linePoints);
-            //DA.SetDataList(2, vertices);
-
-
         }
 
-        /// <summary>
-        /// Provides an Icon for every component that will be visible in the User Interface.
-        /// Icons need to be 24x24 pixels.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
