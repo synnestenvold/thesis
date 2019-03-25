@@ -26,20 +26,24 @@ namespace FEMeshTBrep
 
         public Point3d findCentroid(List<GH_Point> pList)
         {
-          
-            // HAVE TO FIND CENTROID CORRECTLY. NOT WORKING RIGHT NOW
-            double c_x = 0;
-            double c_y = 0;
-            double c_z = 0;
+            
+            Mesh mesh = new Mesh();
 
-            foreach (GH_Point p in pList)
+            for (int i = 0; i<pList.Count;i++)
             {
-                c_x += p.Value.X;
-                c_y += p.Value.Y;
-                c_z += p.Value.Z;
+                mesh.Vertices.Add(pList[i].Value);
             }
+            
+            mesh.Faces.AddFace(0, 3, 2, 1); //Bottom
+            mesh.Faces.AddFace(4, 5, 6, 7); //Top
+            mesh.Faces.AddFace(2, 3, 7, 6); //Back
+            mesh.Faces.AddFace(0, 1, 5, 4); //Front
+            mesh.Faces.AddFace(1, 2, 6, 5); //Right
+            mesh.Faces.AddFace(0, 4, 7, 3); //Left
 
-            Point3d centroid = new Point3d(c_x / 8, c_y / 8, c_z / 8);
+            Brep brep = Brep.CreateFromMesh(mesh, true);
+            VolumeMassProperties vmp = VolumeMassProperties.Compute(brep);
+            Point3d centroid = vmp.Centroid;
 
             return centroid;
         }
