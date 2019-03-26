@@ -12,7 +12,7 @@ namespace FEMeshTBrep
     class Assembly_StiffnessMatrix
     {
 
-        public Matrix<double> assemblyMatrix(Matrix<double> K_tot, Matrix<double> K_e, List<GH_Integer> connectivity, int sizeOfM)
+        public Matrix<double> AssemblyMatrix(Matrix<double> K_tot, Matrix<double> K_e, List<GH_Integer> connectivity, int sizeOfM)
         {
 
             //Matrix<double> K = Matrix<double>.Build.Sparse(sizeOfM, sizeOfM);

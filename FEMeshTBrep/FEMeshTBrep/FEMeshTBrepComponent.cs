@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics;
 using Grasshopper;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -70,8 +71,6 @@ namespace FEMeshTBrep
             var tuple = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM);
             Matrix<double> K_tot = tuple.Item1;
 
-            Matrix<double> K_inv = K_tot.Inverse();
-
             //B_all
             List<List<Matrix<double>>> B_all = tuple.Item2;
 
@@ -97,7 +96,7 @@ namespace FEMeshTBrep
             }
 
             //Inverting K matrix
-            //Matrix<double> K_tot_inverse = K_tot.Inverse();
+            Matrix<double> K_tot_inverse = K_tot.Inverse();
 
             //double[] R_array = SetLoads(sizeOfM, loadtxt);
             double[] R_array = AssignLoadsDefAndBC(loadtxt, predefNodes, predef, bcNodes, globalPoints);
@@ -111,12 +110,15 @@ namespace FEMeshTBrep
             }
 
             //Caluculation of the displacement vector u
-            //Vector<double> u = K_tot_inverse.Multiply(R);
-
+            Vector<double> u_vec = K_tot_inverse.Multiply(R);
+            
+            /*
             //Trying with cholesky
             Deformations def = new Deformations(K_tot, R_array_def);
             List<double> u = def.Cholesky_Banachiewicz();
+            */
 
+            List<double> u = u_vec.ToList();
             DataTree<double> defTree = new DataTree<double>();
             int n = 0;
             for (int i = 0; i < u.Count; i += 3)
@@ -129,7 +131,7 @@ namespace FEMeshTBrep
                 defTree.AddRange(u_node, new GH_Path(new int[] { 0, n }));
                 n++;
             }
-
+            
             //Calculatin strains for each node and stresses based on strain. 
             List<Matrix<double>> B_e = new List<Matrix<double>>();
             List<GH_Integer> c_e = new List<GH_Integer>();
@@ -163,6 +165,7 @@ namespace FEMeshTBrep
                 stressTree.AddRange(globalStress[i], new GH_Path(new int[] { 0, i }));
             }
 
+            
             DA.SetDataTree(0, defTree);
             DA.SetDataTree(1, strainTree);
             DA.SetDataTree(2, stressTree);
@@ -223,8 +226,6 @@ namespace FEMeshTBrep
                         {
                             globalStrain[cNodes[j].Value][k] = (globalStrain[cNodes[j].Value][k] + strain[i][j][k]) / 2;
                         }
-
-                        //globalStrain[cNodes[j].Value][k] = strain[i][j][k];
 
                     }
                 }
@@ -350,7 +351,7 @@ namespace FEMeshTBrep
             {
                 loads[bc] = 0;
             }
-            for (int i = 0; i<predefNodes.Count; i++)
+            for (int i = 0; i < predefNodes.Count; i++)
             {
                 loads[predefNodes[i]] = predef[i];
             }
@@ -448,8 +449,8 @@ namespace FEMeshTBrep
 
         public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
         {
-            Matrix<double> K_i = Matrix<double>.Build.Sparse(sizeOfM, sizeOfM);
-            Matrix<double> K_tot = Matrix<double>.Build.Sparse(sizeOfM, sizeOfM);
+            Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
+            Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
             List<Matrix<Double>> B_e = new List<Matrix<Double>>();
             List<List<Matrix<double>>> B_all = new List<List<Matrix<double>>>();
             StiffnessMatrix sm = new StiffnessMatrix(E, nu);
@@ -464,13 +465,10 @@ namespace FEMeshTBrep
                 Matrix<double> K_e = tuple.Item1;
                 B_e = tuple.Item2;
                 B_all.Add(B_e);
-                K_tot = aSM.assemblyMatrix(K_tot, K_e, connectedNodes, sizeOfM);
+                K_tot = aSM.AssemblyMatrix(K_tot, K_e, connectedNodes, sizeOfM);
                 //K_tot = K_tot + K_i;
 
             }
-
-            //Check if stiffness matrix is symmetric
-            //if (!IsSymmetric(K_tot)) return null; // Some error thing.
 
             return Tuple.Create(K_tot, B_all);
         }
@@ -484,7 +482,6 @@ namespace FEMeshTBrep
 
             StrainCalc sC = new StrainCalc();
             List<Vector<double>> strain = new List<Vector<double>>();
-            //Vector<double> stress = Vector<double>.Build.Dense(6);
 
             //For calculating the strains and stress
             strain = sC.calcStrain(B_e, u, c_e);
@@ -493,9 +490,6 @@ namespace FEMeshTBrep
             {
                 treeStrain.AddRange(strain[i], new GH_Path(new int[] { 0, i }));
             }
-
-            //stress = C.Multiply(strain);
-            //treeStress.AddRange(stress, new GH_Path(new int[] { 0, i }));
 
             return strain;
         }
@@ -529,7 +523,13 @@ namespace FEMeshTBrep
         {
             get { return new Guid("cec65985-58a5-4ff1-a238-e4761e0abbeb"); }
         }
-
+        
+        static void Main(string[] args)
+        {
+            //Control.UseManaged();
+            Control.UseNativeMKL();
+        }
+        
     }
 }
 
