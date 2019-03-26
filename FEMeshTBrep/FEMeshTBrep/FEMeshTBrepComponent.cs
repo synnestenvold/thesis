@@ -96,7 +96,7 @@ namespace FEMeshTBrep
             //Matrix<double> K_tot_inverse = K_tot.Inverse();
 
             //double[] R_array = SetLoads(sizeOfM, loadtxt);
-            double[] R_array = AssignLoadsAndBC(loadtxt, predefNodes, predef, bcNodes, globalPoints);
+            double[] R_array = AssignLoadsDefAndBC(loadtxt, predefNodes, predef, bcNodes, globalPoints);
             var V = Vector<double>.Build;
             var R = (V.DenseOfArray(R_array)).Add(R_def);
 
@@ -301,7 +301,7 @@ namespace FEMeshTBrep
             return K;
         }
 
-        public double[] AssignLoadsAndBC(List<string> pointLoads, List<int> predefNodes, List<double> predef, List<int> bcNodes, Point3d[] points)
+        public double[] AssignLoadsDefAndBC(List<string> pointLoads, List<int> predefNodes, List<double> predef, List<int> bcNodes, Point3d[] points)
         {
             List<double> loadCoord = new List<double>();
             List<double> pointValues = new List<double>();
