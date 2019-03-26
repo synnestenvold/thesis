@@ -12,10 +12,10 @@ namespace FEMeshTBrep
     class Assembly_StiffnessMatrix
     {
 
-        public Matrix<double> assemblyMatrix(Matrix<double> K_e, List<GH_Integer> connectivity, int sizeOfM)
+        public Matrix<double> assemblyMatrix(Matrix<double> K_tot, Matrix<double> K_e, List<GH_Integer> connectivity, int sizeOfM)
         {
 
-            Matrix<double> K = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
+            //Matrix<double> K = Matrix<double>.Build.Sparse(sizeOfM, sizeOfM);
 
             for (int i = 0; i < connectivity.Count; i++)
             {
@@ -27,13 +27,13 @@ namespace FEMeshTBrep
                     {
                         for (int e = 0; e < 3; e++)
                         {
-                            K[3 * connectivity[i].Value + k, 3 * connectivity[j].Value + e] = Math.Round(K_e[3 * i + k, 3 * j + e], 4);
+                            K_tot[3 * connectivity[i].Value + k, 3 * connectivity[j].Value + e] = K_tot[3 * connectivity[i].Value + k, 3 * connectivity[j].Value + e] + Math.Round(K_e[3 * i + k, 3 * j + e], 4);
 
                         }
                     }
                 }
             }
-            return K;
+            return K_tot;
         }
 
     }
