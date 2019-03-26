@@ -45,6 +45,8 @@ namespace FEMeshTBrep
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+
+
             GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
             GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
             List<string> bctxt = new List<string>();
@@ -67,6 +69,8 @@ namespace FEMeshTBrep
             //Create K_tot
             var tuple = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM);
             Matrix<double> K_tot = tuple.Item1;
+
+            Matrix<double> K_inv = K_tot.Inverse();
 
             //B_all
             List<List<Matrix<double>>> B_all = tuple.Item2;
@@ -456,7 +460,7 @@ namespace FEMeshTBrep
                 Matrix<double> K_e = tuple.Item1;
                 B_e = tuple.Item2;
                 B_all.Add(B_e);
-                K_tot = aSM.assemblyMatrix(K_tot,K_e, connectedNodes, sizeOfM);
+                K_tot = aSM.assemblyMatrix(K_tot, K_e, connectedNodes, sizeOfM);
                 //K_tot = K_tot + K_i;
 
             }
@@ -521,5 +525,8 @@ namespace FEMeshTBrep
         {
             get { return new Guid("cec65985-58a5-4ff1-a238-e4761e0abbeb"); }
         }
+
     }
 }
+
+    
