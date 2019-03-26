@@ -24,29 +24,7 @@ namespace FEMeshTBrep
 
         }
 
-        public Point3d findCentroid(List<GH_Point> pList)
-        {
-            
-            Mesh mesh = new Mesh();
-
-            for (int i = 0; i<pList.Count;i++)
-            {
-                mesh.Vertices.Add(pList[i].Value);
-            }
-            
-            mesh.Faces.AddFace(0, 3, 2, 1); //Bottom
-            mesh.Faces.AddFace(4, 5, 6, 7); //Top
-            mesh.Faces.AddFace(2, 3, 7, 6); //Back
-            mesh.Faces.AddFace(0, 1, 5, 4); //Front
-            mesh.Faces.AddFace(1, 2, 6, 5); //Right
-            mesh.Faces.AddFace(0, 4, 7, 3); //Left
-
-            Brep brep = Brep.CreateFromMesh(mesh, true);
-            VolumeMassProperties vmp = VolumeMassProperties.Compute(brep);
-            Point3d centroid = vmp.Centroid;
-
-            return centroid;
-        }
+       
 
         public Tuple<Matrix<double>, List<Matrix<Double>>> CreateMatrix(List<GH_Point> pList)
 
@@ -81,7 +59,20 @@ namespace FEMeshTBrep
 
             Point3d point = new Point3d(0, 0, 0);
             List<Point3d> pNatural = Enumerable.Repeat(point, 8).ToList();
-            Point3d centroid = findCentroid(pList);
+
+            Point3d centroid = new Point3d(0, 0, 0);
+
+            if (IsRectangle(pList))
+            {
+                centroid = FindCentroidRectangle(pList);
+            }
+            else
+            {
+                
+                centroid = FindCentroidTwisted(pList);
+            }
+           
+            
 
             for (int i = 0; i < pList.Count; i++)
             {
@@ -211,14 +202,73 @@ namespace FEMeshTBrep
 
         }
 
-        public double[,] fillZeros(double[,] array)
+        public Boolean IsRectangle(List<GH_Point> pList)
         {
+            double lx1 = pList[0].Value.DistanceTo(pList[1].Value);
+            double lx2 = pList[3].Value.DistanceTo(pList[2].Value);
+            double lx3 = pList[4].Value.DistanceTo(pList[5].Value);
+            double lx4 = pList[7].Value.DistanceTo(pList[6].Value);
 
-            Array.Clear(array, 0, array.Length);
+            double ly1 = pList[0].Value.DistanceTo(pList[3].Value);
+            double ly2 = pList[1].Value.DistanceTo(pList[2].Value);
+            double ly3 = pList[4].Value.DistanceTo(pList[7].Value);
+            double ly4 = pList[5].Value.DistanceTo(pList[6].Value);
 
-            return array;
+            double lz1 = pList[0].Value.DistanceTo(pList[4].Value);
+            double lz2 = pList[1].Value.DistanceTo(pList[5].Value);
+            double lz3 = pList[2].Value.DistanceTo(pList[6].Value);
+            double lz4 = pList[3].Value.DistanceTo(pList[7].Value);
+
+            if(lx1==lx2 && lx3 == lx4 && ly1==ly2 && ly3==ly4 && lz1 == lz4 && lz2 == lz3)
+            {
+                return true;
+            }
+
+            return false;
         }
 
+        public Point3d FindCentroidTwisted(List<GH_Point> pList)
+        {
+
+            Mesh mesh = new Mesh();
+
+            for (int i = 0; i < pList.Count; i++)
+            {
+                mesh.Vertices.Add(pList[i].Value);
+            }
+
+            mesh.Faces.AddFace(0, 3, 2, 1); //Bottom
+            mesh.Faces.AddFace(4, 5, 6, 7); //Top
+            mesh.Faces.AddFace(2, 3, 7, 6); //Back
+            mesh.Faces.AddFace(0, 1, 5, 4); //Front
+            mesh.Faces.AddFace(1, 2, 6, 5); //Right
+            mesh.Faces.AddFace(0, 4, 7, 3); //Left
+
+            Brep brep = Brep.CreateFromMesh(mesh, true);
+            VolumeMassProperties vmp = VolumeMassProperties.Compute(brep);
+            Point3d centroid = vmp.Centroid;
+
+            return centroid;
+        }
+
+        public Point3d FindCentroidRectangle(List<GH_Point> pList)
+        {
+
+            double c_x = 0;
+            double c_y = 0;
+            double c_z = 0;
+
+            foreach (GH_Point p in pList)
+            {
+                c_x += p.Value.X;
+                c_y += p.Value.Y;
+                c_z += p.Value.Z;
+            }
+
+            Point3d centroid = new Point3d(c_x / 8, c_y / 8, c_z / 8);
+
+            return centroid;
+        }
 
         static void Main(string[] args)
         {

@@ -10,12 +10,15 @@ namespace FEMeshTBrep
         private List<double> load = new List<double>();
         private int rows = 0;
         private int cols = 0;
+        Matrix<double> mt;
 
         public Deformations(Matrix<double> _m, double[] _load)
         {
             //må gjøre om fra Matrix<double> til double[,]
             rows = _m.RowCount;
             cols = _m.ColumnCount;
+            mt = _m;
+            /*
             m = new double[rows, cols];
             for (int i = 0; i < rows; i++)
             {
@@ -24,6 +27,7 @@ namespace FEMeshTBrep
                     m[i, j] = _m[i, j];
                 }
             }
+            */
             //må gjøre om fra double[] til List<double>
             for (int k = 0; k < _load.Length; k++)
             {
@@ -33,15 +37,17 @@ namespace FEMeshTBrep
         }
         public List<double> Cholesky_Banachiewicz()
         {
-            double[,] A = m;
+            //double[,] A = mt;
+
+            Matrix<double> A = mt;
             List<double> load1 = load;
             //Cholesky only works for square, symmetric and positive
             //Square matrix is guaranteed because of how matrix is constructed, but symmetry is checked
             if (IsSymmetric(A))
             {
                 //preallocating
-                double[,] L = new double[m.GetLength(0), m.GetLength(1)];
-                double[,] L_T = new double[m.GetLength(0), m.GetLength(1)];
+                double[,] L = new double[A.RowCount, A.ColumnCount];
+                double[,] L_T = new double[A.RowCount, A.ColumnCount];
 
                 //creation of L and L_transposed matrices
                 for (int i = 0; i < L.GetLength(0); i++)
@@ -115,9 +121,9 @@ namespace FEMeshTBrep
             }
             return x;
         }
-        private static bool IsSymmetric(double[,] A)
+        private static bool IsSymmetric(Matrix<double> A)
         {
-            int rowCount = A.GetLength(0);
+            int rowCount = A.RowCount;
             for (int i = 0; i < rowCount; i++)
             {
                 for (int j = 0; j < i; j++)

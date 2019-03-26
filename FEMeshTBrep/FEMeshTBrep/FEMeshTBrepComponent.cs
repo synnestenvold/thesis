@@ -444,15 +444,12 @@ namespace FEMeshTBrep
 
         public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
         {
-            Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
-            Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
+            Matrix<double> K_i = Matrix<double>.Build.Sparse(sizeOfM, sizeOfM);
+            Matrix<double> K_tot = Matrix<double>.Build.Sparse(sizeOfM, sizeOfM);
             List<Matrix<Double>> B_e = new List<Matrix<Double>>();
             List<List<Matrix<double>>> B_all = new List<List<Matrix<double>>>();
             StiffnessMatrix sm = new StiffnessMatrix(E, nu);
             Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
-
-            Point3d point = new Point3d(0, 0, 0);
-            //List<Point3d> pointList = Enumerable.Repeat(point, sizeOfM/3).ToList();
 
             for (int i = 0; i < treeConnectivity.PathCount; i++)
             {
@@ -463,8 +460,8 @@ namespace FEMeshTBrep
                 Matrix<double> K_e = tuple.Item1;
                 B_e = tuple.Item2;
                 B_all.Add(B_e);
-                K_i = aSM.assemblyMatrix(K_e, connectedNodes, sizeOfM);
-                K_tot = K_tot + K_i;
+                K_tot = aSM.assemblyMatrix(K_tot,K_e, connectedNodes, sizeOfM);
+                //K_tot = K_tot + K_i;
 
             }
 

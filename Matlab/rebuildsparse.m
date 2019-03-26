@@ -3,7 +3,7 @@
 clc
 clear
 
-matrix = load('1x1x10_STIF1.mtx');
+matrix = load('uni1x1x1_STIF1.mtx');
 stiffness=matrix(:,5);
 length(stiffness);
 l=max(matrix(:,1))*3;
@@ -23,7 +23,7 @@ disp(GlobalK);
 
 [n,m]=size(GlobalK);
 symK=GlobalK'+GlobalK;
-symK(1:n+1:end)=diag(GlobalK)
+symK(1:n+1:end)=diag(GlobalK);
 
 
 connectivity = [7,3,2,6,5,1,0,4];
