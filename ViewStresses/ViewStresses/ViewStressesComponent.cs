@@ -159,7 +159,7 @@ namespace ViewStresses
                     List<GH_Number> stresses = (List<GH_Number>)treeStress.get_Branch(connect[j].Value);
                     average += stresses[dir].Value;
                 }
-                averageList[i] = average / connect.Count;
+                averageList[i] = Math.Round(average / connect.Count, 4);
             }
             
             return averageList;
