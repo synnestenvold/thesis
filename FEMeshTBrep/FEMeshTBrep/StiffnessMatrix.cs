@@ -189,14 +189,14 @@ namespace FEMeshTBrep
 
                 }
             }
-
+            
             Matrix<double> B_2 = Be[2];
             Be[2] = Be[3];
             Be[3] = B_2;
             Matrix<double> B_6 = Be[6];
             Be[6] = Be[7];
             Be[7] = B_6;
-
+            
 
             return Tuple.Create(Ke, Be);
 
