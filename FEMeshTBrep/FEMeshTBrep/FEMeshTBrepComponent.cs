@@ -112,6 +112,7 @@ namespace FEMeshTBrep
             //Caluculation of the displacement vector u
             Vector<double> u = K_tot_inverse.Multiply(R);
 
+
             /*
             //Trying with cholesky
             Deformations def = new Deformations(K_tot, R_array_def);
@@ -486,11 +487,6 @@ namespace FEMeshTBrep
 
             //For calculating the strains and stress
             strain = sC.calcStrain(B_e, u, c_e);
-
-            for (int i = 0; i < strain.Count; i++)
-            {
-                treeStrain.AddRange(strain[i], new GH_Path(new int[] { 0, i }));
-            }
 
             return strain;
         }
