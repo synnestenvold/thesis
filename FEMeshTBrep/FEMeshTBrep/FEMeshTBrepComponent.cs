@@ -110,15 +110,16 @@ namespace FEMeshTBrep
             }
 
             //Caluculation of the displacement vector u
-            Vector<double> u_vec = K_tot_inverse.Multiply(R);
-            
+            Vector<double> u = K_tot_inverse.Multiply(R);
+
             /*
             //Trying with cholesky
             Deformations def = new Deformations(K_tot, R_array_def);
             List<double> u = def.Cholesky_Banachiewicz();
             */
+            
 
-            List<double> u = u_vec.ToList();
+            //List<double> u = u_vec.ToList();
             DataTree<double> defTree = new DataTree<double>();
             int n = 0;
             for (int i = 0; i < u.Count; i += 3)
@@ -473,7 +474,7 @@ namespace FEMeshTBrep
             return Tuple.Create(K_tot, B_all);
         }
 
-        public List<Vector<double>> CalcStrain(List<GH_Integer> c_e, List<double> u, List<Matrix<Double>> B_e)
+        public List<Vector<double>> CalcStrain(List<GH_Integer> c_e, Vector<double> u, List<Matrix<Double>> B_e)
         {
             DataTree<double> treeStrain = new DataTree<double>();
 

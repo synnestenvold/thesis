@@ -11,7 +11,7 @@ namespace FEMeshTBrep
 {
     class StrainCalc
     {
-        public List<Vector<double>> calcStrain(List<Matrix<double>> B_e, List<double> u, List<GH_Integer> c_e)
+        public List<Vector<double>> calcStrain(List<Matrix<double>> B_e, Vector<double> u, List<GH_Integer> c_e)
         {
             
             List<Vector<double>> strain = new List<Vector<double>>();
