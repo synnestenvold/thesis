@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Rhino.Display;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using System.Drawing;
@@ -14,6 +15,8 @@ namespace ViewDeformations
     public class ViewDeformationsComponent : GH_Component
     {
         Dictionary<Brep, Color> models = new Dictionary<Brep, Color>();
+        Sphere sphere = new Sphere();
+        Text3d text = new Text3d("");
 
         public ViewDeformationsComponent()
           : base("ViewDeformations", "ViewDef",
@@ -55,8 +58,21 @@ namespace ViewDeformations
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef, scale);
             breps = CreateDefBreps(treePoints, treeConnect, defVectors);
+
+            var tuple = GetMaxDeformation(defVectors, treePoints, treeConnect);
+            double defMax = tuple.Item1; //TODO: Scale down.
+            Point3d pointMax = tuple.Item2;
+            sphere = new Sphere(pointMax, 0.3);
+            text.Text = defMax.ToString();
+            Point3d p1 = Point3d.Add(pointMax, new Point3d(1, 0, 0));
+            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, 1));
+            text.TextPlane = new Plane(pointMax, p1, p2);
+            text.Height = 0.7;
             
+           
+            //TextEntity test = new TextEntity(text);
             
+
             //Coloring
             Color color = Color.White;
             for (int i = 0; i < breps.Count; i++)
@@ -82,13 +98,45 @@ namespace ViewDeformations
             Vector3d[] vectors = new Vector3d[number];
             for (int i = 0; i< number; i++)
             {
-                //List<GH_Number> def = (List<GH_Number>)treeDef.get_Branch(i);
-                //double def1 = def[0].Value;
                 List<GH_Number> def = (List<GH_Number>)treeDef.get_Branch(i);
                 Vector3d vector = new Vector3d((def[0].Value)*scale, (def[1].Value)*scale, (def[2].Value)*scale);
                 vectors[i] = vector;
             }
             return vectors;
+        }
+
+        public Tuple<double, Point3d> GetMaxDeformation(Vector3d[] defVectors, GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect)
+        {
+            double defMax = -1;
+            int nodeGlobalMax = new int();
+            int nodeMax = new int();
+            int elemMax = new int();
+            Point3d pointMax = new Point3d();
+            for (int i = 0; i < defVectors.Length; i++)
+            {
+                double def = defVectors[i].Length;
+                if (def > defMax)
+                {
+                    defMax = Math.Round(def, 3);
+                    nodeGlobalMax = i;
+                }
+            }
+            for (int j = 0; j < treeConnect.PathCount; j++)
+            {
+                List<GH_Integer> connect = (List<GH_Integer>)treeConnect.get_Branch(j);
+                for (int k = 0; k < connect.Count; k++)
+                {
+                    if (connect[k].Value == nodeGlobalMax)
+                    {
+                        nodeMax = k;
+                        elemMax = j;
+                    }
+                }
+                List<GH_Point> point = (List<GH_Point>)treePoints.get_Branch(elemMax);
+                pointMax = point[nodeMax].Value;
+            }
+
+            return Tuple.Create(defMax, pointMax);
         }
 
         public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors)
@@ -119,7 +167,7 @@ namespace ViewDeformations
             }
             return breps;
         }
-           
+        
         protected override System.Drawing.Bitmap Icon
         {
             get
@@ -146,14 +194,20 @@ namespace ViewDeformations
         {
             foreach (var m in models)
             {
-                args.Display.DrawBrepShaded(m.Key, new Rhino.Display.DisplayMaterial(m.Value));
+                args.Display.DrawBrepShaded(m.Key, new DisplayMaterial(m.Value));
+                
             }
+            args.Display.DrawSphere(sphere, Color.Red);
+            //args.Display.Draw3dText(new Text3d("dette funker"), Color.Red);
+            //args.Display.Draw3dText(text, Color.Red, new Plane(new Point3d(-1,0,0), new Point3d(-1,0,-1), new Point3d(-1,-1,0)));
+            args.Display.Draw3dText(text, Color.Red);
             //base.DrawViewportMeshes(args);
         }
 
         public override void DrawViewportWires(IGH_PreviewArgs args)
         {
             //base.DrawViewportWires(args);
+            
         }
     }
 }
