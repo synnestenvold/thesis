@@ -56,22 +56,15 @@ namespace ViewDeformations
             if (!DA.GetData(3, ref scale)) return;
             
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
-            defVectors = CreateVectors(treeDef, scale);
-            breps = CreateDefBreps(treePoints, treeConnect, defVectors);
+            defVectors = CreateVectors(treeDef);
+            breps = CreateDefBreps(treePoints, treeConnect, defVectors, scale);
 
             var tuple = GetMaxDeformation(defVectors, treePoints, treeConnect);
-            double defMax = tuple.Item1; //TODO: Scale down.
+            double defMax = tuple.Item1; 
             Point3d pointMax = tuple.Item2;
-            sphere = new Sphere(pointMax, 0.3);
-            text.Text = defMax.ToString();
-            Point3d p1 = Point3d.Add(pointMax, new Point3d(1, 0, 0));
-            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, 1));
-            text.TextPlane = new Plane(pointMax, p1, p2);
-            text.Height = 0.7;
-            
-           
-            //TextEntity test = new TextEntity(text);
-            
+            CreateText(text, defMax, pointMax);
+            sphere = new Sphere(pointMax, 0.2);
+
 
             //Coloring
             Color color = Color.White;
@@ -92,14 +85,14 @@ namespace ViewDeformations
         }
         
 
-        public Vector3d[] CreateVectors(GH_Structure<GH_Number> treeDef, double scale)
+        public Vector3d[] CreateVectors(GH_Structure<GH_Number> treeDef)
         {
             int number = treeDef.PathCount;
             Vector3d[] vectors = new Vector3d[number];
             for (int i = 0; i< number; i++)
             {
                 List<GH_Number> def = (List<GH_Number>)treeDef.get_Branch(i);
-                Vector3d vector = new Vector3d((def[0].Value)*scale, (def[1].Value)*scale, (def[2].Value)*scale);
+                Vector3d vector = new Vector3d((def[0].Value), (def[1].Value), (def[2].Value));
                 vectors[i] = vector;
             }
             return vectors;
@@ -117,7 +110,7 @@ namespace ViewDeformations
                 double def = defVectors[i].Length;
                 if (def > defMax)
                 {
-                    defMax = Math.Round(def, 3);
+                    defMax = Math.Round(def, 6);
                     nodeGlobalMax = i;
                 }
             }
@@ -136,10 +129,11 @@ namespace ViewDeformations
                 pointMax = point[nodeMax].Value;
             }
 
+
             return Tuple.Create(defMax, pointMax);
         }
 
-        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors)
+        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors, double scale)
         {
             List<Brep> breps = new List<Brep>();
             for (int j = 0; j < treePoints.PathCount; j++)
@@ -151,7 +145,7 @@ namespace ViewDeformations
                 for (int i = 0; i < vertices.Count; i++)
                 {
                     GH_Point p = vertices[i];
-                    Point3d new_p = Point3d.Add(p.Value, defVectors[connect[i].Value]);
+                    Point3d new_p = Point3d.Add(p.Value, defVectors[connect[i].Value]*scale);
                     mesh.Vertices.Add(new_p);
                 }
                 mesh.Faces.AddFace(0, 1, 5, 4);
@@ -167,7 +161,17 @@ namespace ViewDeformations
             }
             return breps;
         }
-        
+
+        public void CreateText(Text3d text, double defMax, Point3d pointMax)
+        {
+            text.Text = "Δ = " + defMax.ToString();
+            Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, 0.2));
+            Point3d p1 = Point3d.Add(pointMax, new Point3d(1, 0, 0.2));
+            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, 1.2));
+            text.TextPlane = new Plane(p0, p1, p2);
+            text.Height = 0.5;
+        }
+
         protected override System.Drawing.Bitmap Icon
         {
             get
@@ -197,10 +201,9 @@ namespace ViewDeformations
                 args.Display.DrawBrepShaded(m.Key, new DisplayMaterial(m.Value));
                 
             }
-            args.Display.DrawSphere(sphere, Color.Red);
-            //args.Display.Draw3dText(new Text3d("dette funker"), Color.Red);
-            //args.Display.Draw3dText(text, Color.Red, new Plane(new Point3d(-1,0,0), new Point3d(-1,0,-1), new Point3d(-1,-1,0)));
             args.Display.Draw3dText(text, Color.Red);
+            Mesh mesh =  Mesh.CreateFromSphere(sphere, 10, 10);
+            args.Display.DrawMeshShaded(mesh, new DisplayMaterial(Color.Red));
             //base.DrawViewportMeshes(args);
         }
 
