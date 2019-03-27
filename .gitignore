@@ -8,6 +8,7 @@
 *.sln.docstates
 MathNet.Numerics.MKL.dll
 libquadmath-0.dll
+libiomp5md.dll
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
