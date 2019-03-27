@@ -23,10 +23,11 @@ namespace ViewStresses
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddPointParameter("Points for Breps", "P", "Breps in coordinates", GH_ParamAccess.tree);
+            
             pManager.AddIntegerParameter("Connectivity", "C", "", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Stresses", "S", "Stresses in each node", GH_ParamAccess.tree);
-            pManager.AddIntegerParameter("Stress direction", "Direction", "S11, S22, S33, S12, S13, S23 as 0, 2, 3, 4, 5, 6", GH_ParamAccess.item);
+            pManager.AddPointParameter("Points for Breps", "N", "Breps in coordinates", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Stresses", "Stress", "Stresses in each node", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Stress direction", "Stress dir", "S11, S22, S33, S12, S13, S23 as 0, 2, 3, 4, 5, 6", GH_ParamAccess.item);
             //pManager.AddNumberParameter("Yield limit", "Y", "The limit for coloring Green/Red", GH_ParamAccess.item);
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
@@ -50,8 +51,8 @@ namespace ViewStresses
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = new double();
 
-            if (!DA.GetDataTree(0, out treePoints)) return;
-            if (!DA.GetDataTree(1, out treeConnect)) return;
+            if (!DA.GetDataTree(1, out treePoints)) return;
+            if (!DA.GetDataTree(0, out treeConnect)) return;
             if (!DA.GetDataTree(2, out treeStress)) return;
             if (!DA.GetData(3, ref dir)) return;
             if (!DA.GetDataTree(4, out treeDef)) return;

@@ -33,7 +33,7 @@ namespace FEMeshTBrep
             pManager.AddTextParameter("Boundary conditions", "BC", "Nodes that are constrained", GH_ParamAccess.list);
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
-            pManager[4].Optional = true;
+            pManager[4].Optional = true; //Denne funker ikke
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -41,7 +41,7 @@ namespace FEMeshTBrep
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.list);
+            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.list); //For testing only
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
