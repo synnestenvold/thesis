@@ -24,8 +24,8 @@ namespace ViewDeformations
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddPointParameter("Points for Breps", "P", "Breps in coordinates", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Connectivity", "C", "", GH_ParamAccess.tree);
+            pManager.AddPointParameter("Points for Breps", "N", "Breps in coordinates", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
             pManager[3].Optional = true;
@@ -47,14 +47,15 @@ namespace ViewDeformations
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = 1;
             
-            if (!DA.GetDataTree(0, out treePoints)) return;
-            if (!DA.GetDataTree(1, out treeConnect)) return;
+            if (!DA.GetDataTree(1, out treePoints)) return;
+            if (!DA.GetDataTree(0, out treeConnect)) return;
             if (!DA.GetDataTree(2, out treeDef)) return;
             if (!DA.GetData(3, ref scale)) return;
             
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef, scale);
             breps = CreateDefBreps(treePoints, treeConnect, defVectors);
+            
             
             //Coloring
             Color color = Color.White;
