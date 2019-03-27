@@ -97,11 +97,11 @@ namespace FEMeshTBrep
 
 
             //Numerical integration
-            foreach (double g1 in gaussPoints)
+            foreach (double g3 in gaussPoints)
             {
                 foreach (double g2 in gaussPoints)
                 {
-                    foreach (double g3 in gaussPoints)
+                    foreach (double g1 in gaussPoints)
                     {
 
                         //Shape functions
