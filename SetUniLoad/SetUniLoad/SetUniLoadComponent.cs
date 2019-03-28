@@ -198,6 +198,9 @@ namespace SetUniLoad
             List<double> loadCoord = new List<double>();
             List<double> pointValues = new List<double>();
 
+            double loadRef = 0.5;
+            double arrowRef = 1;
+
             foreach (string s in pointLoads)
             {
                 string coordinate = (s.Split(';'))[0];
@@ -215,24 +218,72 @@ namespace SetUniLoad
                 double loadZ = Math.Round(double.Parse(iLoads[2]), 8);
 
                 Point3d startPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3);
-                Point3d endPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3 - loadZ/2);
                 Point3d arrowPart1 = new Point3d(0, 0, 0);
                 Point3d arrowPart2 = new Point3d(0, 0, 0);
+                Point3d endPoint = new Point3d(0, 0, 0);
 
-                if (loadZ > 0)
+                if (loadX != 0)
                 {
-                    arrowPart1 = new Point3d(loadCoord1 + 1, loadCoord2, loadCoord3 - 1);
-                    arrowPart2 = new Point3d(loadCoord1 - 1, loadCoord2, loadCoord3 - 1);
+                    endPoint = new Point3d(loadCoord1 - loadZ * loadRef, loadCoord2, loadCoord3 );
+
+
+                    if (loadX > 0)
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 - arrowRef, loadCoord3 );
+                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2 + arrowRef, loadCoord3 );
+                    }
+                    else
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2 + arrowRef, loadCoord3 );
+                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 - arrowRef, loadCoord3 );
+                    }
+                    arrows.Add(new Line(startPoint, endPoint));
+                    arrows.Add(new Line(startPoint, arrowPart1));
+                    arrows.Add(new Line(startPoint, arrowPart2));
                 }
-                else
+
+                if (loadY != 0)
                 {
-                    arrowPart1 = new Point3d(loadCoord1 + 1, loadCoord2, loadCoord3 + 1);
-                    arrowPart2 = new Point3d(loadCoord1 - 1, loadCoord2, loadCoord3 + 1);
+                    endPoint = new Point3d(loadCoord1 , loadCoord2 - loadZ * loadRef, loadCoord3);
+
+
+                    if (loadY > 0)
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 - arrowRef, loadCoord3);
+                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 - arrowRef, loadCoord3);
+                    }
+                    else
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 + arrowRef, loadCoord3);
+                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 + arrowRef, loadCoord3);
+                    }
+                    arrows.Add(new Line(startPoint, endPoint));
+                    arrows.Add(new Line(startPoint, arrowPart1));
+                    arrows.Add(new Line(startPoint, arrowPart2));
                 }
-                
-                arrows.Add(new Line(startPoint, endPoint));
-                arrows.Add(new Line(startPoint, arrowPart1));
-                arrows.Add(new Line(startPoint, arrowPart2));
+
+
+
+                if (loadZ != 0)
+                {
+                    endPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3 - loadZ * loadRef);
+
+
+                    if (loadZ > 0)
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2, loadCoord3 - arrowRef);
+                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2, loadCoord3 - arrowRef);
+                    }
+                    else
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2, loadCoord3 + arrowRef);
+                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2, loadCoord3 + arrowRef);
+                    }
+                    arrows.Add(new Line(startPoint, endPoint));
+                    arrows.Add(new Line(startPoint, arrowPart1));
+                    arrows.Add(new Line(startPoint, arrowPart2));
+                }
+  
             }
 
             return arrows;
