@@ -11,7 +11,6 @@ namespace Material
         private double E = 0;
         private double nu = 0;
 
-
         public Material(double _E, double _nu)
         {
             E = _E;
@@ -28,5 +27,4 @@ namespace Material
             return nu;
         }
     }
-
 }

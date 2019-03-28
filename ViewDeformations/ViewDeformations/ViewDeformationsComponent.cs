@@ -173,8 +173,8 @@ namespace ViewDeformations
 
         public Tuple<string, Plane> CreateText(Text3d text, double defMax, Point3d pointMax)
         {
-            //text.Text = defMax.ToString();
-            text.Text = "hei";
+            text.Text = defMax.ToString();
+            //text.Text = "hei";
             Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, 0.2));
             Point3d p1 = Point3d.Add(pointMax, new Point3d(1, 0, 0.2));
             Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, 1.2));
@@ -213,8 +213,8 @@ namespace ViewDeformations
                 
             }
             args.Display.Draw3dText(text, Color.Red);
-            Mesh mesh =  Mesh.CreateFromSphere(sphere, 10, 10);
-            args.Display.DrawMeshShaded(mesh, new DisplayMaterial(Color.Red));
+            //Mesh mesh =  Mesh.CreateFromSphere(sphere, 10, 10);
+            //args.Display.DrawMeshShaded(mesh, new DisplayMaterial(Color.Red));
             //base.DrawViewportMeshes(args);
         }
 

@@ -60,9 +60,12 @@ namespace FEMeshTBrep
             if (!DA.GetDataTree(0, out treeConnectivity)) return;
             if (!DA.GetDataTree(1, out treePoints)) return;
             //if (!DA.GetData(2, ref m)) return;
-            if (!DA.GetDataList(3, bctxt)) return;
-            if (!DA.GetDataList(4, loadtxt)) return;
-            if (!DA.GetDataList(5, deftxt)) return;
+            if (!DA.GetDataList(2, bctxt)) return;
+            if (!DA.GetDataList(3, loadtxt)) return;
+            if (!DA.GetDataList(4, deftxt)) return;
+
+            //double E = m.GetYoungs();
+            //double nu = m.GetPoisson();
 
 
             // Temporary way of finding the size of stiffness matrix and B matrix

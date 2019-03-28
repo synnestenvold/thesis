@@ -53,7 +53,7 @@ namespace LoadSlider
             //double length = new double();
             Curve curve = null;
             if (!DA.GetData(0, ref curve)) return;
-            double length = curve.GetLength();
+            Vector3d length = curve.PointAtEnd - curve.PointAtStart;
             DA.SetData(0, length);
         }
 
