@@ -142,7 +142,7 @@ namespace ViewStresses
                 else if (averageValues[i] < min + 12 * range) color = Color.OrangeRed;
                 else color = Color.Red;
                 tmpModels[breps[i]] = color;
-                colors[i] = color;
+                colors.Add(color);
             }
 
             return tmpModels;
