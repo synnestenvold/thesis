@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Drawing;
 using Grasshopper.Kernel;
+using Rhino.Display;
 using Rhino.Geometry;
 
 // In order to load the result of this wizard, you will also need to
@@ -11,45 +12,79 @@ using Rhino.Geometry;
 
 namespace PartitionSlider
 {
+    
+
     public class PartitionSliderComponent : GH_Component
     {
-        /// <summary>
-        /// Each implementation of GH_Component must provide a public 
-        /// constructor without any arguments.
-        /// Category represents the Tab in which the component will appear, 
-        /// Subcategory the panel. If you use non-existing tab or panel names, 
-        /// new tabs/panels will automatically be created.
-        /// </summary>
+        readonly int maxPartition = 10;
+        readonly Text3d text = new Text3d("");
+        readonly Text3d textValue = new Text3d("");
+
         public PartitionSliderComponent()
           : base("PartitionSlider", "PartSlider",
               "Slider for partition in VR",
               "Category3", "SliderVR")
         {
         }
-
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
+        
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
+            pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
         }
-
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
+        
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            pManager.AddIntegerParameter("Partitions", "P", "Number of partitions", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "T", "Partition text", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
-        /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            Curve curve = null;
+            if (!DA.GetData(0, ref curve)) return;
+
+            int parts = Convert.ToInt32(curve.GetLength());
+            parts = parts > maxPartition ? maxPartition : parts;
+            
+            //Text start
+            var tuple = CreateText(text, curve);
+            string textOut = tuple.Item1;
+            Plane plane = tuple.Item2;
+            //Text on the other side shows the value of load
+            var tupleValue = CreateValueText(textValue, curve, parts);
+            string textValueOut = tupleValue.Item1;
+            Plane planeValue = tupleValue.Item2;
+
+            DA.SetData(0, parts);
+            DA.SetData(1, textValueOut);
+            DA.SetData(2, planeValue);
+
         }
 
+        public Tuple<string, Plane> CreateText(Text3d text, Curve curve)
+        {
+            text.Text = "Adjust for partitions";
+            Point3d start = curve.PointAtStart;
+            Point3d p0 = Point3d.Add(start, new Point3d(0, 0, 0.4));
+            Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 0.4));
+            Point3d p2 = Point3d.Add(start, new Point3d(0, 0, 1.4));
+            text.TextPlane = new Plane(p0, p1, p2);
+            text.Height = 0.4;
+            return Tuple.Create(text.Text, text.TextPlane);
+        }
+
+        public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, int parts)
+        {
+            textValue.Text = "Partitions: "+parts.ToString();
+            Point3d end = curve.PointAtEnd;
+            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
+            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, 0.4));
+            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1.4));
+            textValue.TextPlane = new Plane(p0, p1, p2);
+            textValue.Height = 0.6;
+            return Tuple.Create(textValue.Text, textValue.TextPlane);
+        }
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.
         /// Icons need to be 24x24 pixels.
@@ -64,14 +99,21 @@ namespace PartitionSlider
             }
         }
 
-        /// <summary>
-        /// Each component must have a unique Guid to identify it. 
-        /// It is vital this Guid doesn't change otherwise old ghx files 
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return new Guid("f55bdd6e-1c71-44eb-b1d5-40d997763b3e"); }
+        }
+
+        public override void ExpireSolution(bool recompute)
+        {
+            base.ExpireSolution(recompute);
+        }
+
+        public override void DrawViewportMeshes(IGH_PreviewArgs args)
+        {
+            args.Display.Draw3dText(text, Color.Red);
+            args.Display.Draw3dText(textValue, Color.Red);
+            //base.DrawViewportMeshes(args);
         }
     }
 }
