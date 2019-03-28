@@ -38,6 +38,10 @@ namespace ViewDeformations
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("Model", "M", "3d Model", GH_ParamAccess.list);
+            pManager.AddGeometryParameter("Sphere", "S", "Sphere", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "T", "Text", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "P", "Plane", GH_ParamAccess.item);
+
         }
 
 
@@ -62,7 +66,9 @@ namespace ViewDeformations
             var tuple = GetMaxDeformation(defVectors, treePoints, treeConnect);
             double defMax = tuple.Item1; 
             Point3d pointMax = tuple.Item2;
-            CreateText(text, defMax, pointMax);
+            var tupleOutput = CreateText(text, defMax, pointMax);
+            string textOut = tupleOutput.Item1;
+            Plane plane = tupleOutput.Item2;
             sphere = new Sphere(pointMax, 0.2);
 
 
@@ -82,6 +88,9 @@ namespace ViewDeformations
             }
 
             DA.SetDataList(0, tmpModels.Keys);
+            DA.SetData(1, sphere);
+            DA.SetData(2, textOut);
+            DA.SetData(3, plane);
         }
         
 
@@ -162,7 +171,7 @@ namespace ViewDeformations
             return breps;
         }
 
-        public void CreateText(Text3d text, double defMax, Point3d pointMax)
+        public Tuple<string, Plane> CreateText(Text3d text, double defMax, Point3d pointMax)
         {
             text.Text = "Δ = " + defMax.ToString();
             Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, 0.2));
@@ -170,6 +179,7 @@ namespace ViewDeformations
             Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, 1.2));
             text.TextPlane = new Plane(p0, p1, p2);
             text.Height = 0.5;
+            return Tuple.Create(text.Text, text.TextPlane);
         }
 
         protected override System.Drawing.Bitmap Icon
