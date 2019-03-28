@@ -9,7 +9,6 @@ using Grasshopper;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using System.Linq;
-//using Material;
 
 
 namespace FEMeshTBrep
@@ -17,8 +16,6 @@ namespace FEMeshTBrep
     public class FEMeshTBrepComponent : GH_Component
     {
 
-        double E = 210000;
-        double nu = 0.3;
 
         public FEMeshTBrepComponent()
           : base("Finite Element of meshed TBrep", "FEMeshTBrep",
@@ -52,7 +49,7 @@ namespace FEMeshTBrep
 
             GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
             GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
-            //Material m = new Material();
+            Material.Material m = new Material.Material(0,0);
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
             List<string> deftxt = new List<string>();
@@ -63,11 +60,11 @@ namespace FEMeshTBrep
             if (!DA.GetDataList(2, bctxt)) return;
             if (!DA.GetDataList(3, loadtxt)) return;
             if (!DA.GetDataList(4, deftxt)) return;
-
+            double E = 210000;
+            double nu = 0.3;
             //double E = m.GetYoungs();
             //double nu = m.GetPoisson();
-
-
+            
             // Temporary way of finding the size of stiffness matrix and B matrix
             int sizeOfM = FindSizeOfM(treeConnectivity);
 
@@ -75,7 +72,7 @@ namespace FEMeshTBrep
             Point3d[] globalPoints = CreatePointList(treeConnectivity, treePoints, sizeOfM);
 
             //Create K_tot
-            var tuple = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM);
+            var tuple = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM, E, nu);
             Matrix<double> K_tot = tuple.Item1;
 
             //B_all
@@ -155,7 +152,7 @@ namespace FEMeshTBrep
             {
                 B_e = B_all[i];
                 c_e = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-                List<Vector<double>> calcedStrain = CalcStrain(c_e, u, B_e);
+                List<Vector<double>> calcedStrain = CalcStrain(c_e, u, B_e, E, nu);
 
                 strain.Add(calcedStrain);
 
@@ -456,7 +453,7 @@ namespace FEMeshTBrep
             return sizeOfM;
         }
 
-        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
+        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM, double E, double nu)
         {
             Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
             Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
@@ -482,7 +479,7 @@ namespace FEMeshTBrep
             return Tuple.Create(K_tot, B_all);
         }
 
-        public List<Vector<double>> CalcStrain(List<GH_Integer> c_e, Vector<double> u, List<Matrix<Double>> B_e)
+        public List<Vector<double>> CalcStrain(List<GH_Integer> c_e, Vector<double> u, List<Matrix<Double>> B_e, double E, double nu)
         {
             DataTree<double> treeStrain = new DataTree<double>();
 

@@ -9,9 +9,9 @@ using Rhino.Geometry;
 // folder in Grasshopper.
 // You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
-namespace LoadSlider
+namespace DefSlider
 {
-    public class LoadSliderComponent : GH_Component
+    public class DefSliderComponent : GH_Component
     {
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
@@ -20,16 +20,13 @@ namespace LoadSlider
         /// Subcategory the panel. If you use non-existing tab or panel names, 
         /// new tabs/panels will automatically be created.
         /// </summary>
-        public LoadSliderComponent()
-          : base("LoadSlider", "LoadSlider",
-              "Load slider for VR",
+        public DefSliderComponent()
+          : base("DefSlider", "DefSlider",
+              "Deformation slider for VR",
               "Category3", "SliderVR")
         {
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
@@ -40,7 +37,8 @@ namespace LoadSlider
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddVectorParameter("Load", "L", "Load vector and value", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Scale", "Scale", "Scale value as length", GH_ParamAccess.item);
+
         }
 
         /// <summary>
@@ -53,16 +51,10 @@ namespace LoadSlider
             //double length = new double();
             Curve curve = null;
             if (!DA.GetData(0, ref curve)) return;
-            Vector3d vector = CreateVectorFromCurve(curve);
-            DA.SetData(0, vector);
-
+            Vector3d length = curve.PointAtEnd - curve.PointAtStart;
+            DA.SetData(0, length);
         }
 
-        public Vector3d CreateVectorFromCurve(Curve curve) {
-            Vector3d vector = curve.PointAtEnd - curve.PointAtStart;
-            return vector;
-
-        }
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.
         /// Icons need to be 24x24 pixels.
@@ -84,7 +76,7 @@ namespace LoadSlider
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("74238820-07e9-4490-966e-8a8dcfe33ca8"); }
+            get { return new Guid("4cc4d710-6bdd-463e-8b9d-9a247cae5c75"); }
         }
     }
 }
