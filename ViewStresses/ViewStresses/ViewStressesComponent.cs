@@ -36,6 +36,8 @@ namespace ViewStresses
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("Model", "M", "3d Model", GH_ParamAccess.list);
+            pManager.AddColourParameter("Colors", "C", "Colors", GH_ParamAccess.list);
+            
         }
 
 
