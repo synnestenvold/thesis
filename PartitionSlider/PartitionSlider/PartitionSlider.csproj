@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D1532D4F-4C85-47C9-AB33-BE6318373950}</ProjectGuid>
+    <ProjectGuid>{4ED5F2F3-31F9-4029-A2C6-BF3174F4FA2E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DefSlider</RootNamespace>
-    <AssemblyName>DefSlider</AssemblyName>
+    <RootNamespace>PartitionSlider</RootNamespace>
+    <AssemblyName>PartitionSlider</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -56,8 +56,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefSliderComponent.cs" />
-    <Compile Include="DefSliderInfo.cs" />
+    <Compile Include="PartitionSliderComponent.cs" />
+    <Compile Include="PartitionSliderInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -80,6 +80,5 @@ Erase "$(TargetPath)"</PostBuildEvent>
     <StartArguments>
     </StartArguments>
     <StartAction>Program</StartAction>
-    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 </Project>

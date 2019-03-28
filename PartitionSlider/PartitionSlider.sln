@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.489
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DefSlider", "DefSlider\DefSlider.csproj", "{D1532D4F-4C85-47C9-AB33-BE6318373950}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PartitionSlider", "PartitionSlider\PartitionSlider.csproj", "{4ED5F2F3-31F9-4029-A2C6-BF3174F4FA2E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D1532D4F-4C85-47C9-AB33-BE6318373950}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D1532D4F-4C85-47C9-AB33-BE6318373950}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D1532D4F-4C85-47C9-AB33-BE6318373950}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D1532D4F-4C85-47C9-AB33-BE6318373950}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4ED5F2F3-31F9-4029-A2C6-BF3174F4FA2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4ED5F2F3-31F9-4029-A2C6-BF3174F4FA2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4ED5F2F3-31F9-4029-A2C6-BF3174F4FA2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4ED5F2F3-31F9-4029-A2C6-BF3174F4FA2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4E81C408-E00A-4350-9A3E-13D84A9408A0}
+		SolutionGuid = {4E9A0ADF-FB9E-40FE-B9D6-D8FB7A801ED3}
 	EndGlobalSection
 EndGlobal

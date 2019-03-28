@@ -2,15 +2,15 @@
 using System.Drawing;
 using Grasshopper.Kernel;
 
-namespace DefSlider
+namespace PartitionSlider
 {
-    public class DefSliderInfo : GH_AssemblyInfo
+    public class PartitionSliderInfo : GH_AssemblyInfo
     {
         public override string Name
         {
             get
             {
-                return "DefSlider";
+                return "PartitionSlider";
             }
         }
         public override Bitmap Icon
@@ -33,7 +33,7 @@ namespace DefSlider
         {
             get
             {
-                return new Guid("f531984b-94e6-4fa6-93d7-e05bb8989cb0");
+                return new Guid("6efdd853-7f00-4f22-821c-6d1166a64616");
             }
         }
 
