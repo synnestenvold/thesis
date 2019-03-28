@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Drawing;
 using Grasshopper.Kernel;
+using Rhino.Display;
 using Rhino.Geometry;
 
 // In order to load the result of this wizard, you will also need to
@@ -13,13 +14,9 @@ namespace LoadSlider
 {
     public class LoadSliderComponent : GH_Component
     {
-        /// <summary>
-        /// Each implementation of GH_Component must provide a public 
-        /// constructor without any arguments.
-        /// Category represents the Tab in which the component will appear, 
-        /// Subcategory the panel. If you use non-existing tab or panel names, 
-        /// new tabs/panels will automatically be created.
-        /// </summary>
+        Text3d text = new Text3d("");
+        Text3d textValue = new Text3d("");
+
         public LoadSliderComponent()
           : base("LoadSlider", "LoadSlider",
               "Load slider for VR",
@@ -41,6 +38,8 @@ namespace LoadSlider
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddVectorParameter("Load", "L", "Load vector and value", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "T", "Slider text", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -50,18 +49,48 @@ namespace LoadSlider
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            //double length = new double();
+        
             Curve curve = null;
             if (!DA.GetData(0, ref curve)) return;
-            Vector3d vector = CreateVectorFromCurve(curve);
+            Vector3d vector = curve.PointAtEnd - curve.PointAtStart;
+            //Text on start of curve
+            var tuple = CreateText(text, curve);
+            string textOut = tuple.Item1;
+            Plane plane = tuple.Item2;
+            //Text on the other side shows the value of load
+            var tupleValue = CreateTextValue(textValue, curve, vector);
+            string textValueOut = tupleValue.Item1;
+            Plane planeValue = tupleValue.Item2;
+
             DA.SetData(0, vector);
+            DA.SetData(1, textOut);
+            DA.SetData(2, plane);
 
         }
 
-        public Vector3d CreateVectorFromCurve(Curve curve) {
-            Vector3d vector = curve.PointAtEnd - curve.PointAtStart;
-            return vector;
+       
+        public Tuple<string, Plane> CreateText(Text3d text, Curve curve)
+        {
+            text.Text = "Adjust for load in kN/m^2";
+            Point3d start = curve.PointAtStart;
+            Point3d p0 = Point3d.Add(start, new Point3d(0, 0, 0.4));
+            Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 0.4));
+            Point3d p2 = Point3d.Add(start, new Point3d(0, 0, 1.4));
+            text.TextPlane = new Plane(p0, p1, p2);
+            text.Height = 0.4;
+            return Tuple.Create(text.Text, text.TextPlane);
+        }
 
+        public Tuple<string, Plane> CreateTextValue(Text3d textValue, Curve curve, Vector3d vector)
+        {
+            textValue.Text = "("+(vector.X).ToString()+", "+(vector.Y).ToString()+", "+ (vector.Z).ToString()+")";
+            Point3d end = curve.PointAtEnd;
+            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
+            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, 0.4));
+            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1.4));
+            textValue.TextPlane = new Plane(p0, p1, p2);
+            textValue.Height = 0.6;
+            return Tuple.Create(textValue.Text, textValue.TextPlane);
         }
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.
@@ -76,15 +105,22 @@ namespace LoadSlider
                 return null;
             }
         }
-
-        /// <summary>
-        /// Each component must have a unique Guid to identify it. 
-        /// It is vital this Guid doesn't change otherwise old ghx files 
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
+        
         public override Guid ComponentGuid
         {
             get { return new Guid("74238820-07e9-4490-966e-8a8dcfe33ca8"); }
+        }
+
+        public override void ExpireSolution(bool recompute)
+        {
+            base.ExpireSolution(recompute);
+        }
+
+        public override void DrawViewportMeshes(IGH_PreviewArgs args)
+        {
+            args.Display.Draw3dText(text, Color.Red);
+            args.Display.Draw3dText(textValue, Color.Red);
+            //base.DrawViewportMeshes(args);
         }
     }
 }

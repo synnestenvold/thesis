@@ -40,7 +40,7 @@ namespace ViewDeformations
             pManager.AddGenericParameter("Model", "M", "3d Model", GH_ParamAccess.list);
             pManager.AddGeometryParameter("Sphere", "S", "Sphere", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "T", "Text", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "P", "Plane", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
 
         }
 
@@ -53,9 +53,9 @@ namespace ViewDeformations
             GH_Structure<GH_Integer> treeConnect = new GH_Structure<GH_Integer>();
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = 1;
-            
-            if (!DA.GetDataTree(1, out treePoints)) return;
+
             if (!DA.GetDataTree(0, out treeConnect)) return;
+            if (!DA.GetDataTree(1, out treePoints)) return;
             if (!DA.GetDataTree(2, out treeDef)) return;
             if (!DA.GetData(3, ref scale)) return;
             
@@ -69,7 +69,7 @@ namespace ViewDeformations
             var tupleOutput = CreateText(text, defMax, pointMax);
             string textOut = tupleOutput.Item1;
             Plane plane = tupleOutput.Item2;
-            sphere = new Sphere(pointMax, 0.2);
+            sphere = new Sphere(pointMax, 0.4);
 
 
             //Coloring
@@ -174,12 +174,11 @@ namespace ViewDeformations
         public Tuple<string, Plane> CreateText(Text3d text, double defMax, Point3d pointMax)
         {
             text.Text = defMax.ToString();
-            //text.Text = "hei";
-            Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, 0.2));
-            Point3d p1 = Point3d.Add(pointMax, new Point3d(1, 0, 0.2));
-            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, 1.2));
+            Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, 0.4));
+            Point3d p1 = Point3d.Add(pointMax, new Point3d(1, 0, 0.4));
+            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, 1.4));
             text.TextPlane = new Plane(p0, p1, p2);
-            text.Height = 0.5;
+            text.Height = 0.7;
             return Tuple.Create(text.Text, text.TextPlane);
         }
 
@@ -213,8 +212,8 @@ namespace ViewDeformations
                 
             }
             args.Display.Draw3dText(text, Color.Red);
-            //Mesh mesh =  Mesh.CreateFromSphere(sphere, 10, 10);
-            //args.Display.DrawMeshShaded(mesh, new DisplayMaterial(Color.Red));
+            Mesh mesh =  Mesh.CreateFromSphere(sphere, 10, 10);
+            args.Display.DrawMeshShaded(mesh, new DisplayMaterial(Color.Red));
             //base.DrawViewportMeshes(args);
         }
 
