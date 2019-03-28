@@ -9,6 +9,7 @@ using Grasshopper;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using System.Linq;
+//using Material;
 
 
 namespace FEMeshTBrep
@@ -30,6 +31,7 @@ namespace FEMeshTBrep
         {
             pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
             pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
+            //pManager.AddGenericParameter("Material", "M", "Material info", GH_ParamAccess.item);
             pManager.AddTextParameter("Boundary conditions", "BC", "Nodes that are constrained", GH_ParamAccess.list);
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
@@ -50,15 +52,17 @@ namespace FEMeshTBrep
 
             GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
             GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
+            //Material m = new Material();
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
             List<string> deftxt = new List<string>();
 
             if (!DA.GetDataTree(0, out treeConnectivity)) return;
             if (!DA.GetDataTree(1, out treePoints)) return;
-            if (!DA.GetDataList(2, bctxt)) return;
-            if (!DA.GetDataList(3, loadtxt)) return;
-            if (!DA.GetDataList(4, deftxt)) return;
+            if (!DA.GetData(2, ref m)) return;
+            if (!DA.GetDataList(3, bctxt)) return;
+            if (!DA.GetDataList(4, loadtxt)) return;
+            if (!DA.GetDataList(5, deftxt)) return;
 
 
             // Temporary way of finding the size of stiffness matrix and B matrix

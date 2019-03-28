@@ -50,6 +50,7 @@ namespace ViewStresses
             int dir = new int();
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = new double();
+            List<Color> colors = new List<Color>();
 
             if (!DA.GetDataTree(1, out treePoints)) return;
             if (!DA.GetDataTree(0, out treeConnect)) return;
@@ -61,7 +62,7 @@ namespace ViewStresses
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef, scale);
             breps = CreateDefBreps(treePoints, treeConnect, defVectors);
-            tmpModels = ColorBreps(breps, treeConnect, treeStress, dir);
+            tmpModels = ColorBreps(breps, treeConnect, treeStress, dir, colors);
             
             //Output
             foreach (var m in tmpModels)
@@ -70,6 +71,7 @@ namespace ViewStresses
             }
 
             DA.SetDataList(0, tmpModels.Keys);
+            DA.SetDataList(1, colors);
         }
         
         public Vector3d[] CreateVectors(GH_Structure<GH_Number> treeDef, double scale)
@@ -114,7 +116,7 @@ namespace ViewStresses
             return breps;
         }
 
-        public Dictionary<Brep, Color> ColorBreps(List<Brep> breps, GH_Structure<GH_Integer> treeConnect, GH_Structure<GH_Number> treeStress, int dir)
+        public Dictionary<Brep, Color> ColorBreps(List<Brep> breps, GH_Structure<GH_Integer> treeConnect, GH_Structure<GH_Number> treeStress, int dir, List<Color> colors)
         {
             Dictionary<Brep, Color> tmpModels = new Dictionary<Brep, Color>();
             List<Brep> coloredBreps = new List<Brep>();
@@ -140,6 +142,7 @@ namespace ViewStresses
                 else if (averageValues[i] < min + 12 * range) color = Color.OrangeRed;
                 else color = Color.Red;
                 tmpModels[breps[i]] = color;
+                colors[i] = color;
             }
 
             return tmpModels;
