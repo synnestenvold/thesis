@@ -41,6 +41,7 @@ namespace SetUniLoad
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("Loaded points", "LP", "Loads in point, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
+            pManager.AddLineParameter("Load-arrows", "L", "Arrows showing the load", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -135,6 +136,7 @@ namespace SetUniLoad
             List<string> cornerPointsString = new List<string>();
 
             List<string> pointLoads = new List<string>();
+
             
             //Center
             foreach (Point3d p in centerPoints)
@@ -182,8 +184,58 @@ namespace SetUniLoad
             pointLoads.AddRange(linePointLoads);
             pointLoads.AddRange(cornerPointLoads);
 
-            DA.SetDataList(0, pointLoads);
+            List<Line> arrows = DrawLoads(pointLoads);
 
+            DA.SetDataList(0, pointLoads);
+            DA.SetDataList(1, arrows);
+
+        }
+
+        public List<Line> DrawLoads(List<string> pointLoads)
+        {
+            List<Line> arrows = new List<Line>();
+
+            List<double> loadCoord = new List<double>();
+            List<double> pointValues = new List<double>();
+
+            foreach (string s in pointLoads)
+            {
+                string coordinate = (s.Split(';'))[0];
+                string iLoad = (s.Split(';'))[1];
+
+                string[] coord = (coordinate.Split(','));
+                string[] iLoads = (iLoad.Split(','));
+
+                double loadCoord1 = Math.Round(double.Parse(coord[0]), 8);
+                double loadCoord2 = Math.Round(double.Parse(coord[1]), 8);
+                double loadCoord3 = Math.Round(double.Parse(coord[2]), 8);
+
+                double loadX = Math.Round(double.Parse(iLoads[0]), 8);
+                double loadY = Math.Round(double.Parse(iLoads[1]), 8);
+                double loadZ = Math.Round(double.Parse(iLoads[2]), 8);
+
+                Point3d startPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3);
+                Point3d endPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3 - loadZ/2);
+                Point3d arrowPart1 = new Point3d(0, 0, 0);
+                Point3d arrowPart2 = new Point3d(0, 0, 0);
+
+                if (loadZ > 0)
+                {
+                    arrowPart1 = new Point3d(loadCoord1 + 1, loadCoord2, loadCoord3 - 1);
+                    arrowPart2 = new Point3d(loadCoord1 - 1, loadCoord2, loadCoord3 - 1);
+                }
+                else
+                {
+                    arrowPart1 = new Point3d(loadCoord1 + 1, loadCoord2, loadCoord3 + 1);
+                    arrowPart2 = new Point3d(loadCoord1 - 1, loadCoord2, loadCoord3 + 1);
+                }
+                
+                arrows.Add(new Line(startPoint, endPoint));
+                arrows.Add(new Line(startPoint, arrowPart1));
+                arrows.Add(new Line(startPoint, arrowPart2));
+            }
+
+            return arrows;
         }
 
         protected override System.Drawing.Bitmap Icon
