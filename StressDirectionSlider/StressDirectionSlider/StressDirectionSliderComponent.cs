@@ -51,17 +51,17 @@ namespace StressDirectionSlider
             dir = dir > maxDir ? maxDir : dir;
 
             //Text start
-            var tuple = CreateText(text, curve);
-            string textOut = tuple.Item1;
-            Plane plane = tuple.Item2;
+            //var tuple = CreateText(text, curve);
+            //string textOut = tuple.Item1;
+            //Plane plane = tuple.Item2;
             //Text on the other side shows the value of load
             var tupleValue = CreateValueText(textValue, curve, dir);
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
 
             DA.SetData(0, dir);
-            DA.SetData(1, textOut);
-            DA.SetData(2, plane);
+            //DA.SetData(1, textOut);
+            //DA.SetData(2, plane);
             DA.SetData(1, textValueOut);
             DA.SetData(2, planeValue);
 
@@ -75,7 +75,7 @@ namespace StressDirectionSlider
             Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 0.4));
             Point3d p2 = Point3d.Add(start, new Point3d(0, 0, 1.4));
             text.TextPlane = new Plane(p0, p1, p2);
-            text.Height = 0.4;
+            text.Height = 0.6;
             return Tuple.Create(text.Text, text.TextPlane);
         }
 
@@ -83,12 +83,12 @@ namespace StressDirectionSlider
         {
             string direction = "";
             if (dir < 1) direction = "σ,xx";
-            else if (dir < 1) direction = "σ,yy";
-            else if (dir < 1) direction = "σ,zz";
-            else if (dir < 1) direction = "σ,yz?";
-            else if (dir < 1) direction = "σ,xz?";
-            else direction = "σ,xy?";
-            textValue.Text = "Direction: " + direction;
+            else if (dir < 2) direction = "σ,yy";
+            else if (dir < 3) direction = "σ,zz";
+            else if (dir < 4) direction = "σ,yz";
+            else if (dir < 5) direction = "σ,xz";
+            else direction = "σ,xy";
+            textValue.Text = "Stress direction: " + direction;
             Point3d end = curve.PointAtEnd;
             Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
             Point3d p1 = Point3d.Add(end, new Point3d(1, 0, 0.4));
@@ -127,7 +127,7 @@ namespace StressDirectionSlider
 
         public override void DrawViewportMeshes(IGH_PreviewArgs args)
         {
-            args.Display.Draw3dText(text, Color.Red);
+            //args.Display.Draw3dText(text, Color.Red);
             args.Display.Draw3dText(textValue, Color.Red);
             //base.DrawViewportMeshes(args);
         }
