@@ -93,7 +93,7 @@ namespace ViewDeformations
 
             DA.SetDataList(0, tmpModels.Keys);
             DA.SetData(1, sphere);
-            DA.SetDataList(2, new List<Color>(){ Color.White, Color.Red });
+            DA.SetDataList(2, new List<Color>(){ Color.Red, Color.White });
             DA.SetData(3, textOut);
             DA.SetData(4, plane);
             DA.SetData(5, Color.Red);

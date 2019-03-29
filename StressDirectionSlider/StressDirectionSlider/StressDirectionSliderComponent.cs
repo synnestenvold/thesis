@@ -91,12 +91,12 @@ namespace StressDirectionSlider
         public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, int dir)
         {
             string direction = "";
-            if (dir < 1) direction = "σ,xx";
-            else if (dir < 2) direction = "σ,yy";
-            else if (dir < 3) direction = "σ,zz";
-            else if (dir < 4) direction = "σ,yz";
-            else if (dir < 5) direction = "σ,xz";
-            else direction = "σ,xy";
+            if (dir < 1) direction = "S,xx";
+            else if (dir < 2) direction = "S,yy";
+            else if (dir < 3) direction = "S,zz";
+            else if (dir < 4) direction = "S,yz";
+            else if (dir < 5) direction = "S,xz";
+            else direction = "S,xy";
             textValue.Text = "Stress direction: " + direction;
             Point3d end = curve.PointAtEnd;
             Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
