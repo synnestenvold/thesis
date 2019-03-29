@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Drawing;
 using Grasshopper.Kernel;
+using Rhino.Display;
 using Rhino.Geometry;
 
 // In order to load the result of this wizard, you will also need to
@@ -13,13 +14,9 @@ namespace DeformationSlider
 {
     public class DeformationSliderComponent : GH_Component
     {
-        /// <summary>
-        /// Each implementation of GH_Component must provide a public 
-        /// constructor without any arguments.
-        /// Category represents the Tab in which the component will appear, 
-        /// Subcategory the panel. If you use non-existing tab or panel names, 
-        /// new tabs/panels will automatically be created.
-        /// </summary>
+        readonly Text3d text = new Text3d("");
+        readonly Text3d textValue = new Text3d("");
+       
         public DeformationSliderComponent()
           : base("DeformationSlider", "DefSlider",
               "Slider for deformation scale in VR",
@@ -27,35 +24,39 @@ namespace DeformationSlider
         {
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddNumberParameter("Scale", "Scale", "Scale value as length", GH_ParamAccess.item);
-
+            
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
-        /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            //double length = new double();
             Curve curve = null;
             if (!DA.GetData(0, ref curve)) return;
-            Vector3d length = curve.PointAtEnd - curve.PointAtStart;
+            double length = (curve.PointAtEnd - curve.PointAtStart).Length;
+            var tupleValue = CreateValueText(textValue, curve, length);
+            string textValueOut = tupleValue.Item1;
+            Plane planeValue = tupleValue.Item2;
             DA.SetData(0, length);
+            DA.SetData(1, textValueOut);
+            DA.SetData(2, planeValue);
+        }
+        public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, double length)
+        {
+            textValue.Text = "Scale size: " + Math.Round(length).ToString();
+            Point3d end = curve.PointAtEnd;
+            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
+            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, 0.4));
+            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1.4));
+            textValue.TextPlane = new Plane(p0, p1, p2);
+            textValue.Height = 0.6;
+            return Tuple.Create(textValue.Text, textValue.TextPlane);
         }
 
         /// <summary>
@@ -80,6 +81,17 @@ namespace DeformationSlider
         public override Guid ComponentGuid
         {
             get { return new Guid("8a4183c2-fdcf-4af1-93ca-8e411a84a3bc"); }
+        }
+        public override void ExpireSolution(bool recompute)
+        {
+            base.ExpireSolution(recompute);
+        }
+
+        public override void DrawViewportMeshes(IGH_PreviewArgs args)
+        {
+            //args.Display.Draw3dText(text, Color.Red);
+            args.Display.Draw3dText(textValue, Color.Red);
+            //base.DrawViewportMeshes(args);
         }
     }
 }

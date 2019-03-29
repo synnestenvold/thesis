@@ -38,6 +38,8 @@ namespace StressDirectionSlider
             pManager.AddIntegerParameter("Direction", "Dir", "Direction of stress (0-5)", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "T", "Direction text", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "T2", "Direction text", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "P2", "Placement for text", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -58,6 +60,8 @@ namespace StressDirectionSlider
             Plane planeValue = tupleValue.Item2;
 
             DA.SetData(0, dir);
+            DA.SetData(1, textOut);
+            DA.SetData(2, plane);
             DA.SetData(1, textValueOut);
             DA.SetData(2, planeValue);
 
@@ -65,7 +69,7 @@ namespace StressDirectionSlider
 
         public Tuple<string, Plane> CreateText(Text3d text, Curve curve)
         {
-            text.Text = "Adjust for direction to view";
+            text.Text = "Stress direction";
             Point3d start = curve.PointAtStart;
             Point3d p0 = Point3d.Add(start, new Point3d(0, 0, 0.4));
             Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 0.4));
