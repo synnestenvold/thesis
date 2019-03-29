@@ -37,8 +37,12 @@ namespace ViewStresses
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("Model", "M", "3d Model of stresses", GH_ParamAccess.list);
-            pManager.AddColourParameter("Colors", "C", "Colors", GH_ParamAccess.list);
-            
+            pManager.AddColourParameter("Colors", "C", "Colors for breps", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Stress range", "SR", "Breps for stress range", GH_ParamAccess.list);
+            pManager.AddColourParameter("Colors", "C", "Colors for stress range", GH_ParamAccess.list);
+            pManager.AddTextParameter("Text", "T", "Text", GH_ParamAccess.list);
+            pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.list);
+            pManager.AddColourParameter("Colors", "C", "Colors for text", GH_ParamAccess.list);
         }
 
 
@@ -70,25 +74,31 @@ namespace ViewStresses
             double volume = origBrep.GetVolume();
             double angle = 225;
 
-            Vector3d transVec = CreateTransVector(centroid, volume, angle);
+            double sqrt3 = (double)1 / 3;
+            double refLength = Math.Pow(volume, sqrt3);
+
+            Vector3d transVec = CreateTransVector(centroid, refLength, angle);
 
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef, scale);
             breps = CreateDefBreps(treePoints, treeConnect, defVectors, transVec, angle, centroid);
-            tmpModels = ColorBreps(breps, treeConnect, treeStress, dir, colors);
+            var tuple1 = ColorBreps(breps, treeConnect, treeStress, dir, colors);
+            tmpModels = tuple1.Item1;
+            List<string> rangeValues = tuple1.Item2;
+
 
             Dictionary<Brep, Color> tmpRanges = new Dictionary<Brep, Color>();
-            List<Color> colorRange = new List<Color>();
-
-
-        
+            List<Color> colorRange = CreateColorRange();
             
+            var tuple2 = CreateBrepRanges(centroid, refLength, transVec);
 
-            /*
-            List<Brep> BrepRanges = CreateBrepRanges(centroid, volume, transVec);
+            List<Brep> brepRanges = tuple2.Item1;
+            List<Plane> planeRanges = tuple2.Item2;
 
-            tmpRanges = CreateRanges(brepsRange, centroid, volume, transVec);
-            */
+            tmpRanges = CreateRanges(brepRanges, colorRange);
+
+            Color textColor = Color.Black;
+            
 
             //Output
             foreach (var m in tmpModels)
@@ -96,26 +106,108 @@ namespace ViewStresses
                 models[m.Key] = m.Value;
             }
 
+            foreach (var m in tmpRanges)
+            {
+                models[m.Key] = m.Value;
+            }
+
             DA.SetDataList(0, tmpModels.Keys);
             DA.SetDataList(1, colors);
+            DA.SetDataList(2, tmpRanges.Keys);
+            DA.SetDataList(3, colorRange);
+            DA.SetDataList(4, rangeValues);
+            DA.SetDataList(5, planeRanges);
+            DA.SetData(6, textColor);
         }
 
-        /*
-        public List<Brep> CreateBrepRanges(Point3d centroid, double volume, Vector3d)
+        public List<Color> CreateColorRange()
+        {
+            List<Color> colorRange = new List<Color>();
 
-        public Dictionary<Brep, Color> createRanges(List<Brep> breps, Point3d centroid, double volume, Vector3d transVec)
+            colorRange.Add(Color.Blue);
+            colorRange.Add(Color.RoyalBlue);
+            colorRange.Add(Color.DeepSkyBlue);
+            colorRange.Add(Color.Cyan);
+            colorRange.Add(Color.PaleGreen);
+            colorRange.Add(Color.LimeGreen);
+            colorRange.Add(Color.Lime);
+            colorRange.Add(Color.Lime);
+            colorRange.Add(Color.GreenYellow);
+            colorRange.Add(Color.Yellow);
+            colorRange.Add(Color.Orange);
+            colorRange.Add(Color.OrangeRed);
+            colorRange.Add(Color.Red);
+
+            return colorRange;
+        }
+
+
+        public Tuple<List<Brep>, List<Plane>> CreateBrepRanges(Point3d centroid, double refLength, Vector3d transVec)
+        {
+            List<Brep> brepRanges = new List<Brep>();
+            List<Plane> planeRanges = new List<Plane>();
+            Brep brep_new = new Brep();
+
+            Point3d centroidGlobal = centroid + transVec;
+
+            int ranges = 13;
+            double totLength = refLength * 1.5;
+            double rangeHeight = totLength / ranges;
+
+            Vector3d rangePos = new Vector3d(0, refLength, refLength );
+            Point3d startRanges = centroidGlobal + rangePos;
+
+            for(int i = 0; i < ranges; i++)
+            {
+                Interval x = new Interval(startRanges.X, startRanges.X + refLength*0.2);
+                Interval y = new Interval(startRanges.Y, startRanges.Y + refLength);
+                Interval z = new Interval(startRanges.Z + rangeHeight*i, startRanges.Z + rangeHeight * (i+1));
+                Box box_new = new Box(Plane.WorldXY, x, y, z);
+                brep_new = box_new.ToBrep();
+                brepRanges.Add(brep_new);
+
+                Point3d p0 = new Point3d(startRanges.X + refLength * 0.2, startRanges.Y + refLength , startRanges.Z + rangeHeight * i);
+                Point3d p1 = Point3d.Add(p0, new Point3d(0, 1, 0));
+                Point3d p2 = Point3d.Add(p0, new Point3d(0, 1, 1));
+
+                planeRanges.Add(new Plane(p0, p1, p2));
+
+            }
+
+            Point3d p_0 = new Point3d(startRanges.X + refLength * 0.2, startRanges.Y + refLength, startRanges.Z + rangeHeight * ranges);
+            Point3d p_1 = Point3d.Add(p_0, new Point3d(0, 1, 0));
+            Point3d p_2 = Point3d.Add(p_0, new Point3d(0, 1, 1));
+
+            planeRanges.Add(new Plane(p_0, p_1, p_2));
+
+            Point3d ph_0 = new Point3d(startRanges.X + refLength * 0.2, startRanges.Y + refLength*0.2, startRanges.Z + rangeHeight * (ranges+0.5));
+            Point3d ph_1 = Point3d.Add(ph_0, new Point3d(0, 1, 0));
+            Point3d ph_2 = Point3d.Add(ph_0, new Point3d(0, 1, 1));
+
+            planeRanges.Add(new Plane(ph_0, ph_1, ph_2));
+
+            return Tuple.Create(brepRanges, planeRanges);
+        }
+            
+           
+
+        public Dictionary<Brep, Color> CreateRanges(List<Brep> breps, List<Color> color)
         {
             Dictionary<Brep, Color> tmpRanges = new Dictionary<Brep, Color>();
-            return tmpRanges
+
+            for(int i = 0; i < breps.Count; i++)
+            {
+                tmpRanges[breps[i]] = color[i];
+            }
+
+            return tmpRanges;
         }
 
-        */
+        
 
-        public Vector3d CreateTransVector(Point3d centroid, double volume, double angle)
+        public Vector3d CreateTransVector(Point3d centroid, double refLength, double angle)
         {
             double factor = 2.5;
-            double sqrt3 = (double)1 / 3;
-            double refLength = Math.Pow(volume, sqrt3);
 
             double side1 = refLength*factor;
             double side2 = side1 * Math.Tan(45*Math.PI/180);
@@ -180,15 +272,34 @@ namespace ViewStresses
             return breps;
         }
 
-        public Dictionary<Brep, Color> ColorBreps(List<Brep> breps, GH_Structure<GH_Integer> treeConnect, GH_Structure<GH_Number> treeStress, int dir, List<Color> colors)
+        public Tuple<Dictionary<Brep, Color>,List<string>> ColorBreps(List<Brep> breps, GH_Structure<GH_Integer> treeConnect, GH_Structure<GH_Number> treeStress, int dir, List<Color> colors)
         {
             Dictionary<Brep, Color> tmpModels = new Dictionary<Brep, Color>();
             List<Brep> coloredBreps = new List<Brep>();
             Color color = Color.White;
+            List<string> rangeValues = new List<String>();
+
             double[] averageValues = AverageValuesStress(treeStress, treeConnect, dir);
             double max = averageValues.Max();
             double min = averageValues.Min();
             double range = (max - min) / 13;
+
+
+            //Adding values to stress range
+            for(int i = 0; i <= 13; i++)
+            {
+                rangeValues.Add("_"+(Math.Round(min + i * range,4)).ToString());
+            }
+
+            //Creating header
+            if (dir == 0) rangeValues.Add("S,xx [MPa]");
+            else if (dir == 1) rangeValues.Add("S,yy [Mpa]");
+            else if (dir == 2) rangeValues.Add("S,zz [Mpa]");
+            else if (dir == 3) rangeValues.Add("S,yz [Mpa]");
+            else if (dir == 4) rangeValues.Add("S,xz [Mpa]");
+            else if (dir == 5) rangeValues.Add("S,zy [Mpa]");
+
+           
 
             for (int i = 0; i < breps.Count; i++)
             {
@@ -209,7 +320,7 @@ namespace ViewStresses
                 colors.Add(color);
             }
 
-            return tmpModels;
+            return Tuple.Create(tmpModels,rangeValues);
 
     
         }
