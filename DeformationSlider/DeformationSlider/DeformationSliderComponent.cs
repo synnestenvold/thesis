@@ -49,7 +49,7 @@ namespace DeformationSlider
             double sqrt3 = (double) 1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
             double adjustment = 200 / refLength; //5 times the length should give 1000
-            double length = (curve.PointAtEnd - curve.PointAtStart).Length*adjustment;
+            double length = curve.GetLength()*adjustment;
 
             var tupleValue = CreateValueText(textValue, curve, length);
             string textValueOut = tupleValue.Item1;

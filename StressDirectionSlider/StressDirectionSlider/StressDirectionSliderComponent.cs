@@ -31,23 +31,31 @@ namespace StressDirectionSlider
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Brep", "B", "Brep as reference", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddIntegerParameter("Direction", "Dir", "Direction of stress (0-5)", GH_ParamAccess.item);
+            //pManager.AddTextParameter("Text", "T", "Direction text", GH_ParamAccess.item);
+            //pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "T", "Direction text", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
-            pManager.AddTextParameter("Text", "T2", "Direction text", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "P2", "Placement for text", GH_ParamAccess.item);
+            pManager.AddColourParameter("Color", "C", "Color for text", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Curve curve = null;
+            Brep brep = new Brep();
             if (!DA.GetData(0, ref curve)) return;
-
-            int dir = Convert.ToInt32(curve.GetLength());
+            if (!DA.GetData(1, ref brep)) return;
+            double volume = brep.GetVolume();
+            double sqrt3 = (double)1 / 3;
+            double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double adjustment = 5 / refLength; //the length should give 10
+            
+            int dir = Convert.ToInt32(curve.GetLength()*adjustment);
             dir = dir > maxDir ? maxDir : dir;
 
             //Text start
@@ -64,6 +72,7 @@ namespace StressDirectionSlider
             //DA.SetData(2, plane);
             DA.SetData(1, textValueOut);
             DA.SetData(2, planeValue);
+            DA.SetData(3, Color.White);
 
         }
 
@@ -128,7 +137,7 @@ namespace StressDirectionSlider
         public override void DrawViewportMeshes(IGH_PreviewArgs args)
         {
             //args.Display.Draw3dText(text, Color.Red);
-            args.Display.Draw3dText(textValue, Color.Red);
+            args.Display.Draw3dText(textValue, Color.White);
             //base.DrawViewportMeshes(args);
         }
     }

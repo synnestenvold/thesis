@@ -30,6 +30,7 @@ namespace LoadSlider
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Brep", "B", "Brep as reference", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -54,8 +55,16 @@ namespace LoadSlider
         {
         
             Curve curve = null;
+            Brep brep = new Brep();
             if (!DA.GetData(0, ref curve)) return;
-            Vector3d vector = curve.PointAtEnd - curve.PointAtStart;
+            if (!DA.GetData(1, ref brep)) return;
+            Vector3d vectorRef = curve.PointAtEnd - curve.PointAtStart;
+            //Scale vector
+            double volume = brep.GetVolume();
+            double sqrt3 = (double)1 / 3;
+            double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double adjustment = 20 / refLength; //the length should give 20 kn/m^2
+            Vector3d vector = Vector3d.Multiply(adjustment, vectorRef);
             //Text on start of curve
             var tuple = CreateText(text, curve);
             string textOut = tuple.Item1;
@@ -64,6 +73,8 @@ namespace LoadSlider
             var tupleValue = CreateTextValue(textValue, curve, vector);
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
+
+            
 
             DA.SetData(0, vector);
             DA.SetData(1, textOut);

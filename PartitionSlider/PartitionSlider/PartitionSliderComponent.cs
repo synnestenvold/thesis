@@ -44,9 +44,15 @@ namespace PartitionSlider
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Curve curve = null;
+            Brep brep = new Brep();
             if (!DA.GetData(0, ref curve)) return;
-
-            int parts = Convert.ToInt32(curve.GetLength());
+            if (!DA.GetData(1, ref brep)) return;
+            double volume = brep.GetVolume();
+            double sqrt3 = (double)1 / 3;
+            double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double adjustment = 10 / refLength; //the length should give 10
+           
+            int parts = Convert.ToInt32(curve.GetLength()*adjustment);
             parts = parts > maxPartition ? maxPartition : parts;
             
             //Text start (not needed for partitions?)
@@ -57,6 +63,8 @@ namespace PartitionSlider
             var tupleValue = CreateValueText(textValue, curve, parts);
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
+
+           
 
             DA.SetData(0, parts);
             DA.SetData(1, textValueOut);
