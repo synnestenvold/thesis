@@ -27,6 +27,7 @@ namespace DeformationSlider
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Brep", "B", "Brep as reference size", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -41,8 +42,15 @@ namespace DeformationSlider
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Curve curve = null;
+            Brep brep = new Brep();
             if (!DA.GetData(0, ref curve)) return;
-            double length = (curve.PointAtEnd - curve.PointAtStart).Length;
+            if (!DA.GetData(1, ref brep)) return;
+            double volume = brep.GetVolume();
+            double sqrt3 = (double) 1 / 3;
+            double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double adjustment = 200 / refLength; //5 times the length should give 1000
+            double length = (curve.PointAtEnd - curve.PointAtStart).Length*adjustment;
+
             var tupleValue = CreateValueText(textValue, curve, length);
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
