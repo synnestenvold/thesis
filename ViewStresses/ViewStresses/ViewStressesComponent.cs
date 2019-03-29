@@ -31,11 +31,12 @@ namespace ViewStresses
             //pManager.AddNumberParameter("Yield limit", "Y", "The limit for coloring Green/Red", GH_ParamAccess.item);
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
+            pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Model", "M", "3d Model", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Model", "M", "3d Model of stresses", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "C", "Colors", GH_ParamAccess.list);
             
         }
@@ -53,6 +54,7 @@ namespace ViewStresses
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = new double();
             List<Color> colors = new List<Color>();
+            Brep origBrep = new Brep();
 
             if (!DA.GetDataTree(1, out treePoints)) return;
             if (!DA.GetDataTree(0, out treeConnect)) return;
@@ -60,12 +62,34 @@ namespace ViewStresses
             if (!DA.GetData(3, ref dir)) return;
             if (!DA.GetDataTree(4, out treeDef)) return;
             if (!DA.GetData(5, ref scale)) return;
+            if (!DA.GetData(6, ref origBrep)) return;
+
+            VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
+
+            Point3d centroid = vmp.Centroid;
+            double volume = origBrep.GetVolume();
+            double angle = 225;
+
+            Vector3d transVec = CreateTransVector(centroid, volume, angle);
 
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef, scale);
-            breps = CreateDefBreps(treePoints, treeConnect, defVectors);
+            breps = CreateDefBreps(treePoints, treeConnect, defVectors, transVec, angle, centroid);
             tmpModels = ColorBreps(breps, treeConnect, treeStress, dir, colors);
+
+            Dictionary<Brep, Color> tmpRanges = new Dictionary<Brep, Color>();
+            List<Color> colorRange = new List<Color>();
+
+
+        
             
+
+            /*
+            List<Brep> BrepRanges = CreateBrepRanges(centroid, volume, transVec);
+
+            tmpRanges = CreateRanges(brepsRange, centroid, volume, transVec);
+            */
+
             //Output
             foreach (var m in tmpModels)
             {
@@ -75,7 +99,32 @@ namespace ViewStresses
             DA.SetDataList(0, tmpModels.Keys);
             DA.SetDataList(1, colors);
         }
-        
+
+        /*
+        public List<Brep> CreateBrepRanges(Point3d centroid, double volume, Vector3d)
+
+        public Dictionary<Brep, Color> createRanges(List<Brep> breps, Point3d centroid, double volume, Vector3d transVec)
+        {
+            Dictionary<Brep, Color> tmpRanges = new Dictionary<Brep, Color>();
+            return tmpRanges
+        }
+
+        */
+
+        public Vector3d CreateTransVector(Point3d centroid, double volume, double angle)
+        {
+            double factor = 2.5;
+            double sqrt3 = (double)1 / 3;
+            double refLength = Math.Pow(volume, sqrt3);
+
+            double side1 = refLength*factor;
+            double side2 = side1 * Math.Tan(45*Math.PI/180);
+
+            Vector3d transVec = new Vector3d(centroid.X-side1, centroid.Y-side2, 0);
+
+            return transVec;
+        }
+
         public Vector3d[] CreateVectors(GH_Structure<GH_Number> treeDef, double scale)
         {
             int number = treeDef.PathCount;
@@ -89,7 +138,7 @@ namespace ViewStresses
             return vectors;
         }
 
-        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors)
+        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors, Vector3d transVec, double angle, Point3d centroid)
         {
             List<Brep> breps = new List<Brep>();
             for (int j = 0; j < treePoints.PathCount; j++)
@@ -101,7 +150,8 @@ namespace ViewStresses
                 for (int i = 0; i < vertices.Count; i++)
                 {
                     GH_Point p = vertices[i];
-                    Point3d new_p = Point3d.Add(p.Value, defVectors[connect[i].Value]);
+                    Vector3d totVec = Vector3d.Add(defVectors[connect[i].Value], transVec);
+                    Point3d new_p = Point3d.Add(p.Value, totVec);
                     mesh.Vertices.Add(new_p);
                 }
                 mesh.Faces.AddFace(0, 1, 5, 4);
@@ -112,6 +162,18 @@ namespace ViewStresses
                 mesh.Faces.AddFace(0, 1, 2, 3);
 
                 Brep new_brep = Brep.CreateFromMesh(mesh, false);
+
+                ///////THIS FOR ROTATION OF THE WHOLE CUBE. First we rotate one small brep for its own centroid, then for global.
+
+                Point3d[] points = new_brep.DuplicateVertices();
+                Point3d centroid_local = FindCentroidRectangle(points);
+                Point3d centroid_global = Point3d.Add(centroid, transVec);
+                Vector3d vecAxis = points[4] - points[0];
+                new_brep.Rotate(angle * 2 * Math.PI / 180, vecAxis, centroid_local);
+                new_brep.Rotate(angle * 2 * Math.PI / 180, vecAxis, centroid_global);
+
+                ////// END ROTATION
+
                 breps.Add(new_brep);
 
             }
@@ -169,6 +231,25 @@ namespace ViewStresses
             }
             
             return averageList;
+        }
+
+        public Point3d FindCentroidRectangle(Point3d[] pList)
+        {
+
+            double c_x = 0;
+            double c_y = 0;
+            double c_z = 0;
+
+            foreach (Point3d p in pList)
+            {
+                c_x += p.X;
+                c_y += p.Y;
+                c_z += p.Z;
+            }
+
+            Point3d centroid = new Point3d(c_x / 8, c_y / 8, c_z / 8);
+
+            return centroid;
         }
 
         protected override System.Drawing.Bitmap Icon
