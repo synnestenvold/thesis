@@ -87,7 +87,7 @@ namespace LoadSlider
 
         public Tuple<string, Plane> CreateTextValue(Text3d textValue, Curve curve, Vector3d vector)
         {
-            textValue.Text = "("+(vector.X).ToString()+", "+(vector.Y).ToString()+", "+ (vector.Z).ToString()+")";
+            textValue.Text = "("+Math.Round((vector.X),3).ToString()+", "+Math.Round((vector.Y),3).ToString()+", "+Math.Round((vector.Z),3).ToString()+")";
             Point3d end = curve.PointAtEnd;
             Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
             Point3d p1 = Point3d.Add(end, new Point3d(1, 0, 0.4));

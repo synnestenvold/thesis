@@ -47,11 +47,11 @@ namespace PartitionSlider
             int parts = Convert.ToInt32(curve.GetLength());
             parts = parts > maxPartition ? maxPartition : parts;
             
-            //Text start
-            var tuple = CreateText(text, curve);
-            string textOut = tuple.Item1;
-            Plane plane = tuple.Item2;
-            //Text on the other side shows the value of load
+            //Text start (not needed for partitions?)
+            //var tuple = CreateText(text, curve);
+            //string textOut = tuple.Item1;
+            //Plane plane = tuple.Item2;
+            //Text on the other side shows the number of partitions
             var tupleValue = CreateValueText(textValue, curve, parts);
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
@@ -111,7 +111,7 @@ namespace PartitionSlider
 
         public override void DrawViewportMeshes(IGH_PreviewArgs args)
         {
-            args.Display.Draw3dText(text, Color.Red);
+            //args.Display.Draw3dText(text, Color.Red);
             args.Display.Draw3dText(textValue, Color.Red);
             //base.DrawViewportMeshes(args);
         }
