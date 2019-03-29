@@ -40,6 +40,8 @@ namespace LoadSlider
             pManager.AddVectorParameter("Load", "L", "Load vector and value", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "T", "Slider text", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "T2", "Slider text", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "P2", "Placement for text", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -65,6 +67,8 @@ namespace LoadSlider
             DA.SetData(0, vector);
             DA.SetData(1, textOut);
             DA.SetData(2, plane);
+            DA.SetData(3, textValueOut);
+            DA.SetData(4, planeValue);
 
         }
 
