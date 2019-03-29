@@ -42,6 +42,7 @@ namespace LoadSlider
             pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "T2", "Slider text", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "P2", "Placement for text", GH_ParamAccess.item);
+            pManager.AddColourParameter("Text colors", "C text", "Color for deformed text", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -69,6 +70,7 @@ namespace LoadSlider
             DA.SetData(2, plane);
             DA.SetData(3, textValueOut);
             DA.SetData(4, planeValue);
+            DA.SetData(5, Color.White);
 
         }
 
@@ -122,8 +124,8 @@ namespace LoadSlider
 
         public override void DrawViewportMeshes(IGH_PreviewArgs args)
         {
-            args.Display.Draw3dText(text, Color.Red);
-            args.Display.Draw3dText(textValue, Color.Red);
+            args.Display.Draw3dText(text, Color.White);
+            args.Display.Draw3dText(textValue, Color.White);
             //base.DrawViewportMeshes(args);
         }
     }

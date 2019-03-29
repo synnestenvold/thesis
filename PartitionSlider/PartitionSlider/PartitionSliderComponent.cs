@@ -30,6 +30,7 @@ namespace PartitionSlider
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Brep", "B", "Brep as reference", GH_ParamAccess.item);
         }
         
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -37,6 +38,7 @@ namespace PartitionSlider
             pManager.AddIntegerParameter("Partitions", "P", "Number of partitions", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "T", "Partition text", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
+            pManager.AddColourParameter("Text colors", "C text", "Color for deformed text", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -59,6 +61,7 @@ namespace PartitionSlider
             DA.SetData(0, parts);
             DA.SetData(1, textValueOut);
             DA.SetData(2, planeValue);
+            DA.SetData(3, Color.White);
 
         }
 
@@ -111,8 +114,8 @@ namespace PartitionSlider
 
         public override void DrawViewportMeshes(IGH_PreviewArgs args)
         {
-            //args.Display.Draw3dText(text, Color.Red);
-            args.Display.Draw3dText(textValue, Color.Red);
+            //args.Display.Draw3dText(text, Color.White);
+            args.Display.Draw3dText(textValue, Color.White);
             //base.DrawViewportMeshes(args);
         }
     }

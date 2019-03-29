@@ -32,7 +32,10 @@ namespace DeformationSlider
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddNumberParameter("Scale", "Scale", "Scale value as length", GH_ParamAccess.item);
-            
+            pManager.AddTextParameter("Text", "T", "Text", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "P", "Text placement", GH_ParamAccess.item);
+            pManager.AddColourParameter("Text colors", "C text", "Color for deformed text", GH_ParamAccess.item);
+
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -46,6 +49,7 @@ namespace DeformationSlider
             DA.SetData(0, length);
             DA.SetData(1, textValueOut);
             DA.SetData(2, planeValue);
+            DA.SetData(3, Color.White);
         }
         public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, double length)
         {
@@ -90,7 +94,7 @@ namespace DeformationSlider
         public override void DrawViewportMeshes(IGH_PreviewArgs args)
         {
             //args.Display.Draw3dText(text, Color.Red);
-            args.Display.Draw3dText(textValue, Color.Red);
+            args.Display.Draw3dText(textValue, Color.White);
             //base.DrawViewportMeshes(args);
         }
     }

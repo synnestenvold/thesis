@@ -39,8 +39,12 @@ namespace ViewDeformations
         {
             pManager.AddGenericParameter("Model", "M", "3d Model", GH_ParamAccess.list);
             pManager.AddGeometryParameter("Sphere", "S", "Sphere", GH_ParamAccess.item);
+            pManager.AddColourParameter("Geometry colors", "C geo", "Color for deformed brep and sphere", GH_ParamAccess.list);
             pManager.AddTextParameter("Text", "T", "Text", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
+            pManager.AddColourParameter("Text colors", "C text", "Color for deformed text", GH_ParamAccess.item);
+            
+            
 
         }
 
@@ -69,7 +73,7 @@ namespace ViewDeformations
             var tupleOutput = CreateText(text, defMax, pointMax);
             string textOut = tupleOutput.Item1;
             Plane plane = tupleOutput.Item2;
-            sphere = new Sphere(pointMax, 0.4);
+            sphere = new Sphere(pointMax, 0.5);
 
 
             //Coloring
@@ -89,8 +93,11 @@ namespace ViewDeformations
 
             DA.SetDataList(0, tmpModels.Keys);
             DA.SetData(1, sphere);
-            DA.SetData(2, textOut);
-            DA.SetData(3, plane);
+            DA.SetDataList(2, new List<Color>(){ Color.White, Color.Red });
+            DA.SetData(3, textOut);
+            DA.SetData(4, plane);
+            DA.SetData(5, Color.Red);
+            
         }
         
 
