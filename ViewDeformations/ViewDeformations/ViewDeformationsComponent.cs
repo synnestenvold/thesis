@@ -31,6 +31,7 @@ namespace ViewDeformations
             pManager.AddPointParameter("Points for Breps", "N", "Breps in coordinates", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
+            pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
             pManager[3].Optional = true;
         }
 
@@ -56,13 +57,20 @@ namespace ViewDeformations
             GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
             GH_Structure<GH_Integer> treeConnect = new GH_Structure<GH_Integer>();
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
+            Brep brep = new Brep();
             double scale = 1;
 
             if (!DA.GetDataTree(0, out treeConnect)) return;
             if (!DA.GetDataTree(1, out treePoints)) return;
             if (!DA.GetDataTree(2, out treeDef)) return;
             if (!DA.GetData(3, ref scale)) return;
-            
+            if (!DA.GetData(4, ref brep)) return;
+
+            double volume = brep.GetVolume();
+            double sqrt3 = (double)1 / 3;
+            double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double refSize = (double)(refLength / 10);
+
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef);
             breps = CreateDefBreps(treePoints, treeConnect, defVectors, scale);
@@ -70,10 +78,10 @@ namespace ViewDeformations
             var tuple = GetMaxDeformation(defVectors, treePoints, treeConnect);
             double defMax = tuple.Item1; 
             Point3d pointMax = tuple.Item2;
-            var tupleOutput = CreateText(text, defMax, pointMax);
+            var tupleOutput = CreateText(text, defMax, pointMax, refSize);
             string textOut = tupleOutput.Item1;
             Plane plane = tupleOutput.Item2;
-            sphere = new Sphere(pointMax, 0.5);
+            sphere = new Sphere(pointMax, refSize);
 
 
             //Coloring
@@ -178,14 +186,14 @@ namespace ViewDeformations
             return breps;
         }
 
-        public Tuple<string, Plane> CreateText(Text3d text, double defMax, Point3d pointMax)
+        public Tuple<string, Plane> CreateText(Text3d text, double defMax, Point3d pointMax, double refSize)
         {
             text.Text = defMax.ToString();
-            Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, 0.4));
-            Point3d p1 = Point3d.Add(pointMax, new Point3d(0, -1, 0.4));
-            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, 1.4));
+            Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, refSize));
+            Point3d p1 = Point3d.Add(pointMax, new Point3d(0, -1, refSize));
+            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, (1+refSize)));
             text.TextPlane = new Plane(p0, p1, p2);
-            text.Height = 0.7;
+            text.Height = refSize;
             return Tuple.Create(text.Text, text.TextPlane);
         }
 

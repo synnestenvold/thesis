@@ -63,50 +63,48 @@ namespace LoadSlider
             double volume = brep.GetVolume();
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double refSize = (double)(refLength / 10);
             double adjustment = 20 / refLength; //the length should give 20 kn/m^2
             Vector3d vector = Vector3d.Multiply(adjustment, vectorRef);
             //Text on start of curve
-            var tuple = CreateText(text, curve);
+            var tuple = CreateText(text, curve, refSize);
             string textOut = tuple.Item1;
             Plane plane = tuple.Item2;
             //Text on the other side shows the value of load
-            var tupleValue = CreateTextValue(textValue, curve, vector);
+            var tupleValue = CreateTextValue(textValue, curve, vector, refSize);
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
-
             
-
             DA.SetData(0, vector);
             DA.SetData(1, textOut);
             DA.SetData(2, plane);
             DA.SetData(3, textValueOut);
             DA.SetData(4, planeValue);
             DA.SetData(5, Color.White);
-
         }
 
        
-        public Tuple<string, Plane> CreateText(Text3d text, Curve curve)
+        public Tuple<string, Plane> CreateText(Text3d text, Curve curve, double refSize)
         {
             text.Text = "Adjust for load in kN/m^2";
             Point3d start = curve.PointAtStart;
-            Point3d p0 = Point3d.Add(start, new Point3d(0, 0, 0.4));
-            Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 0.4));
-            Point3d p2 = Point3d.Add(start, new Point3d(0, 0, 1.4));
+            Point3d p0 = Point3d.Add(start, new Point3d(0, 0, refSize));
+            Point3d p1 = Point3d.Add(start, new Point3d(1, 0, refSize));
+            Point3d p2 = Point3d.Add(start, new Point3d(0, 0, (1+refSize)));
             text.TextPlane = new Plane(p0, p1, p2);
-            text.Height = 0.6;
+            text.Height = refSize;
             return Tuple.Create(text.Text, text.TextPlane);
         }
 
-        public Tuple<string, Plane> CreateTextValue(Text3d textValue, Curve curve, Vector3d vector)
+        public Tuple<string, Plane> CreateTextValue(Text3d textValue, Curve curve, Vector3d vector, double refSize)
         {
             textValue.Text = "("+Math.Round((vector.X),3).ToString()+", "+Math.Round((vector.Y),3).ToString()+", "+Math.Round((vector.Z),3).ToString()+")";
             Point3d end = curve.PointAtEnd;
-            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
-            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, 0.4));
-            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1.4));
+            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, refSize));
+            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, refSize));
+            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1+refSize)));
             textValue.TextPlane = new Plane(p0, p1, p2);
-            textValue.Height = 0.6;
+            textValue.Height = refSize;
             return Tuple.Create(textValue.Text, textValue.TextPlane);
         }
         /// <summary>

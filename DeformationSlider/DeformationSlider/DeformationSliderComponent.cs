@@ -48,10 +48,11 @@ namespace DeformationSlider
             double volume = brep.GetVolume();
             double sqrt3 = (double) 1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double refSize = (double)(refLength / 10);
             double adjustment = 200 / refLength; //5 times the length should give 1000
             double length = curve.GetLength()*adjustment;
 
-            var tupleValue = CreateValueText(textValue, curve, length);
+            var tupleValue = CreateValueText(textValue, curve, length, refSize);
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
             DA.SetData(0, length);
@@ -59,7 +60,7 @@ namespace DeformationSlider
             DA.SetData(2, planeValue);
             DA.SetData(3, Color.White);
         }
-        public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, double length)
+        public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, double length, double refSize)
         {
             textValue.Text = "Scale size: " + Math.Round(length).ToString();
             Point3d end = curve.PointAtEnd;
@@ -67,7 +68,7 @@ namespace DeformationSlider
             Point3d p1 = Point3d.Add(end, new Point3d(0, -1, 0.4));
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1.4));
             textValue.TextPlane = new Plane(p0, p1, p2);
-            textValue.Height = 0.6;
+            textValue.Height = refSize;
             return Tuple.Create(textValue.Text, textValue.TextPlane);
         }
 

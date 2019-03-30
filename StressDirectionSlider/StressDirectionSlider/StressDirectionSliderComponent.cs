@@ -53,42 +53,36 @@ namespace StressDirectionSlider
             double volume = brep.GetVolume();
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double refSize = (double)(refLength / 10);
             double adjustment = 5 / refLength; //the length should give 10
             
             int dir = Convert.ToInt32(curve.GetLength()*adjustment);
             dir = dir > maxDir ? maxDir : dir;
-
-            //Text start
-            //var tuple = CreateText(text, curve);
-            //string textOut = tuple.Item1;
-            //Plane plane = tuple.Item2;
-            //Text on the other side shows the value of load
-            var tupleValue = CreateValueText(textValue, curve, dir);
+            
+            var tupleValue = CreateValueText(textValue, curve, dir, refSize);
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
 
             DA.SetData(0, dir);
-            //DA.SetData(1, textOut);
-            //DA.SetData(2, plane);
             DA.SetData(1, textValueOut);
             DA.SetData(2, planeValue);
             DA.SetData(3, Color.White);
 
         }
 
-        public Tuple<string, Plane> CreateText(Text3d text, Curve curve)
+        public Tuple<string, Plane> CreateText(Text3d text, Curve curve, double refSize)
         {
             text.Text = "Stress direction";
             Point3d start = curve.PointAtStart;
-            Point3d p0 = Point3d.Add(start, new Point3d(0, 0, 0.4));
-            Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 0.4));
-            Point3d p2 = Point3d.Add(start, new Point3d(0, 0, 1.4));
+            Point3d p0 = Point3d.Add(start, new Point3d(0, 0, refSize));
+            Point3d p1 = Point3d.Add(start, new Point3d(1, 0, refSize));
+            Point3d p2 = Point3d.Add(start, new Point3d(0, 0, (1+refSize)));
             text.TextPlane = new Plane(p0, p1, p2);
-            text.Height = 0.6;
+            text.Height = refSize;
             return Tuple.Create(text.Text, text.TextPlane);
         }
 
-        public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, int dir)
+        public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, int dir, double refSize)
         {
             string direction = "";
             if (dir < 1) direction = "S,xx";
@@ -99,11 +93,11 @@ namespace StressDirectionSlider
             else direction = "S,xy";
             textValue.Text = "Stress direction: " + direction;
             Point3d end = curve.PointAtEnd;
-            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
-            Point3d p1 = Point3d.Add(end, new Point3d(0, 1, 0.4));
-            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1.4));
+            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, refSize));
+            Point3d p1 = Point3d.Add(end, new Point3d(0, 1, refSize));
+            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1+refSize)));
             textValue.TextPlane = new Plane(p0, p1, p2);
-            textValue.Height = 0.6;
+            textValue.Height = refSize;
             return Tuple.Create(textValue.Text, textValue.TextPlane);
         }
         /// <summary>

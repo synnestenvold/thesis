@@ -32,6 +32,7 @@ namespace ViewStresses
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
             pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
+            pManager[5].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -76,7 +77,7 @@ namespace ViewStresses
 
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(volume, sqrt3);
-
+            double redSize = (double)(refLength / 10);
             Vector3d transVec = CreateTransVector(centroid, refLength, angle);
 
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];

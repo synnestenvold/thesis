@@ -50,6 +50,7 @@ namespace PartitionSlider
             double volume = brep.GetVolume();
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double refSize = (double)(refLength / 10);
             double adjustment = 10 / refLength; //the length should give 10
            
             int parts = Convert.ToInt32(curve.GetLength()*adjustment);
@@ -60,7 +61,7 @@ namespace PartitionSlider
             //string textOut = tuple.Item1;
             //Plane plane = tuple.Item2;
             //Text on the other side shows the number of partitions
-            var tupleValue = CreateValueText(textValue, curve, parts);
+            var tupleValue = CreateValueText(textValue, curve, parts, refSize);
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
 
@@ -85,15 +86,15 @@ namespace PartitionSlider
             return Tuple.Create(text.Text, text.TextPlane);
         }
 
-        public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, int parts)
+        public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, int parts, double refSize)
         {
             textValue.Text = "Partitions: "+parts.ToString();
             Point3d end = curve.PointAtEnd;
-            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
-            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, 0.4));
-            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1.4));
+            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, refSize));
+            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, refSize));
+            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1+refSize)));
             textValue.TextPlane = new Plane(p0, p1, p2);
-            textValue.Height = 0.6;
+            textValue.Height = refSize;
             return Tuple.Create(textValue.Text, textValue.TextPlane);
         }
         /// <summary>
