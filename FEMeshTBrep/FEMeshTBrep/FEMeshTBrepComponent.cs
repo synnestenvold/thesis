@@ -49,7 +49,7 @@ namespace FEMeshTBrep
 
             GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
             GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
-            Material.Material m = new Material.Material(0,0);
+            //Material m = new Material();
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
             List<string> deftxt = new List<string>();

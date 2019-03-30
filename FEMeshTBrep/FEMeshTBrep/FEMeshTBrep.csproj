@@ -69,7 +69,6 @@
     <Compile Include="Cmatrix.cs" />
     <Compile Include="FEMeshTBrepComponent.cs" />
     <Compile Include="FEMeshTBrepInfo.cs" />
-    <Compile Include="Material.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StiffnessMatrix.cs" />
     <Compile Include="StiffnessMatrix2.cs" />
