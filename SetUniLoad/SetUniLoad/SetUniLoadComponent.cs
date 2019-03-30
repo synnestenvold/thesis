@@ -41,7 +41,7 @@ namespace SetUniLoad
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("Loaded points", "LP", "Loads in point, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
-            pManager.AddLineParameter("Load-arrows", "L", "Arrows showing the load", GH_ParamAccess.list);
+            pManager.AddBrepParameter("Load-arrows", "L", "Arrows showing the load", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -184,22 +184,24 @@ namespace SetUniLoad
             pointLoads.AddRange(linePointLoads);
             pointLoads.AddRange(cornerPointLoads);
 
-            List<Line> arrows = DrawLoads(pointLoads);
+            List<Brep> arrows = DrawLoads(pointLoads);
 
             DA.SetDataList(0, pointLoads);
             DA.SetDataList(1, arrows);
 
         }
 
-        public List<Line> DrawLoads(List<string> pointLoads)
+        public List<Brep> DrawLoads(List<string> pointLoads)
         {
-            List<Line> arrows = new List<Line>();
+
+            List<Brep> arrows = new List<Brep>();
 
             List<double> loadCoord = new List<double>();
             List<double> pointValues = new List<double>();
 
-            double loadRef = 0.5;
-            double arrowRef = 1;
+            double arrowHeight = 0.1;
+            double arrowRadius = 0.1;
+            double cRadius = 0.01;
 
             foreach (string s in pointLoads)
             {
@@ -217,75 +219,125 @@ namespace SetUniLoad
                 double loadY = Math.Round(double.Parse(iLoads[1]), 8);
                 double loadZ = Math.Round(double.Parse(iLoads[2]), 8);
 
-                Point3d startPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3);
-                Point3d arrowPart1 = new Point3d(0, 0, 0);
-                Point3d arrowPart2 = new Point3d(0, 0, 0);
-                Point3d endPoint = new Point3d(0, 0, 0);
+                Point3d p0 = new Point3d(loadCoord1, loadCoord2, loadCoord3);
 
                 if (loadX != 0)
                 {
-                    endPoint = new Point3d(loadCoord1 - loadZ * loadRef, loadCoord2, loadCoord3 );
+                    Point3d p1x = new Point3d(0, 0, 0);
+                    Point3d p2x = new Point3d(0, 0, 0);
 
+                    Plane planeX = new Plane(p0, p1x, p2x);
+                    Cone coneX = new Cone(planeX, arrowHeight, arrowRadius);
 
                     if (loadX > 0)
                     {
-                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 - arrowRef, loadCoord3 );
-                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2 + arrowRef, loadCoord3 );
+                        p1x = Point3d.Add(p0, new Point3d(0, 0, 1));
+                        p2x = Point3d.Add(p0, new Point3d(0, 1, 0));
+
+                        planeX = new Plane(p0, p1x, p2x);
+                        coneX = new Cone(planeX, arrowHeight, arrowRadius);
+
+                        Vector3d movePlane = new Vector3d(-arrowHeight, 0, 0);
+                        planeX.Translate(movePlane);
+
                     }
                     else
                     {
-                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2 + arrowRef, loadCoord3 );
-                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 - arrowRef, loadCoord3 );
+                        p1x = Point3d.Add(p0, new Point3d(0, 1, 0));
+                        p2x = Point3d.Add(p0, new Point3d(0, 0, 1));
+
+                        planeX = new Plane(p0, p1x, p2x);
+                        coneX = new Cone(planeX, arrowHeight, arrowRadius);
+
+                        Vector3d movePlane = new Vector3d(arrowHeight,0, 0);
+                        planeX.Translate(movePlane);
                     }
-                    arrows.Add(new Line(startPoint, endPoint));
-                    arrows.Add(new Line(startPoint, arrowPart1));
-                    arrows.Add(new Line(startPoint, arrowPart2));
+
+                    Circle c = new Circle(planeX, cRadius);
+                    Cylinder cyl = new Cylinder(c, Math.Abs(loadX) - arrowHeight);
+
+                    arrows.Add(cyl.ToBrep(true, true));
+                    arrows.Add(coneX.ToBrep(true));
                 }
 
                 if (loadY != 0)
                 {
-                    endPoint = new Point3d(loadCoord1 , loadCoord2 - loadZ * loadRef, loadCoord3);
+                    Point3d p1y = new Point3d(0, 0, 0);
+                    Point3d p2y = new Point3d(0, 0, 0);
 
+                    Plane planeY = new Plane(p0, p1y, p2y);
+                    Cone coneY = new Cone(planeY, arrowHeight, arrowRadius);
 
                     if (loadY > 0)
                     {
-                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 - arrowRef, loadCoord3);
-                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 - arrowRef, loadCoord3);
+                        p1y = Point3d.Add(p0, new Point3d(1, 0, 0));
+                        p2y = Point3d.Add(p0, new Point3d(0, 0, 1));
+
+                        planeY = new Plane(p0, p1y, p2y);
+                        coneY = new Cone(planeY, arrowHeight, arrowRadius);
+
+                        Vector3d movePlane = new Vector3d(0, -arrowHeight, 0);
+                        planeY.Translate(movePlane);
+
                     }
                     else
                     {
-                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 + arrowRef, loadCoord3);
-                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 + arrowRef, loadCoord3);
+                        p1y = Point3d.Add(p0, new Point3d(0, 0, 1));
+                        p2y = Point3d.Add(p0, new Point3d(1, 0, 0));
+
+                        planeY = new Plane(p0, p1y, p2y);
+                        coneY = new Cone(planeY, arrowHeight, arrowRadius);
+
+                        Vector3d movePlane = new Vector3d(0, arrowHeight,0);
+                        planeY.Translate(movePlane);
                     }
-                    arrows.Add(new Line(startPoint, endPoint));
-                    arrows.Add(new Line(startPoint, arrowPart1));
-                    arrows.Add(new Line(startPoint, arrowPart2));
+
+                    Circle c = new Circle(planeY, cRadius);
+                    Cylinder cyl = new Cylinder(c, Math.Abs(loadY) - arrowHeight);
+
+                    arrows.Add(cyl.ToBrep(true, true));
+                    arrows.Add(coneY.ToBrep(true));
                 }
-
-
 
                 if (loadZ != 0)
                 {
-                    endPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3 - loadZ * loadRef);
+                    Point3d p1z = new Point3d(0, 0, 0);
+                    Point3d p2z = new Point3d(0, 0, 0);
 
+                    Plane planeZ = new Plane(p0, p1z, p2z);
+                    Cone coneZ = new Cone(planeZ, arrowHeight, arrowRadius);
 
                     if (loadZ > 0)
                     {
-                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2, loadCoord3 - arrowRef);
-                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2, loadCoord3 - arrowRef);
+                        p1z = Point3d.Add(p0, new Point3d(0, 1, 0));
+                        p2z = Point3d.Add(p0, new Point3d(1, 0, 0));
+
+                        planeZ = new Plane(p0, p1z, p2z);
+                        coneZ = new Cone(planeZ, arrowHeight, arrowRadius);
+                        
+                        Vector3d movePlane = new Vector3d(0, 0, -arrowHeight);
+                        planeZ.Translate(movePlane);
+
                     }
                     else
                     {
-                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2, loadCoord3 + arrowRef);
-                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2, loadCoord3 + arrowRef);
-                    }
-                    arrows.Add(new Line(startPoint, endPoint));
-                    arrows.Add(new Line(startPoint, arrowPart1));
-                    arrows.Add(new Line(startPoint, arrowPart2));
-                }
-  
-            }
+                        p1z = Point3d.Add(p0, new Point3d(1, 0, 0));
+                        p2z = Point3d.Add(p0, new Point3d(0, 1, 0));
 
+                        planeZ = new Plane(p0, p1z, p2z);
+                        coneZ = new Cone(planeZ, arrowHeight, arrowRadius);
+
+                        Vector3d movePlane = new Vector3d(0, 0, arrowHeight);
+                        planeZ.Translate(movePlane);
+                    }
+
+                    Circle c = new Circle(planeZ, cRadius);
+                    Cylinder cyl = new Cylinder(c, Math.Abs(loadZ)-arrowHeight);
+
+                    arrows.Add(cyl.ToBrep(true,true));
+                    arrows.Add(coneZ.ToBrep(true));
+                }
+            }
             return arrows;
         }
 
