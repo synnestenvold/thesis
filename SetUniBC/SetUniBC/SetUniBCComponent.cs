@@ -155,11 +155,6 @@ namespace SetUniBC
                 double restrain2 = Math.Round(double.Parse(iBCs[1]), 8);
                 double restrain3 = Math.Round(double.Parse(iBCs[2]), 8);
 
-                Point3d startPoint = new Point3d(BCPoints1, BCPoints2, BCPoints3);
-                Point3d arrowPart1 = new Point3d(0, 0, 0);
-                Point3d arrowPart2 = new Point3d(0, 0, 0);
-                Point3d endPoint = new Point3d(0, 0, 0);
-
                 double height = 0.2;
                 double radius = 0.2;
 
