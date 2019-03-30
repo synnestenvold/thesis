@@ -100,7 +100,7 @@ namespace StressDirectionSlider
             textValue.Text = "Stress direction: " + direction;
             Point3d end = curve.PointAtEnd;
             Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 0.4));
-            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, 0.4));
+            Point3d p1 = Point3d.Add(end, new Point3d(0, 1, 0.4));
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1.4));
             textValue.TextPlane = new Plane(p0, p1, p2);
             textValue.Height = 0.6;
