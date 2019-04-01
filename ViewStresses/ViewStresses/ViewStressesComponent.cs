@@ -254,8 +254,6 @@ namespace ViewStresses
                 for (int i = 0; i < vertices.Count; i++)
                 {
                     GH_Point p = vertices[i];
-                    //Vector3d totVec = Vector3d.Add(defVectors[connect[i].Value], transVec);
-                   // Point3d new_p = Point3d.Add(p.Value, totVec);
                     mesh.Vertices.Add(p.Value);
                 }
                 mesh.Faces.AddFace(0, 1, 5, 4);
@@ -266,19 +264,6 @@ namespace ViewStresses
                 mesh.Faces.AddFace(0, 1, 2, 3);
 
                 Brep new_brep = Brep.CreateFromMesh(mesh, false);
-
-                ///////THIS FOR ROTATION OF THE WHOLE CUBE. First we rotate one small brep for its own centroid, then for global.
-                /*
-                
-                Point3d centroid_local = FindCentroidRectangle(points);
-                Point3d centroid_global = Point3d.Add(centroid, transVec);
-                
-                new_brep.Rotate(angle * 2 * Math.PI / 180, vecAxis, centroid_local);
-                new_brep.Rotate(angle * 2 * Math.PI / 180, vecAxis, centroid_global);
-
-                ////// END ROTATION
-                ///
-                */
 
                 Point3d[] points = new_brep.DuplicateVertices();
                 Vector3d vecAxis = points[4] - points[0];
@@ -360,25 +345,6 @@ namespace ViewStresses
             }
             
             return averageList;
-        }
-
-        public Point3d FindCentroidRectangle(Point3d[] pList)
-        {
-
-            double c_x = 0;
-            double c_y = 0;
-            double c_z = 0;
-
-            foreach (Point3d p in pList)
-            {
-                c_x += p.X;
-                c_y += p.Y;
-                c_z += p.Z;
-            }
-
-            Point3d centroid = new Point3d(c_x / 8, c_y / 8, c_z / 8);
-
-            return centroid;
         }
 
         protected override System.Drawing.Bitmap Icon
