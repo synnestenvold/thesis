@@ -189,9 +189,9 @@ namespace ViewDeformations
         public Tuple<string, Plane> CreateText(Text3d text, double defMax, Point3d pointMax, double refSize)
         {
             text.Text = defMax.ToString();
-            Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, refSize));
-            Point3d p1 = Point3d.Add(pointMax, new Point3d(0, -1, refSize));
-            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, (1+refSize)));
+            Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, 2*refSize));
+            Point3d p1 = Point3d.Add(pointMax, new Point3d(0, -1, 2*refSize));
+            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, (1+2*refSize)));
             text.TextPlane = new Plane(p0, p1, p2);
             text.Height = refSize;
             return Tuple.Create(text.Text, text.TextPlane);

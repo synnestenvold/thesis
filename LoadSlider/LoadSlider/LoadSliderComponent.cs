@@ -88,9 +88,9 @@ namespace LoadSlider
         {
             text.Text = "Adjust for load in kN/m^2";
             Point3d start = curve.PointAtStart;
-            Point3d p0 = Point3d.Add(start, new Point3d(0, 0, refSize));
-            Point3d p1 = Point3d.Add(start, new Point3d(1, 0, refSize));
-            Point3d p2 = Point3d.Add(start, new Point3d(0, 0, (1+refSize)));
+            Point3d p0 = Point3d.Add(start, new Point3d(0, 0, 2*refSize));
+            Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 2*refSize));
+            Point3d p2 = Point3d.Add(start, new Point3d(0, 0, (1+2*refSize)));
             text.TextPlane = new Plane(p0, p1, p2);
             text.Height = refSize;
             return Tuple.Create(text.Text, text.TextPlane);
@@ -100,9 +100,9 @@ namespace LoadSlider
         {
             textValue.Text = "("+Math.Round((vector.X),3).ToString()+", "+Math.Round((vector.Y),3).ToString()+", "+Math.Round((vector.Z),3).ToString()+")";
             Point3d end = curve.PointAtEnd;
-            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, refSize));
-            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, refSize));
-            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1+refSize)));
+            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, -2*refSize));
+            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, -2*refSize));
+            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1-2*refSize)));
             textValue.TextPlane = new Plane(p0, p1, p2);
             textValue.Height = refSize;
             return Tuple.Create(textValue.Text, textValue.TextPlane);
