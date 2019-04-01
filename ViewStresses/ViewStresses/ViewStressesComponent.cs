@@ -73,16 +73,16 @@ namespace ViewStresses
 
             Point3d centroid = vmp.Centroid;
             double volume = origBrep.GetVolume();
-            double angle = 225;
+            double angle = 90*Math.PI/180;
 
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(volume, sqrt3);
-            double redSize = (double)(refLength / 10);
-            Vector3d transVec = CreateTransVector(centroid, refLength, angle);
+
+            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 2.5, 0));
 
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef, scale);
-            breps = CreateDefBreps(treePoints, treeConnect, defVectors, transVec, angle, centroid);
+            breps = CreateDefBreps(treePoints, treeConnect, defVectors, angle, center);
             var tuple1 = ColorBreps(breps, treeConnect, treeStress, dir, colors);
             tmpModels = tuple1.Item1;
             List<string> rangeValues = tuple1.Item2;
@@ -91,7 +91,7 @@ namespace ViewStresses
             Dictionary<Brep, Color> tmpRanges = new Dictionary<Brep, Color>();
             List<Color> colorRange = CreateColorRange();
             
-            var tuple2 = CreateBrepRanges(centroid, refLength, transVec);
+            var tuple2 = CreateBrepRanges(centroid, refLength, center, angle);
 
             List<Brep> brepRanges = tuple2.Item1;
             List<Plane> planeRanges = tuple2.Item2;
@@ -143,49 +143,60 @@ namespace ViewStresses
         }
 
 
-        public Tuple<List<Brep>, List<Plane>> CreateBrepRanges(Point3d centroid, double refLength, Vector3d transVec)
+        public Tuple<List<Brep>, List<Plane>> CreateBrepRanges(Point3d centroid, double refLength, Point3d center, double angle)
         {
             List<Brep> brepRanges = new List<Brep>();
             List<Plane> planeRanges = new List<Plane>();
             Brep brep_new = new Brep();
 
-            Point3d centroidGlobal = centroid + transVec;
-
             int ranges = 13;
             double totLength = refLength * 1.5;
             double rangeHeight = totLength / ranges;
 
-            Vector3d rangePos = new Vector3d(0, refLength, refLength );
-            Point3d startRanges = centroidGlobal + rangePos;
+            Vector3d rangePos = new Vector3d(refLength,0, refLength );
+            Point3d startRanges = centroid + rangePos;
+
+            Vector3d vecBrep = new Vector3d(0, 0, 1);
+
+            Plane plane = new Plane(new Point3d(0,0,0), vecBrep);
 
             for(int i = 0; i < ranges; i++)
             {
-                Interval x = new Interval(startRanges.X, startRanges.X + refLength*0.2);
-                Interval y = new Interval(startRanges.Y, startRanges.Y + refLength);
+                Interval x = new Interval(startRanges.X, startRanges.X + refLength);
+                Interval y = new Interval(startRanges.Y, startRanges.Y + refLength * 0.2);
                 Interval z = new Interval(startRanges.Z + rangeHeight*i, startRanges.Z + rangeHeight * (i+1));
                 Box box_new = new Box(Plane.WorldXY, x, y, z);
                 brep_new = box_new.ToBrep();
+
+                Vector3d vecAxis = new Vector3d(0, 0, 1);
+                brep_new.Rotate(angle, vecAxis, center);
+
                 brepRanges.Add(brep_new);
 
-                Point3d p0 = new Point3d(startRanges.X + refLength * 0.2, startRanges.Y + refLength , startRanges.Z + rangeHeight * i);
-                Point3d p1 = Point3d.Add(p0, new Point3d(0, 1, 0));
-                Point3d p2 = Point3d.Add(p0, new Point3d(0, 1, 1));
+                Point3d[] points = brep_new.DuplicateVertices();
 
-                planeRanges.Add(new Plane(p0, p1, p2));
+                vecBrep = points[1] - points[0];
+
+                Point3d p0 = points[0] + vecBrep;
+                Point3d p1 = points[1] + vecBrep;
+                Point3d p2 = points[4] + vecBrep;
+
+                plane = new Plane(p0, p1, p2);
+
+                planeRanges.Add(plane);
 
             }
 
-            Point3d p_0 = new Point3d(startRanges.X + refLength * 0.2, startRanges.Y + refLength, startRanges.Z + rangeHeight * ranges);
-            Point3d p_1 = Point3d.Add(p_0, new Point3d(0, 1, 0));
-            Point3d p_2 = Point3d.Add(p_0, new Point3d(0, 1, 1));
 
-            planeRanges.Add(new Plane(p_0, p_1, p_2));
+            plane.Translate(new Vector3d(0, 0, rangeHeight));
+            
 
-            Point3d ph_0 = new Point3d(startRanges.X + refLength * 0.2, startRanges.Y + refLength*0.2, startRanges.Z + rangeHeight * (ranges+0.5));
-            Point3d ph_1 = Point3d.Add(ph_0, new Point3d(0, 1, 0));
-            Point3d ph_2 = Point3d.Add(ph_0, new Point3d(0, 1, 1));
+            planeRanges.Add(plane);
 
-            planeRanges.Add(new Plane(ph_0, ph_1, ph_2));
+            plane.Translate(new Vector3d(0, 0, rangeHeight));
+            plane.Translate(-vecBrep);
+
+            planeRanges.Add(plane);
 
             return Tuple.Create(brepRanges, planeRanges);
         }
@@ -231,7 +242,7 @@ namespace ViewStresses
             return vectors;
         }
 
-        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors, Vector3d transVec, double angle, Point3d centroid)
+        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors, double angle, Point3d center)
         {
             List<Brep> breps = new List<Brep>();
             for (int j = 0; j < treePoints.PathCount; j++)
@@ -243,9 +254,9 @@ namespace ViewStresses
                 for (int i = 0; i < vertices.Count; i++)
                 {
                     GH_Point p = vertices[i];
-                    Vector3d totVec = Vector3d.Add(defVectors[connect[i].Value], transVec);
-                    Point3d new_p = Point3d.Add(p.Value, totVec);
-                    mesh.Vertices.Add(new_p);
+                    //Vector3d totVec = Vector3d.Add(defVectors[connect[i].Value], transVec);
+                   // Point3d new_p = Point3d.Add(p.Value, totVec);
+                    mesh.Vertices.Add(p.Value);
                 }
                 mesh.Faces.AddFace(0, 1, 5, 4);
                 mesh.Faces.AddFace(1, 2, 6, 5);
@@ -257,15 +268,21 @@ namespace ViewStresses
                 Brep new_brep = Brep.CreateFromMesh(mesh, false);
 
                 ///////THIS FOR ROTATION OF THE WHOLE CUBE. First we rotate one small brep for its own centroid, then for global.
-
-                Point3d[] points = new_brep.DuplicateVertices();
+                /*
+                
                 Point3d centroid_local = FindCentroidRectangle(points);
                 Point3d centroid_global = Point3d.Add(centroid, transVec);
-                Vector3d vecAxis = points[4] - points[0];
+                
                 new_brep.Rotate(angle * 2 * Math.PI / 180, vecAxis, centroid_local);
                 new_brep.Rotate(angle * 2 * Math.PI / 180, vecAxis, centroid_global);
 
                 ////// END ROTATION
+                ///
+                */
+
+                Point3d[] points = new_brep.DuplicateVertices();
+                Vector3d vecAxis = points[4] - points[0];
+                new_brep.Rotate(angle, vecAxis, center);
 
                 breps.Add(new_brep);
 
