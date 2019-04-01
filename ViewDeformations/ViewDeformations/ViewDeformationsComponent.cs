@@ -44,6 +44,7 @@ namespace ViewDeformations
             pManager.AddTextParameter("Text", "T", "Text", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
             pManager.AddColourParameter("Text colors", "C text", "Color for deformed text", GH_ParamAccess.item);
+            pManager.AddCurveParameter("Outer edges", "E", "Edges showing the brep", GH_ParamAccess.list);
             
             
 
@@ -71,18 +72,26 @@ namespace ViewDeformations
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
             double refSize = (double)(refLength / 10);
 
+            VolumeMassProperties vmp = VolumeMassProperties.Compute(brep);
+            Point3d centroid = vmp.Centroid;
+            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 2.5, 0)); //Center for viewpoint
+
+            double angle = 270*Math.PI/180;
+
             Vector3d[] defVectors = new Vector3d[treeDef.PathCount];
             defVectors = CreateVectors(treeDef);
-            breps = CreateDefBreps(treePoints, treeConnect, defVectors, scale);
+            breps = CreateDefBreps(treePoints, treeConnect, defVectors, scale, angle, center);
 
             var tuple = GetMaxDeformation(defVectors, treePoints, treeConnect);
             double defMax = tuple.Item1; 
             Point3d pointMax = tuple.Item2;
-            var tupleOutput = CreateText(text, defMax, pointMax, refSize);
+            int nodeGlobalMax = tuple.Item3;
+            var tupleOutput = CreateText(text, defMax, pointMax, refSize, angle, center);
             string textOut = tupleOutput.Item1;
             Plane plane = tupleOutput.Item2;
-            sphere = new Sphere(pointMax, refSize);
+            //sphere = new Sphere(pointMax, refSize);
 
+            sphere = DrawSphere(pointMax, nodeGlobalMax, defVectors, angle, center, scale, refSize);
 
             //Coloring
             Color color = Color.White;
@@ -99,15 +108,42 @@ namespace ViewDeformations
                 models[m.Key] = m.Value;
             }
 
+            Curve[] lines = DrawOuterCurves(brep, angle, center);
+
             DA.SetDataList(0, tmpModels.Keys);
             DA.SetData(1, sphere);
             DA.SetDataList(2, new List<Color>(){ Color.Red, Color.White });
             DA.SetData(3, textOut);
             DA.SetData(4, plane);
             DA.SetData(5, Color.Red);
-            
+            DA.SetDataList(6,lines);
+
         }
         
+        public Sphere DrawSphere(Point3d pointMax, int nodeGlobalMax, Vector3d[] defVectors, double angle, Point3d center, double scale, double refSize)
+        {
+            Point3d newPoint = pointMax + defVectors[nodeGlobalMax]*scale;
+
+            Point3d p0 = newPoint;
+            Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
+            Point3d p2 = Point3d.Add(p0, new Point3d(1, 0, 1));
+
+            Plane plane = new Plane(p0, p1, p2);
+
+            plane.Rotate(angle, new Vector3d(0, 0, 1), center);
+
+            Sphere sphere = new Sphere(plane, refSize);
+
+            return sphere;
+        }
+
+        public Curve[] DrawOuterCurves(Brep brep, double angle, Point3d center)
+        {
+            brep.Rotate(angle, new Vector3d(0, 0, 1), center);
+            Curve[] curves = brep.DuplicateEdgeCurves();
+
+            return curves;
+        }
 
         public Vector3d[] CreateVectors(GH_Structure<GH_Number> treeDef)
         {
@@ -122,7 +158,7 @@ namespace ViewDeformations
             return vectors;
         }
 
-        public Tuple<double, Point3d> GetMaxDeformation(Vector3d[] defVectors, GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect)
+        public Tuple<double, Point3d, int> GetMaxDeformation(Vector3d[] defVectors, GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect)
         {
             double defMax = -1;
             int nodeGlobalMax = new int();
@@ -154,10 +190,10 @@ namespace ViewDeformations
             }
 
 
-            return Tuple.Create(defMax, pointMax);
+            return Tuple.Create(defMax, pointMax, nodeGlobalMax);
         }
 
-        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors, double scale)
+        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors, double scale, double angle, Point3d center)
         {
             List<Brep> breps = new List<Brep>();
             for (int j = 0; j < treePoints.PathCount; j++)
@@ -180,21 +216,32 @@ namespace ViewDeformations
                 mesh.Faces.AddFace(0, 1, 2, 3);
 
                 Brep new_brep = Brep.CreateFromMesh(mesh, false);
+
+                //Point3d[] points = new_brep.DuplicateVertices();
+                Vector3d vecAxis = new Vector3d(0, 0, 1);
+                new_brep.Rotate(angle, vecAxis, center);
+
                 breps.Add(new_brep);
                 
             }
             return breps;
         }
 
-        public Tuple<string, Plane> CreateText(Text3d text, double defMax, Point3d pointMax, double refSize)
+        public Tuple<string, Plane> CreateText(Text3d text, double defMax, Point3d pointMax, double refSize, double angle, Point3d center)
         {
+ 
             text.Text = defMax.ToString();
             Point3d p0 = Point3d.Add(pointMax, new Point3d(0, 0, 2*refSize));
-            Point3d p1 = Point3d.Add(pointMax, new Point3d(0, -1, 2*refSize));
+            Point3d p1 = Point3d.Add(pointMax, new Point3d(1, 0, 2*refSize));
             Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, (1+2*refSize)));
             text.TextPlane = new Plane(p0, p1, p2);
+
+            Vector3d vecAxis = new Vector3d(0, 0, 1);
+
+            Plane plane = new Plane(p0, p1, p2);
+            plane.Rotate(angle, vecAxis, center);
             text.Height = refSize;
-            return Tuple.Create(text.Text, text.TextPlane);
+            return Tuple.Create(text.Text, plane);
         }
 
         protected override System.Drawing.Bitmap Icon
@@ -229,7 +276,7 @@ namespace ViewDeformations
             args.Display.Draw3dText(text, Color.Red);
             Mesh mesh =  Mesh.CreateFromSphere(sphere, 10, 10);
             args.Display.DrawMeshShaded(mesh, new DisplayMaterial(Color.Red));
-            //base.DrawViewportMeshes(args);
+            base.DrawViewportMeshes(args);
         }
 
         public override void DrawViewportWires(IGH_PreviewArgs args)

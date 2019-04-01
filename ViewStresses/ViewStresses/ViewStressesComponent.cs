@@ -254,7 +254,8 @@ namespace ViewStresses
                 for (int i = 0; i < vertices.Count; i++)
                 {
                     GH_Point p = vertices[i];
-                    mesh.Vertices.Add(p.Value);
+                    Point3d new_p = Point3d.Add(p.Value, defVectors[connect[i].Value]);
+                    mesh.Vertices.Add(new_p);
                 }
                 mesh.Faces.AddFace(0, 1, 5, 4);
                 mesh.Faces.AddFace(1, 2, 6, 5);
@@ -266,7 +267,7 @@ namespace ViewStresses
                 Brep new_brep = Brep.CreateFromMesh(mesh, false);
 
                 Point3d[] points = new_brep.DuplicateVertices();
-                Vector3d vecAxis = points[4] - points[0];
+                Vector3d vecAxis = new Vector3d(0, 0, 1);
                 new_brep.Rotate(angle, vecAxis, center);
 
                 breps.Add(new_brep);
