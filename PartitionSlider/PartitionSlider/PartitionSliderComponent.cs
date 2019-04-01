@@ -19,6 +19,7 @@ namespace PartitionSlider
         readonly int maxPartition = 10;
         readonly Text3d text = new Text3d("");
         readonly Text3d textValue = new Text3d("");
+        readonly List<Text3d> textList = new List<Text3d>();
 
         public PartitionSliderComponent()
           : base("PartitionSlider", "PartSlider",
@@ -38,6 +39,8 @@ namespace PartitionSlider
             pManager.AddIntegerParameter("Partitions", "P", "Number of partitions", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "T", "Partition text", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "T info", "Partition text", GH_ParamAccess.list);
+            pManager.AddPlaneParameter("Plane", "P info", "Placement for text", GH_ParamAccess.list);
             pManager.AddColourParameter("Text colors", "C text", "Color for deformed text", GH_ParamAccess.item);
         }
 
@@ -65,12 +68,15 @@ namespace PartitionSlider
             string textValueOut = tupleValue.Item1;
             Plane planeValue = tupleValue.Item2;
 
-           
+            List<string> textListOut = new List<string>() { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+            List<Plane> planeList = CreateTextList(curve, refLength, refSize);
 
             DA.SetData(0, parts);
             DA.SetData(1, textValueOut);
             DA.SetData(2, planeValue);
-            DA.SetData(3, Color.White);
+            DA.SetDataList(3, textListOut);
+            DA.SetDataList(4, planeList);
+            DA.SetData(5, Color.White);
 
         }
 
@@ -97,6 +103,29 @@ namespace PartitionSlider
             textValue.Height = refSize;
             return Tuple.Create(textValue.Text, textValue.TextPlane);
         }
+
+        List<Plane> CreateTextList(Curve curve, double refLength, double refSize)
+        {
+            List<Plane> textPlaneList = new List<Plane>();
+            
+            double range = (double)(refLength / 10);
+            for (int i = 1; i < 11; i++)
+            {
+                Text3d tall = new Text3d(i.ToString());
+                textList.Add(tall);
+                Point3d start = curve.PointAtStart;
+                Point3d p0 = Point3d.Add(start, new Point3d(0 + range * i, 0, -2 * refSize));
+                Point3d p1 = Point3d.Add(start, new Point3d(1 + range * i, 0, -2 * refSize));
+                Point3d p2 = Point3d.Add(start, new Point3d(0 + range * i, 0, (1 - 2 * refSize)));
+                Plane plane = new Plane(p0, p1, p2);
+                textList[i-1].TextPlane = plane;
+                textList[i-1].Height = (double)(refSize / 2);
+                textPlaneList.Add(plane);
+
+            }
+            return textPlaneList;
+        }
+
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.
         /// Icons need to be 24x24 pixels.
@@ -125,6 +154,10 @@ namespace PartitionSlider
         {
             //args.Display.Draw3dText(text, Color.White);
             args.Display.Draw3dText(textValue, Color.White);
+            for (int i = 0; i < 10; i++)
+            {
+                args.Display.Draw3dText(textList[i], Color.White);
+            }
             //base.DrawViewportMeshes(args);
         }
     }
