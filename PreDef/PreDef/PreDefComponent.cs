@@ -24,7 +24,7 @@ namespace PreDef
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Points", "P", "Points for deformation", GH_ParamAccess.list);
-            pManager.AddTextParameter("Prescribed deformations", "PreDef", "Prescribed deformation in the way (0,0,0)", GH_ParamAccess.item, "(0,0,0)");
+            pManager.AddVectorParameter("Prescribed deformations", "PreDef", "Prescribed deformation in the way [0,0,0]", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -34,7 +34,7 @@ namespace PreDef
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string def = "";
+            Vector3d def = new Vector3d(0, 0, 0);
             List<Point3d> points = new List<Point3d>();
             List<string> pointsString = new List<string>();
             if (!DA.GetDataList(0, points)) return;
@@ -50,7 +50,7 @@ namespace PreDef
             List<string> pointDef = new List<string>();
             foreach (string s in pointsString)
             {
-                pointDef.Add(s + ";" + def);
+                pointDef.Add(s + ";" + def.ToString());
             }
 
             DA.SetDataList(0, pointDef);

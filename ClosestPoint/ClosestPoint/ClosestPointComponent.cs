@@ -49,9 +49,9 @@ namespace ClosestPoint
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddPointParameter("Point", "P", "Closest point to sphere", GH_ParamAccess.item);
-            pManager.AddTextParameter("Text", "T", "Text", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
-            pManager.AddColourParameter("Colors", "C", "Colors for text", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.item);
+            pManager.AddColourParameter("Colors", "Color", "Colors for text", GH_ParamAccess.item);
 
         }
 
