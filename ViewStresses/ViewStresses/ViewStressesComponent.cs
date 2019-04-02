@@ -95,8 +95,10 @@ namespace ViewStresses
             //Getting colors stress legend
             List<Color> colorRange = CreateColorRange(); //Output brep colors legend
 
-            double textSizeRange = (double)refLength / 10; //Output text legend size
-            Color textColorRange = Color.Black; // Output text color legend
+        
+
+            List<double> textSizeRange = Enumerable.Repeat((double)refLength / 10, rangeValues.Count).ToList();  //Output text legend size
+            List<Color> textColorRange = Enumerable.Repeat(Color.Black, rangeValues.Count).ToList(); // Output text color legend
 
             //Createing headline for area
             var tuple3 = CreateHeadline(centroid, angle, center, refLength);
@@ -111,20 +113,15 @@ namespace ViewStresses
             rangeValues.Add(headText);
             List<string> text = rangeValues;
 
-            List<double> textSizes = new List<double>
-            {
-                textSizeRange,
-                headSize,
-            };
+            textSizeRange.Add(headSize);
+            List<double> textSizes = textSizeRange;
+            
 
             planeRanges.Add(headPlane);
             List<Plane> textPlanes = planeRanges;
 
-            List<Color> textColors = new List<Color>
-            {
-                textColorRange,
-                headColor,
-            };
+            textColorRange.Add(headColor);
+            List<Color> textColors = textColorRange;
 
             //Geometry
             DA.SetDataList(0, breps);
