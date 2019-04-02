@@ -32,8 +32,8 @@ namespace SurfaceSlider
             pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Text placement", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors text", "Color T", "Color for text", GH_ParamAccess.item);
-            pManager.AddGeometryParameter("Geometry", "Geometry", "Sphere on point to drag", GH_ParamAccess.list);
-            pManager.AddColourParameter("Colors geometry", "Color G", "Color for geomtry", GH_ParamAccess.list);
+            pManager.AddGeometryParameter("Geometry", "Geometry", "Sphere on point to drag", GH_ParamAccess.item);
+            
         }
         
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -49,24 +49,23 @@ namespace SurfaceSlider
 
             int surface = Convert.ToInt32(curve.GetLength() * adjustment);
             surface = surface > max ? max : surface;
+            Surface surf = brep.Surfaces[surface];
 
             var tuple = CreateText(curve, refLength);
             List<string> text = tuple.Item1;
             List<double> size = tuple.Item2;
             List<Plane> textPlane = tuple.Item3;
-            Color colorText = tuple.Item4;
+            Color color = tuple.Item4;
 
-            var tupleGeo = CreateGeometry(brep, surface, curve, size[0]);
-            List<Brep> geometry = tupleGeo.Item1;
-            List<Color> colorGeo = tupleGeo.Item2;
-            
-            DA.SetData(0, geometry[0]);
+            Sphere sphere = new Sphere(curve.PointAtEnd, (double)(size[0] / 2));
+
+            DA.SetData(0, surface);
             DA.SetDataList(1, text);
             DA.SetDataList(2, size);
             DA.SetDataList(3, textPlane);
-            DA.SetData(4, colorText);
-            DA.SetDataList(5, geometry);
-            DA.SetDataList(6, colorGeo);
+            DA.SetData(4, color);
+            DA.SetData(5, sphere);
+            
         }
 
         public Tuple<List<string>, List<double>, List<Plane>, Color> CreateText(Curve curve, double refLength)
@@ -91,7 +90,7 @@ namespace SurfaceSlider
                 Point3d p3 = Point3d.Add(start, new Point3d(0 + range * i, 0, -2 * refSize));
                 Point3d p4 = Point3d.Add(start, new Point3d(1 + range * i, 0, -2 * refSize));
                 Point3d p5 = Point3d.Add(start, new Point3d(0 + range * i, 0, (1 - 2 * refSize)));
-                Plane plane = new Plane(p0, p1, p2);
+                Plane plane = new Plane(p3, p4, p5);
                 textPlane.Add(plane);
                 
             }
@@ -99,15 +98,7 @@ namespace SurfaceSlider
             return Tuple.Create(text, size, textPlane, Color.White);
         }
 
-        public Tuple<List<Brep>, List<Color>> CreateGeometry(Brep brep, int surface, Curve curve, double refSize)
-        {
-            Surface surf = brep.Surfaces[surface];
-            Sphere sphere = new Sphere(curve.PointAtEnd, (double)(refSize / 2));
-            List<Brep> geometry = new List<Brep>() { surf.ToBrep(), sphere.ToBrep() };
-            List<Color> colorGeo = new List<Color>() { Color.Gray, Color.White };
-            return Tuple.Create(geometry, colorGeo);
-        }
-
+        
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.
         /// Icons need to be 24x24 pixels.
