@@ -8,25 +8,25 @@ using Rhino.Geometry;
 
 namespace PartitionSlider
 {
-    
+
 
     public class PartitionSliderComponent : GH_Component
     {
-        readonly int max= 10;
-  
+        readonly int max = 10;
+
         public PartitionSliderComponent()
           : base("DivisionSlider", "DivSlider",
               "Slider for division in VR",
               "Category3", "SliderVR")
         {
         }
-        
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Sliders as curves (U, V, W)", GH_ParamAccess.list);
             pManager.AddBrepParameter("Brep", "B", "Brep as reference", GH_ParamAccess.item);
         }
-        
+
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddIntegerParameter("Mesh division U", "U", "Number of divisions", GH_ParamAccess.item);
@@ -41,8 +41,8 @@ namespace PartitionSlider
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<Curve> curve = null;
-            Brep brep = new Brep();
+            List<Curve> curve = new List<Curve>();
+            Brep brep = new Brep(); //the only reason to have brep as unput is refLength
             if (!DA.GetDataList(0, curve)) return;
             if (!DA.GetData(1, ref brep)) return;
 
@@ -55,27 +55,27 @@ namespace PartitionSlider
             List<double> sizeAll = new List<double>();
             List<Plane> textPlaneAll = new List<Plane>();
             List<Sphere> sphereAll = new List<Sphere>();
-           
+
             for (int i = 0; i < curve.Count; i++)
             {
                 int div = Convert.ToInt32(curve[i].GetLength() * adjustment);
                 div = div > max ? max : div;
                 divAll.Add(div);
 
-                var tuple = CreateText(curve[i], div, refLength);
+                var tuple = CreateText(curve[i], div, refLength, i);
                 List<string> text = tuple.Item1;
                 List<double> size = tuple.Item2;
                 List<Plane> textPlane = tuple.Item3;
                 Sphere sphere = new Sphere(curve[i].PointAtEnd, (double)(size[0] / 2));
 
                 textAll.AddRange(text);
-                sizeAll.AddRange(size); //denne inneholder ikke alle str
+                sizeAll.AddRange(size); 
                 textPlaneAll.AddRange(textPlane);
                 sphereAll.Add(sphere);
 
             }
-            
-            
+
+
             DA.SetData(0, divAll[0]);
             DA.SetData(1, divAll[1]);
             DA.SetData(2, divAll[2]);
@@ -87,17 +87,19 @@ namespace PartitionSlider
 
         }
 
-        public Tuple<List<string>, List<double>, List<Plane>> CreateText(Curve curve, double div, double refLength)
+        public Tuple<List<string>, List<double>, List<Plane>> CreateText(Curve curve, double div, double refLength, int count)
         {
             List<string> text = new List<string>();
-            text.Add("Mesh division: "+div.ToString());
-            text.AddRange(new List<string>(){ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"});
+            string direction = "U";
+            if (count == 1) { 
+                direction = "V";
+            }
+            if (count == 2) {
+                direction = "W";
+            }
+            text.Add("Mesh division "+ direction+": "+div.ToString());
             double refSize = (double)(refLength / 10);
             List<double> size = new List<double>() { refSize };
-            for (int j=0; j < 10; j++)
-            {
-                size.Add((double)(refSize / 2));
-            }
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
             Point3d end = curve.PointAtEnd;
@@ -108,6 +110,7 @@ namespace PartitionSlider
             double range = (double)(refLength / 10);
             for (int i = 1; i < 11; i++)
             {
+                size.Add((double)(refSize / 2));
                 string divRange = i.ToString();
                 text.Add(divRange);
                 Point3d p3 = Point3d.Add(start, new Point3d(0 + range * i, 0, -2 * refSize));
