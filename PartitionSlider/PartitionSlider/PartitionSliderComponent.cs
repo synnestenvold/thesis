@@ -15,66 +15,89 @@ namespace PartitionSlider
         readonly int max= 10;
   
         public PartitionSliderComponent()
-          : base("PartitionSlider", "PartSlider",
-              "Slider for partition in VR",
+          : base("DivisionSlider", "DivSlider",
+              "Slider for division in VR",
               "Category3", "SliderVR")
         {
         }
         
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
+            pManager.AddCurveParameter("SliderVR", "S", "Sliders as curves (U, V, W)", GH_ParamAccess.list);
             pManager.AddBrepParameter("Brep", "B", "Brep as reference", GH_ParamAccess.item);
         }
         
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Mesh division", "Divisions", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Mesh division U", "U", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Mesh division V", "V", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Mesh division W", "W", "Number of divisions", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "Text", "Division text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "Color", "Color for text and geometry", GH_ParamAccess.item);
-            pManager.AddGeometryParameter("Geometry", "Geometry", "Sphere for place to drag line", GH_ParamAccess.item);
+            pManager.AddGeometryParameter("Geometry", "Geometry", "Sphere for place to drag line", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Curve curve = null;
+            List<Curve> curve = null;
             Brep brep = new Brep();
-            if (!DA.GetData(0, ref curve)) return;
+            if (!DA.GetDataList(0, curve)) return;
             if (!DA.GetData(1, ref brep)) return;
 
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
-            
             double adjustment = 10 / refLength; //the length should give 10
+
+            List<int> divAll = new List<int>();
+            List<string> textAll = new List<string>();
+            List<double> sizeAll = new List<double>();
+            List<Plane> textPlaneAll = new List<Plane>();
+            List<Sphere> sphereAll = new List<Sphere>();
            
-            int div = Convert.ToInt32(curve.GetLength()*adjustment);
-            div = div > max ? max : div;
+            for (int i = 0; i < curve.Count; i++)
+            {
+                int div = Convert.ToInt32(curve[i].GetLength() * adjustment);
+                div = div > max ? max : div;
+                divAll.Add(div);
+
+                var tuple = CreateText(curve[i], div, refLength);
+                List<string> text = tuple.Item1;
+                List<double> size = tuple.Item2;
+                List<Plane> textPlane = tuple.Item3;
+                Sphere sphere = new Sphere(curve[i].PointAtEnd, (double)(size[0] / 2));
+
+                textAll.AddRange(text);
+                sizeAll.AddRange(size); //denne inneholder ikke alle str
+                textPlaneAll.AddRange(textPlane);
+                sphereAll.Add(sphere);
+
+            }
             
-            var tuple = CreateText(curve, div, refLength);
-            List<string> text = tuple.Item1;
-            List<double> size = tuple.Item2;
-            List<Plane> textPlane = tuple.Item3;
-            Color color = tuple.Item4;
-            Sphere sphere = new Sphere(curve.PointAtEnd, (double)(size[0] / 2));
             
-            DA.SetData(0, div);
-            DA.SetDataList(1, text);
-            DA.SetDataList(2, size);
-            DA.SetDataList(3, textPlane);
-            DA.SetData(4, color);
-            DA.SetData(5, sphere);
+            DA.SetData(0, divAll[0]);
+            DA.SetData(1, divAll[1]);
+            DA.SetData(2, divAll[2]);
+            DA.SetDataList(3, textAll);
+            DA.SetDataList(4, sizeAll);
+            DA.SetDataList(5, textPlaneAll);
+            DA.SetData(6, Color.White);
+            DA.SetDataList(7, sphereAll);
 
         }
 
-        public Tuple<List<string>, List<double>, List<Plane>, Color> CreateText(Curve curve, double div, double refLength)
+        public Tuple<List<string>, List<double>, List<Plane>> CreateText(Curve curve, double div, double refLength)
         {
             List<string> text = new List<string>();
             text.Add("Mesh division: "+div.ToString());
             text.AddRange(new List<string>(){ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"});
             double refSize = (double)(refLength / 10);
-            List<double> size = new List<double>() { refSize, (double)(refSize / 2) };
+            List<double> size = new List<double>() { refSize };
+            for (int j=0; j < 10; j++)
+            {
+                size.Add((double)(refSize / 2));
+            }
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
             Point3d end = curve.PointAtEnd;
@@ -94,7 +117,7 @@ namespace PartitionSlider
                 textPlane.Add(plane);
             }
 
-            return Tuple.Create(text, size, textPlane, Color.White);
+            return Tuple.Create(text, size, textPlane);
         }
         
         /// <summary>
