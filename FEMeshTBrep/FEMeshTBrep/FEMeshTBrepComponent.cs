@@ -9,6 +9,7 @@ using Grasshopper;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using System.Linq;
+using System.Drawing;
 
 
 namespace FEMeshTBrep
@@ -33,6 +34,7 @@ namespace FEMeshTBrep
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
             pManager[4].Optional = true; //Denne funker ikke
+            pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -41,6 +43,11 @@ namespace FEMeshTBrep
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
             pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.list); //For testing only
+
+            pManager.AddTextParameter("Text", "Text", "Text for headline", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.item);
+            pManager.AddColourParameter("Colors", "Color T", "Colors for text", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -53,6 +60,7 @@ namespace FEMeshTBrep
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
             List<string> deftxt = new List<string>();
+            Brep origBrep = new Brep();
 
             if (!DA.GetDataTree(0, out treeConnectivity)) return;
             if (!DA.GetDataTree(1, out treePoints)) return;
@@ -60,6 +68,7 @@ namespace FEMeshTBrep
             if (!DA.GetDataList(2, bctxt)) return;
             if (!DA.GetDataList(3, loadtxt)) return;
             if (!DA.GetDataList(4, deftxt)) return;
+            if (!DA.GetData(5, ref origBrep)) return;
             double E = 210000;
             double nu = 0.3;
             //double E = m.GetYoungs();
@@ -171,12 +180,32 @@ namespace FEMeshTBrep
                 stressTree.AddRange(globalStress[i], new GH_Path(new int[] { 0, i }));
             }
 
-            
+ 
             DA.SetDataTree(0, defTree);
             DA.SetDataTree(1, strainTree);
             DA.SetDataTree(2, stressTree);
             DA.SetDataList(3, globalPoints);
 
+            //FOR PREVIEW OF HEADLINE
+
+            VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
+            Point3d centroid = vmp.Centroid;
+            double volume = origBrep.GetVolume();
+            double sqrt3 = (double)1 / 3;
+            double refLength = Math.Pow(volume, sqrt3);
+
+            var tuple3 = CreateHeadline(centroid, refLength);
+
+            string headText = tuple3.Item1;
+            double headSize = tuple3.Item2;
+            Plane headPlane = tuple3.Item3;
+            Color headColor = tuple3.Item4;
+
+            //Text
+            DA.SetData(4, headText);
+            DA.SetData(5, headSize);
+            DA.SetData(6, headPlane);
+            DA.SetData(7, headColor);
 
             /*
             GH_Boolean => Boolean
@@ -187,6 +216,24 @@ namespace FEMeshTBrep
             GH_Surface => Brep
             */
 
+        }
+
+        public Tuple<string, double, Plane, Color> CreateHeadline(Point3d centroid, double refLength)
+        {
+            string headText = "MODEL";
+
+            double headSize = (double)refLength / 2;
+
+            Point3d p0 = centroid;
+            Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
+            Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
+
+            Plane headPlane = new Plane(p0, p1, p2);
+            headPlane.Translate(new Vector3d(0, 0, refLength));
+
+            Color headColor = Color.Pink;
+
+            return Tuple.Create(headText, headSize, headPlane, headColor);
         }
 
         public List<Vector<double>> CalcStress(List<List<double>> globalStrain, Matrix<double> Cmatrix)
