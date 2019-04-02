@@ -98,7 +98,7 @@ namespace ViewStresses
         
 
             List<double> textSizeRange = Enumerable.Repeat((double)refLength / 10, rangeValues.Count).ToList();  //Output text legend size
-            List<Color> textColorRange = Enumerable.Repeat(Color.Black, rangeValues.Count).ToList(); // Output text color legend
+            List<Color> textColorRange = Enumerable.Repeat(Color.White, rangeValues.Count).ToList(); // Output text color legend
 
             //Createing headline for area
             var tuple3 = CreateHeadline(centroid, angle, center, refLength);
@@ -143,8 +143,8 @@ namespace ViewStresses
             double headSize = (double)refLength / 2;
 
             Point3d p0 = centroid;
-            Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
-            Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
+            Point3d p1 = Point3d.Add(p0, new Point3d(0, 0, 1));
+            Point3d p2 = Point3d.Add(p0, new Point3d(1, 0, 0));
 
             Plane headPlane = new Plane(p0, p1, p2);
 
@@ -215,8 +215,9 @@ namespace ViewStresses
                 vecBrep = points[1] - points[0];
 
                 Point3d p0 = points[0] + vecBrep;
-                Point3d p1 = points[1] + vecBrep;
-                Point3d p2 = points[4] + vecBrep;
+                Point3d p1 = points[4] + vecBrep;
+                Point3d p2 = points[1] + vecBrep;
+                
 
                 plane = new Plane(p0, p1, p2);
 
