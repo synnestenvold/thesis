@@ -31,7 +31,7 @@ namespace SurfaceSlider
             pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Text placement", GH_ParamAccess.list);
-            pManager.AddColourParameter("Colors text", "Color T", "Color for text", GH_ParamAccess.item);
+            pManager.AddColourParameter("Colors", "Color", "Color for text", GH_ParamAccess.item);
             pManager.AddGeometryParameter("Geometry", "Geometry", "Sphere on point to drag", GH_ParamAccess.item);
             
         }
