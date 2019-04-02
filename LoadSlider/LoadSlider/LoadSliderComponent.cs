@@ -63,7 +63,7 @@ namespace LoadSlider
 
             DA.SetData(0, load);
             DA.SetDataList(1, text);
-            DA.SetData(3, refSize);
+            DA.SetData(2, refSize);
             DA.SetDataList(3, textPlane);
             DA.SetData(4, Color.White);
             DA.SetData(5, sphere);
