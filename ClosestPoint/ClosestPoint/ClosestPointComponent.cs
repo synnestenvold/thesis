@@ -80,7 +80,7 @@ namespace ClosestPoint
             VolumeMassProperties vmp = VolumeMassProperties.Compute(sphere);
             Point3d centroid = vmp.Centroid;
 
-            double refLength = 0.5;
+            double refLength = 1;
 
             Point3d closestPoint = FindClosestPoint(globalPoints, centroid, refLength);
 

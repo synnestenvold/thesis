@@ -367,6 +367,8 @@ namespace FEMeshTBrep
 
         public Vector<double> ApplyPreDef(Matrix<double> K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
         {
+            if(predefNodes.Count == 0) return Vector<double>.Build.Dense(sizeOfM);
+
             //Pick the parts of K that are prescribed a deformation
             Matrix<double> K_red = Matrix<double>.Build.Dense(sizeOfM, predefNodes.Count);
             int n = 0;
