@@ -2,15 +2,15 @@
 using System.Drawing;
 using Grasshopper.Kernel;
 
-namespace closestPoint
+namespace ClosestPoint
 {
-    public class closestPointInfo : GH_AssemblyInfo
+    public class ClosestPointInfo : GH_AssemblyInfo
     {
         public override string Name
         {
             get
             {
-                return "closestPoint";
+                return "ClosestPoint";
             }
         }
         public override Bitmap Icon
@@ -33,7 +33,7 @@ namespace closestPoint
         {
             get
             {
-                return new Guid("a9f4fe80-fde7-4eba-ac0a-e9b3517a1d69");
+                return new Guid("eab1cca2-a868-45e1-8a0b-270367da7032");
             }
         }
 
