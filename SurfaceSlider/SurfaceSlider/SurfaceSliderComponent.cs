@@ -59,7 +59,7 @@ namespace SurfaceSlider
 
             Sphere sphere = new Sphere(curve.PointAtEnd, (double)(size[0] / 2));
 
-            DA.SetData(0, surface);
+            DA.SetData(0, surf);
             DA.SetDataList(1, text);
             DA.SetDataList(2, size);
             DA.SetDataList(3, textPlane);
