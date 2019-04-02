@@ -24,14 +24,14 @@ namespace PartitionSlider
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Sliders as curves (U, V, W)", GH_ParamAccess.list);
-            pManager.AddBrepParameter("Brep", "B", "Brep as reference", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Brep", "B", "Brep as reference size", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Mesh division U", "U", "Number of divisions", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Mesh division V", "V", "Number of divisions", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Mesh division W", "W", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("U count", "U", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("V count", "V", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("W count", "W", "Number of divisions", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "Text", "Division text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
@@ -42,7 +42,7 @@ namespace PartitionSlider
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             List<Curve> curve = new List<Curve>();
-            Brep brep = new Brep(); //the only reason to have brep as unput is refLength
+            Brep brep = new Brep(); 
             if (!DA.GetDataList(0, curve)) return;
             if (!DA.GetData(1, ref brep)) return;
 
