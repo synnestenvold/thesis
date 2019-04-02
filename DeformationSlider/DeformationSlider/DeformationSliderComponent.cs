@@ -36,7 +36,7 @@ namespace DeformationSlider
             pManager.AddTextParameter("Text", "T", "Text", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "P", "Text placement", GH_ParamAccess.item);
             pManager.AddColourParameter("Text colors", "C text", "Color for deformed text", GH_ParamAccess.item);
-
+            pManager.AddGeometryParameter("Sphere", "S", "Sphere", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -51,6 +51,7 @@ namespace DeformationSlider
             double refSize = (double)(refLength / 10);
             double adjustment = 200 / refLength; //5 times the length should give 1000
             double length = curve.GetLength()*adjustment;
+            Sphere sphere = new Sphere(curve.PointAtEnd, refSize);
 
             var tupleValue = CreateValueText(textValue, curve, length, refSize);
             string textValueOut = tupleValue.Item1;
@@ -59,6 +60,7 @@ namespace DeformationSlider
             DA.SetData(1, textValueOut);
             DA.SetData(2, planeValue);
             DA.SetData(3, Color.White);
+            DA.SetData(4, sphere);
         }
         public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, double length, double refSize)
         {
