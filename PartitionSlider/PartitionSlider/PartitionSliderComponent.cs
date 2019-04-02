@@ -116,20 +116,5 @@ namespace PartitionSlider
             get { return new Guid("f55bdd6e-1c71-44eb-b1d5-40d997763b3e"); }
         }
 
-        public override void ExpireSolution(bool recompute)
-        {
-            base.ExpireSolution(recompute);
-        }
-
-        public override void DrawViewportMeshes(IGH_PreviewArgs args)
-        {
-            //args.Display.Draw3dText(text, Color.White);
-            args.Display.Draw3dText(textValue, Color.White);
-            for (int i = 0; i < 10; i++)
-            {
-                args.Display.Draw3dText(textList[i], Color.White);
-            }
-            //base.DrawViewportMeshes(args);
-        }
     }
 }
