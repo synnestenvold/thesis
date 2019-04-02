@@ -14,8 +14,6 @@ namespace LoadSlider
 {
     public class LoadSliderComponent : GH_Component
     {
-        Text3d text = new Text3d("");
-        Text3d textValue = new Text3d("");
 
         public LoadSliderComponent()
           : base("LoadSlider", "LoadSlider",
@@ -24,33 +22,22 @@ namespace LoadSlider
         {
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
             pManager.AddBrepParameter("Brep", "B", "Brep as reference", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddVectorParameter("Load", "L", "Load vector and value", GH_ParamAccess.item);
-            pManager.AddTextParameter("Text", "T", "Slider text", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "P", "Placement for text", GH_ParamAccess.item);
-            pManager.AddTextParameter("Text", "T2", "Slider text", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "P2", "Placement for text", GH_ParamAccess.item);
-            pManager.AddColourParameter("Text colors", "C text", "Color for deformed text", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Load", "Load", "Load vector and value", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "Text", "Slider text", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
+            pManager.AddColourParameter("Colors", "Color", "Color for text and geometry", GH_ParamAccess.item);
+            pManager.AddGeometryParameter("Geometry", "Geometry", "Sphere for place to drag line", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
-        /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
         
@@ -58,55 +45,53 @@ namespace LoadSlider
             Brep brep = new Brep();
             if (!DA.GetData(0, ref curve)) return;
             if (!DA.GetData(1, ref brep)) return;
-            Vector3d vectorRef = curve.PointAtEnd - curve.PointAtStart;
-            //Scale vector
+            
             double volume = brep.GetVolume();
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
-            double refSize = (double)(refLength / 10);
-            double adjustment = 20 / refLength; //the length should give 20 kn/m^2
-            Vector3d vector = Vector3d.Multiply(adjustment, vectorRef);
-            //Text on start of curve
-            var tuple = CreateText(text, curve, refSize);
-            string textOut = tuple.Item1;
-            Plane plane = tuple.Item2;
-            //Text on the other side shows the value of load
-            var tupleValue = CreateTextValue(textValue, curve, vector, refSize);
-            string textValueOut = tupleValue.Item1;
-            Plane planeValue = tupleValue.Item2;
             
-            DA.SetData(0, vector);
-            DA.SetData(1, textOut);
-            DA.SetData(2, plane);
-            DA.SetData(3, textValueOut);
-            DA.SetData(4, planeValue);
-            DA.SetData(5, Color.White);
+            double adjustment = 20 / refLength; //the length should give 20 kn/m^2
+            Vector3d vectorRef = curve.PointAtEnd - curve.PointAtStart;
+            Vector3d load = Vector3d.Multiply(adjustment, vectorRef);
+            
+            var tuple = CreateText(curve, load, refLength);
+            List<string> text = tuple.Item1;
+            double refSize = tuple.Item2;
+            List<Plane> textPlane = tuple.Item3;
+            Color color = tuple.Item4;
+            Sphere sphere = new Sphere(curve.PointAtEnd, refSize);
+
+            DA.SetData(0, load);
+            DA.SetDataList(1, text);
+            DA.SetData(3, refSize);
+            DA.SetDataList(3, textPlane);
+            DA.SetData(4, Color.White);
+            DA.SetData(5, sphere);
         }
 
        
-        public Tuple<string, Plane> CreateText(Text3d text, Curve curve, double refSize)
+        public Tuple<List<string>, double, List<Plane>, Color> CreateText(Curve curve, Vector3d load, double refLength)
         {
-            text.Text = "Adjust for load in kN/m^2";
+            List<string> text = new List<string>();
+            text.Add("Adjust for load in kN/m^2");
+            text.Add("(" + Math.Round((load.X), 3).ToString() + ", " + Math.Round((load.Y), 3).ToString() + ", " + Math.Round((load.Z), 3).ToString() + ")");
+
+            double refSize = (double)(refLength / 10);
+
+            List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
             Point3d p0 = Point3d.Add(start, new Point3d(0, 0, 2*refSize));
             Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 2*refSize));
             Point3d p2 = Point3d.Add(start, new Point3d(0, 0, (1+2*refSize)));
-            text.TextPlane = new Plane(p0, p1, p2);
-            text.Height = refSize;
-            return Tuple.Create(text.Text, text.TextPlane);
+            textPlane.Add(new Plane(p0, p1, p2));
+            Point3d end = curve.PointAtEnd;
+            Point3d p3 = Point3d.Add(end, new Point3d(0, 0, -2 * refSize));
+            Point3d p4 = Point3d.Add(end, new Point3d(1, 0, -2 * refSize));
+            Point3d p5 = Point3d.Add(end, new Point3d(0, 0, (1 - 2 * refSize)));
+            textPlane.Add(new Plane(p3, p4, p5));
+            return Tuple.Create(text, refSize, textPlane, Color.White);
         }
 
-        public Tuple<string, Plane> CreateTextValue(Text3d textValue, Curve curve, Vector3d vector, double refSize)
-        {
-            textValue.Text = "("+Math.Round((vector.X),3).ToString()+", "+Math.Round((vector.Y),3).ToString()+", "+Math.Round((vector.Z),3).ToString()+")";
-            Point3d end = curve.PointAtEnd;
-            Point3d p0 = Point3d.Add(end, new Point3d(0, 0, -2*refSize));
-            Point3d p1 = Point3d.Add(end, new Point3d(1, 0, -2*refSize));
-            Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1-2*refSize)));
-            textValue.TextPlane = new Plane(p0, p1, p2);
-            textValue.Height = refSize;
-            return Tuple.Create(textValue.Text, textValue.TextPlane);
-        }
         /// <summary>
         /// Provides an Icon for every component that will be visible in the User Interface.
         /// Icons need to be 24x24 pixels.
@@ -125,17 +110,6 @@ namespace LoadSlider
         {
             get { return new Guid("74238820-07e9-4490-966e-8a8dcfe33ca8"); }
         }
-
-        public override void ExpireSolution(bool recompute)
-        {
-            base.ExpireSolution(recompute);
-        }
-
-        public override void DrawViewportMeshes(IGH_PreviewArgs args)
-        {
-            args.Display.Draw3dText(text, Color.White);
-            args.Display.Draw3dText(textValue, Color.White);
-            //base.DrawViewportMeshes(args);
-        }
+        
     }
 }

@@ -5,17 +5,10 @@ using Grasshopper.Kernel;
 using Rhino.Display;
 using Rhino.Geometry;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
-
 namespace DeformationSlider
 {
     public class DeformationSliderComponent : GH_Component
     {
-        readonly Text3d text = new Text3d("");
-        readonly Text3d textValue = new Text3d("");
        
         public DeformationSliderComponent()
           : base("DeformationSlider", "DefSlider",
@@ -33,10 +26,11 @@ namespace DeformationSlider
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddNumberParameter("Scale", "Scale", "Scale value as length", GH_ParamAccess.item);
-            pManager.AddTextParameter("Text", "T", "Text", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "P", "Text placement", GH_ParamAccess.item);
-            pManager.AddColourParameter("Text colors", "C text", "Color for deformed text", GH_ParamAccess.item);
-            pManager.AddGeometryParameter("Sphere", "S", "Sphere", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane", "Plane", "Text placement", GH_ParamAccess.item);
+            pManager.AddColourParameter("Colors", "Color", "Color for text and geometry", GH_ParamAccess.item);
+            pManager.AddGeometryParameter("Geometry", "Geometry", "Sphere as geometry", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -45,33 +39,38 @@ namespace DeformationSlider
             Brep brep = new Brep();
             if (!DA.GetData(0, ref curve)) return;
             if (!DA.GetData(1, ref brep)) return;
-            double volume = brep.GetVolume();
+
             double sqrt3 = (double) 1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
-            double refSize = (double)(refLength / 10);
-            double adjustment = 200 / refLength; //5 times the length should give 1000
-            double length = curve.GetLength()*adjustment;
+            double adjustment = 200 / refLength; //5 times the length should give scale = 1000
+            double scale = curve.GetLength()*adjustment;
+            
+            var tuple = CreateText(curve, scale, refLength);
+            string text = tuple.Item1;
+            double refSize = tuple.Item2;
+            Plane textPlane = tuple.Item3;
+            Color color = tuple.Item4;
+
             Sphere sphere = new Sphere(curve.PointAtEnd, refSize);
 
-            var tupleValue = CreateValueText(textValue, curve, length, refSize);
-            string textValueOut = tupleValue.Item1;
-            Plane planeValue = tupleValue.Item2;
-            DA.SetData(0, length);
-            DA.SetData(1, textValueOut);
-            DA.SetData(2, planeValue);
-            DA.SetData(3, Color.White);
-            DA.SetData(4, sphere);
+            DA.SetData(0, scale);
+            DA.SetData(1, text);
+            DA.SetData(2, refSize);
+            DA.SetData(3, textPlane);
+            DA.SetData(4, color);
+            DA.SetData(5, sphere);
         }
-        public Tuple<string, Plane> CreateValueText(Text3d textValue, Curve curve, double length, double refSize)
+        public Tuple<string, double, Plane, Color> CreateText(Curve curve, double scale, double refLength)
         {
-            textValue.Text = "Scale size: " + Math.Round(length).ToString();
+            string text = "Scale: " + Math.Round(scale).ToString();
+            double refSize = (double)(refLength / 10); //text size and sphere size
             Point3d end = curve.PointAtEnd;
             Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 2*refSize));
             Point3d p1 = Point3d.Add(end, new Point3d(0, 1, 2*refSize));
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1+2*refSize));
-            textValue.TextPlane = new Plane(p0, p1, p2);
-            textValue.Height = refSize;
-            return Tuple.Create(textValue.Text, textValue.TextPlane);
+            Plane textPlane = new Plane(p0, p1, p2);
+
+            return Tuple.Create(text, refSize, textPlane, Color.White);
         }
 
         /// <summary>
@@ -87,26 +86,11 @@ namespace DeformationSlider
                 return null;
             }
         }
-
-        /// <summary>
-        /// Each component must have a unique Guid to identify it. 
-        /// It is vital this Guid doesn't change otherwise old ghx files 
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
+        
         public override Guid ComponentGuid
         {
             get { return new Guid("8a4183c2-fdcf-4af1-93ca-8e411a84a3bc"); }
         }
-        public override void ExpireSolution(bool recompute)
-        {
-            base.ExpireSolution(recompute);
-        }
-
-        public override void DrawViewportMeshes(IGH_PreviewArgs args)
-        {
-            //args.Display.Draw3dText(text, Color.Red);
-            args.Display.Draw3dText(textValue, Color.White);
-            //base.DrawViewportMeshes(args);
-        }
+        
     }
 }
