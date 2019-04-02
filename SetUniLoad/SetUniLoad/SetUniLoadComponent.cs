@@ -5,22 +5,12 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Drawing;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
 namespace SetUniLoad
 {
     public class SetUniLoadComponent : GH_Component
     {
-        /// <summary>
-        /// Each implementation of GH_Component must provide a public 
-        /// constructor without any arguments.
-        /// Category represents the Tab in which the component will appear, 
-        /// Subcategory the panel. If you use non-existing tab or panel names, 
-        /// new tabs/panels will automatically be created.
-        /// </summary>
+      
         public SetUniLoadComponent()
           : base("Uniform load component for FEA", "UniLoads",
               "Description",
@@ -28,37 +18,31 @@ namespace SetUniLoad
         {
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddBrepParameter("Surface", "S", "Surface for loading", GH_ParamAccess.item);
-            pManager.AddVectorParameter("Force vector", "V", "Direction and load amount in kN/m", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("u-divisions", "U", "U-division", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("v-divisions", "V", "V-division", GH_ParamAccess.item);
+            pManager.AddSurfaceParameter("Surface", "Surface", "Surface for loading", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Load vector", "Load", "Direction and load amount in kN/m", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
             pManager.AddBrepParameter("Brep", "B", "Brep as a reference size", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Loaded points", "LP", "Loads in point, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Point loads", "PL", "Lumped load to points, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
             pManager.AddBrepParameter("Load-arrows", "Geometry", "Arrows showing the load", GH_ParamAccess.list);
             pManager.AddColourParameter("Arrow coloring", "Color", "Coloring of arrows", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
-        /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
-            Brep surface = new Brep();
+            Surface surface = null;
             Vector3d forceVec = new Vector3d();
-            int u = 2;
-            int v = 2;
+            int u = 1;
+            int v = 1;
+            int w = 1;
             Brep origBrep = new Brep();
 
             
@@ -66,9 +50,10 @@ namespace SetUniLoad
             if (!DA.GetData(1, ref forceVec)) return;
             if (!DA.GetData(2, ref u)) return;
             if (!DA.GetData(3, ref v)) return;
-            if (!DA.GetData(4, ref origBrep)) return;
+            if (!DA.GetData(4, ref w)) return;
+            if (!DA.GetData(5, ref origBrep)) return;
 
-            List<string> pointLoads = FindPointLoads(surface, forceVec, u, v);
+            List<string> pointLoads = FindPointLoads(surface, forceVec, u, v, w);
 
             ///////FOR PREVIEWING OF LOADS///////
 
@@ -239,9 +224,43 @@ namespace SetUniLoad
             return arrows;
         }
 
-        public List<string> FindPointLoads(Brep surface, Vector3d forceVec, int u, int v)
+        public List<string> FindPointLoads(Surface surface, Vector3d forceVec, int u, int v, int w)
         {
-            Point3d [] vertices = surface.DuplicateVertices();
+            Brep surfaceBrep = surface.ToBrep();
+            Point3d [] vertices = surfaceBrep.DuplicateVertices();
+            
+            Vector3d vec_u1 = (vertices[1] - vertices[0]) / vertices[0].DistanceTo(vertices[1]);
+            Vector3d vec_u2 = (vertices[2] - vertices[3]) / vertices[3].DistanceTo(vertices[2]);
+            Vector3d vec_v1 = (vertices[3] - vertices[0]) / vertices[0].DistanceTo(vertices[3]);
+            Vector3d vec_v2 = (vertices[2] - vertices[1]) / vertices[1].DistanceTo(vertices[2]);
+
+            int relativeU = u;
+            int relativeV = v;
+
+            //Use these vectors to find out weather to use u, v or w.
+            ///////////TEMPORARY SOLUTION, ASSUMING CUBE IN X, Y AND Z DIRECTION/////////
+
+            if (vec_u1 == Vector3d.YAxis)
+            {
+                relativeU = v;
+            }
+            if (vec_u1 == Vector3d.ZAxis)
+            {
+                relativeU = w;
+            }
+            if (vec_v1 == Vector3d.XAxis)
+            {
+                relativeV = u;
+            }
+            if (vec_v1 == Vector3d.ZAxis)
+            {
+                relativeV = w;
+            }
+            /////END TEMP////
+            double l_u1 = vertices[0].DistanceTo(vertices[1]) / relativeU;
+            double l_u2 = vertices[3].DistanceTo(vertices[2]) / relativeU;
+            double l_v1 = vertices[0].DistanceTo(vertices[3]) / relativeV;
+            double l_v2 = vertices[1].DistanceTo(vertices[2]) / relativeV;
 
             //FINDING CORNER POINTS
             List<Point3d> cornerPoints = new List<Point3d>();
@@ -250,23 +269,10 @@ namespace SetUniLoad
             cornerPoints.Add(vertices[2]);
             cornerPoints.Add(vertices[3]);
 
-            double l_u1 = vertices[0].DistanceTo(vertices[1]) / u;
-            double l_u2 = vertices[3].DistanceTo(vertices[2]) / u;
-
-            double l_v1 = vertices[0].DistanceTo(vertices[3]) / v;
-            double l_v2 = vertices[1].DistanceTo(vertices[2]) / v;
-
-            Vector3d vec_u1 = (vertices[1] - vertices[0]) / vertices[0].DistanceTo(vertices[1]);
-            Vector3d vec_u2 = (vertices[2] - vertices[3]) / vertices[3].DistanceTo(vertices[2]);
-
-            Vector3d vec_v1 = (vertices[3] - vertices[0]) / vertices[0].DistanceTo(vertices[3]);
-            Vector3d vec_v2 = (vertices[2] - vertices[1]) / vertices[1].DistanceTo(vertices[2]);
-
-
             //FINDING LINE POINTS
             List<Point3d> linePoints = new List<Point3d>();
 
-            for (int i = 1; i < u; i++)
+            for (int i = 1; i < relativeU; i++)
             {
                 Point3d p1 = new Point3d(vertices[0].X + l_u1 * i * vec_u1.X, vertices[0].Y + l_u1 * vec_u1.Y * i, vertices[0].Z + l_u1 * vec_u1.Z * i);
                 linePoints.Add(p1);
@@ -274,7 +280,7 @@ namespace SetUniLoad
                 linePoints.Add(p2);
             }
 
-            for (int i = 1; i < v; i++)
+            for (int i = 1; i < relativeV; i++)
             {
                 Point3d p1 = new Point3d(vertices[0].X + l_v1 * i * vec_v1.X, vertices[0].Y + l_v1 * vec_v1.Y * i, vertices[0].Z + l_v1 * vec_v1.Z * i);
                 linePoints.Add(p1);
@@ -285,25 +291,25 @@ namespace SetUniLoad
             //FINDING CENTER POINTS
             List<Point3d> centerPoints = new List<Point3d>();
 
-            for (int i = 1; i < u; i++)
+            for (int i = 1; i < relativeU; i++)
             {
                 Point3d p1_u = new Point3d(vertices[0].X + l_u1 * i * vec_u1.X, vertices[0].Y + l_u1 * vec_u1.Y * i, vertices[0].Z + l_u1 * vec_u1.Z * i);
                 Point3d p2_u = new Point3d(vertices[3].X + l_u2 * i * vec_u2.X, vertices[3].Y + l_u2 * vec_u2.Y * i, vertices[3].Z + l_u2 * vec_u2.Z * i);
 
                 Vector3d vec_u = (p2_u - p1_u) / (p1_u.DistanceTo(p2_u));
 
-                Double length_u1 = p1_u.DistanceTo(p2_u) / u;
+                double length_v1 = p1_u.DistanceTo(p2_u) / relativeV;
 
-                for (int j = 1; j < v; j++)
+                for (int j = 1; j < relativeV; j++)
                 {
-                    Point3d p1_v = new Point3d(p1_u.X + length_u1 * j * vec_u.X, p1_u.Y + length_u1 * j * vec_u.Y, p1_u.Z + length_u1 * j * vec_u.Z);
+                    Point3d p1_v = new Point3d(p1_u.X + length_v1 * j * vec_u.X, p1_u.Y + length_v1 * j * vec_u.Y, p1_u.Z + length_v1 * j * vec_u.Z);
                     centerPoints.Add(p1_v);
                 }
             }
 
             //DISTRIBUTING LOAD TO POINTS FOUND
             double pointsCount = 4 * centerPoints.Count + cornerPoints.Count + 2 * linePoints.Count;
-            double area = surface.GetArea();
+            double area = surfaceBrep.GetArea();
             forceVec = forceVec * area;
 
             List<string> centerPointsString = new List<string>();
