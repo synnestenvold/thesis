@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("closestPoint")]
+[assembly: AssemblyTitle("ClosestPoint")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("HP Inc.")]
-[assembly: AssemblyProduct("closestPoint")]
+[assembly: AssemblyProduct("ClosestPoint")]
 [assembly: AssemblyCopyright("Copyright © HP Inc. 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b11f1ca1-3a50-42f9-af35-6537dc49e8c8")]
+[assembly: Guid("830433b9-8adf-407e-a68b-4b13f41cd657")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -14,9 +14,9 @@ using System.Drawing;
 // folder in Grasshopper.
 // You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
-namespace closestPoint
+namespace ClosestPoint
 {
-    public class closestPointComponent : GH_Component
+    public class ClosestPointComponent : GH_Component
     {
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
@@ -25,7 +25,7 @@ namespace closestPoint
         /// Subcategory the panel. If you use non-existing tab or panel names, 
         /// new tabs/panels will automatically be created.
         /// </summary>
-        public closestPointComponent()
+        public ClosestPointComponent()
           : base("Find the closest point to sphere", "Closest point",
               "Description",
               "Category3", "Closest point")
@@ -99,7 +99,7 @@ namespace closestPoint
 
         public Plane FindSpherePlane(Point3d centroid, double refLength)
         {
-            Point3d p0 = new Point3d(centroid.X + refLength*2, centroid.Y, centroid.Z+refLength*2);
+            Point3d p0 = new Point3d(centroid.X + refLength * 2, centroid.Y, centroid.Z + refLength * 2);
             Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
             Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 
