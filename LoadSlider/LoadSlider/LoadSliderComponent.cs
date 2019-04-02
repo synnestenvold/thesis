@@ -59,7 +59,7 @@ namespace LoadSlider
             double refSize = tuple.Item2;
             List<Plane> textPlane = tuple.Item3;
             Color color = tuple.Item4;
-            Sphere sphere = new Sphere(curve.PointAtEnd, refSize);
+            Sphere sphere = new Sphere(curve.PointAtEnd, (double)(refSize/2));
 
             DA.SetData(0, load);
             DA.SetDataList(1, text);

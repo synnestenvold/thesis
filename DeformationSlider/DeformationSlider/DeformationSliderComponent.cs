@@ -51,7 +51,7 @@ namespace DeformationSlider
             Plane textPlane = tuple.Item3;
             Color color = tuple.Item4;
 
-            Sphere sphere = new Sphere(curve.PointAtEnd, refSize);
+            Sphere sphere = new Sphere(curve.PointAtEnd, (double)(refSize/2));
 
             DA.SetData(0, scale);
             DA.SetData(1, text);
