@@ -88,16 +88,16 @@ namespace ViewStresses
             List<string> rangeValues = tuple1.Item2; //output text
 
             //Creating breps stress legend
-            var tuple2 = CreateBrepRanges(centroid, refLength, center, angle);
-            List<Brep> brepRanges = tuple2.Item1; //Output brep lengend
-            List<Plane> planeRanges = tuple2.Item2; //output text legend planes
-            
+            List<Brep> brepRanges = CreateBrepRanges(centroid, refLength, center, angle);
+
             //Getting colors stress legend
             List<Color> colorRange = CreateColorRange(); //Output brep colors legend
 
-        
+            var tuple2 = CreateTextPlanes(brepRanges, refLength);
+            List<Plane> planeRanges = tuple2.Item1;
+            double textSize = tuple2.Item2;
 
-            List<double> textSizeRange = Enumerable.Repeat((double)refLength / 10, rangeValues.Count).ToList();  //Output text legend size
+            List<double> textSizeRange = Enumerable.Repeat(textSize, rangeValues.Count).ToList();  //Output text legend size
             List<Color> textColorRange = Enumerable.Repeat(Color.White, rangeValues.Count).ToList(); // Output text color legend
 
             //Createing headline for area
@@ -180,7 +180,7 @@ namespace ViewStresses
         }
 
 
-        public Tuple<List<Brep>, List<Plane>> CreateBrepRanges(Point3d centroid, double refLength, Point3d center, double angle)
+        public List<Brep> CreateBrepRanges(Point3d centroid, double refLength, Point3d center, double angle)
         {
             List<Brep> brepRanges = new List<Brep>();
             List<Plane> planeRanges = new List<Plane>();
@@ -199,7 +199,7 @@ namespace ViewStresses
 
             for (int i = 0; i < ranges; i++)
             {
-                Interval x = new Interval(startRanges.X, startRanges.X + refLength);
+                Interval x = new Interval(startRanges.X, startRanges.X + refLength * 0.8);
                 Interval y = new Interval(startRanges.Y, startRanges.Y + refLength * 0.2);
                 Interval z = new Interval(startRanges.Z + rangeHeight * i, startRanges.Z + rangeHeight * (i + 1));
                 Box box_new = new Box(Plane.WorldXY, x, y, z);
@@ -209,35 +209,56 @@ namespace ViewStresses
                 brep_new.Rotate(angle, vecAxis, center);
 
                 brepRanges.Add(brep_new);
+            }
 
-                Point3d[] points = brep_new.DuplicateVertices();
+            return brepRanges;
+        }
+
+        public Tuple<List<Plane>, double> CreateTextPlanes(List<Brep> brepRanges, double refLength)
+        {
+            int ranges = 13;
+            double totLength = refLength * 1.2;
+            double rangeHeight = totLength / ranges;
+            double textSize = rangeHeight * 0.8;
+
+            Vector3d textVector = new Vector3d(0, 0, textSize / 2);
+
+            List<Plane> planeRanges = new List<Plane>();
+
+            Vector3d vecBrep = new Vector3d(0, 0, 0);
+            Point3d p = new Point3d(0, 0, 0);
+            Plane plane = new Plane(p, p, p); 
+
+
+            for (int i = 0; i < brepRanges.Count; i++)
+            {
+                Point3d[] points = brepRanges[i].DuplicateVertices();
 
                 vecBrep = points[1] - points[0];
 
-                Point3d p0 = points[0] + vecBrep;
-                Point3d p1 = points[1] - vecBrep;
-                Point3d p2 = points[4] + vecBrep;
-                
-                
+                Point3d p0 = points[0];
+                Point3d p1 = points[0] - vecBrep;
+                Point3d p2 = points[4];
 
                 plane = new Plane(p0, p1, p2);
 
-                planeRanges.Add(plane);
+                plane.Translate(textVector);
+                plane.Translate(-vecBrep * 0.5);
 
+                planeRanges.Add(plane);
             }
 
-
             plane.Translate(new Vector3d(0, 0, rangeHeight));
 
 
             planeRanges.Add(plane);
 
             plane.Translate(new Vector3d(0, 0, rangeHeight));
-            plane.Translate(-vecBrep);
+            plane.Translate(vecBrep);
 
             planeRanges.Add(plane);
 
-            return Tuple.Create(brepRanges, planeRanges);
+            return Tuple.Create(planeRanges, textSize);
         }
 
         public Vector3d[] CreateVectors(GH_Structure<GH_Number> treeDef)
