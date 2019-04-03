@@ -243,7 +243,7 @@ namespace ViewStresses
                 plane = new Plane(p0, p1, p2);
 
                 plane.Translate(textVector);
-                plane.Translate(-vecBrep * 0.5);
+                plane.Translate(-vecBrep * 0.3);
 
                 planeRanges.Add(plane);
             }
@@ -324,7 +324,7 @@ namespace ViewStresses
             //Adding values to stress range
             for (int i = 0; i <= 13; i++)
             {
-                rangeValues.Add("_" + (Math.Round(min + i * range, 4)).ToString());
+                rangeValues.Add((Math.Round(min + i * range, 4)).ToString()+"_" );
             }
 
             //Creating header
