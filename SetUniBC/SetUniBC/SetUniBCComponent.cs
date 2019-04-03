@@ -31,7 +31,6 @@ namespace SetUniBC
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddSurfaceParameter("Surface", "Surface", "Surface for BC", GH_ParamAccess.item);
-            //pManager.AddTextParameter("Restained translations", "BC", "Restained translation in the way 0,0,0", GH_ParamAccess.item, "0,0,0");
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
             pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
@@ -56,11 +55,12 @@ namespace SetUniBC
             Brep origBrep = new Brep();
             
             if (!DA.GetData(0, ref surface)) return;
-            //if (!DA.GetData(1, ref restrains)) return;
             if (!DA.GetData(1, ref u)) return;
             if (!DA.GetData(2, ref v)) return;
             if (!DA.GetData(3, ref w)) return;
-            if (!DA.GetData(4, ref origBrep)) return;
+            if (!DA.GetData(4, ref origBrep)) return; //TODO: Change this input to list of 8 points.
+
+            //TODO: Create Brep from these 8 points and save as origBrep.
             
             List<string> pointsBC = FindBCPoints(surface, restrains, u, v, w, origBrep);
 
@@ -135,7 +135,7 @@ namespace SetUniBC
             Point3d[] nodesAll = brp.DuplicateVertices();
             VolumeMassProperties vmp = VolumeMassProperties.Compute(brp);
             Point3d centroid = vmp.Centroid;
-            Point3d[] sortedNodes = SortNodes(nodesAll, centroid);//new potential input, sorted nodes (global)
+            Point3d[] sortedNodes = SortNodes(nodesAll, centroid); //new potential input, sorted nodes (global)
 
             //Finding all points 
             points.Add(vertices[0]);
@@ -145,8 +145,7 @@ namespace SetUniBC
             
             int relativeU = u;
             int relativeV = v;
-            //Use these vectors to find out weather to use u, v or w.
-            ///////////TEMPORARY SOLUTION, ASSUMING CUBE IN X, Y AND Z DIRECTION/////////
+            
             int[] nodeIndex = new int[4];
             for (int i = 0; i < vertices.Length; i++)
             {
@@ -179,7 +178,6 @@ namespace SetUniBC
             {
                 if (nodeIndex[1] == 1)
                 {
-                    //vec_u1 = (sortedNodes[1] - sortedNodes[0]) / sortedNodes[0].DistanceTo(sortedNodes[1]);
                     if (nodeIndex[2] == 4)
                     {
                         relativeV = w;

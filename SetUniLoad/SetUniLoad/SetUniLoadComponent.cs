@@ -51,15 +51,14 @@ namespace SetUniLoad
             if (!DA.GetData(2, ref u)) return;
             if (!DA.GetData(3, ref v)) return;
             if (!DA.GetData(4, ref w)) return;
-            if (!DA.GetData(5, ref origBrep)) return;
+            if (!DA.GetData(5, ref origBrep)) return; //input as 8 points insted, and create origBrep from this
 
-            List<string> pointLoads = FindPointLoads(surface, forceVec, u, v, w);
+            List<string> pointLoads = FindPointLoads(surface, forceVec, u, v, w, origBrep);
 
             ///////FOR PREVIEWING OF LOADS///////
 
             //Setting up values for reflength and angle for rotation of area
-            VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
-            Point3d centroid = vmp.Centroid;
+            
             double volume = origBrep.GetVolume();
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(volume, sqrt3);
@@ -172,43 +171,14 @@ namespace SetUniLoad
             return arrows;
         }
 
-        public List<string> FindPointLoads(Surface surface, Vector3d forceVec, int u, int v, int w)
+        public List<string> FindPointLoads(Surface surface, Vector3d forceVec, int u, int v, int w, Brep brep)
         {
             Brep surfaceBrep = surface.ToBrep();
             Point3d [] vertices = surfaceBrep.DuplicateVertices();
-            
-            Vector3d vec_u1 = (vertices[1] - vertices[0]) / vertices[0].DistanceTo(vertices[1]);
-            Vector3d vec_u2 = (vertices[2] - vertices[3]) / vertices[3].DistanceTo(vertices[2]);
-            Vector3d vec_v1 = (vertices[3] - vertices[0]) / vertices[0].DistanceTo(vertices[3]);
-            Vector3d vec_v2 = (vertices[2] - vertices[1]) / vertices[1].DistanceTo(vertices[2]);
-
-            int relativeU = u;
-            int relativeV = v;
-
-            //Use these vectors to find out weather to use u, v or w.
-            ///////////TEMPORARY SOLUTION, ASSUMING CUBE IN X, Y AND Z DIRECTION/////////
-
-            if (vec_u1 == Vector3d.YAxis)
-            {
-                relativeU = v;
-            }
-            if (vec_u1 == Vector3d.ZAxis)
-            {
-                relativeU = w;
-            }
-            if (vec_v1 == Vector3d.XAxis)
-            {
-                relativeV = u;
-            }
-            if (vec_v1 == Vector3d.ZAxis)
-            {
-                relativeV = w;
-            }
-            /////END TEMP////
-            double l_u1 = vertices[0].DistanceTo(vertices[1]) / relativeU;
-            double l_u2 = vertices[3].DistanceTo(vertices[2]) / relativeU;
-            double l_v1 = vertices[0].DistanceTo(vertices[3]) / relativeV;
-            double l_v2 = vertices[1].DistanceTo(vertices[2]) / relativeV;
+            Point3d[] nodesAll = brep.DuplicateVertices();
+            VolumeMassProperties vmp = VolumeMassProperties.Compute(brep);
+            Point3d centroid = vmp.Centroid;
+            Point3d[] sortedNodes = SortNodes(nodesAll, centroid);
 
             //FINDING CORNER POINTS
             List<Point3d> cornerPoints = new List<Point3d>();
@@ -216,6 +186,129 @@ namespace SetUniLoad
             cornerPoints.Add(vertices[1]);
             cornerPoints.Add(vertices[2]);
             cornerPoints.Add(vertices[3]);
+            //END CORNER
+
+            int relativeU = u;
+            int relativeV = v;
+
+            int[] nodeIndex = new int[4];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                for (int j = 0; j < sortedNodes.Length; j++)
+                {
+                    if (vertices[i] == sortedNodes[j])
+                    {
+                        nodeIndex[i] = j;
+                    }
+                }
+            }
+            Array.Sort(nodeIndex);
+
+            //If surface is below
+            Vector3d vec_u1 = (sortedNodes[1] - sortedNodes[0]) / sortedNodes[0].DistanceTo(sortedNodes[1]);
+            Vector3d vec_u2 = (sortedNodes[2] - sortedNodes[3]) / sortedNodes[3].DistanceTo(sortedNodes[2]);
+            Vector3d vec_v1 = (sortedNodes[3] - sortedNodes[0]) / sortedNodes[0].DistanceTo(sortedNodes[3]);
+            Vector3d vec_v2 = (sortedNodes[2] - sortedNodes[1]) / sortedNodes[1].DistanceTo(sortedNodes[2]);
+            
+            double l_u1 = sortedNodes[0].DistanceTo(sortedNodes[1]) / relativeU;
+            double l_u2 = sortedNodes[3].DistanceTo(sortedNodes[2]) / relativeU;
+            double l_v1 = sortedNodes[0].DistanceTo(sortedNodes[3]) / relativeV;
+            double l_v2 = sortedNodes[1].DistanceTo(sortedNodes[2]) / relativeV;
+
+            //If not, update:
+            vertices[0] = sortedNodes[0];
+            vertices[1] = sortedNodes[3];
+            vertices[2] = sortedNodes[0];
+            vertices[3] = sortedNodes[1];
+
+            if (nodeIndex[0] == 0)
+            {
+                if (nodeIndex[1] == 1)
+                {
+                    if (nodeIndex[2] == 4)
+                    {
+                        relativeV = w;
+                        vec_u2 = (sortedNodes[5] - sortedNodes[4]) / sortedNodes[4].DistanceTo(sortedNodes[5]);
+                        vec_v1 = (sortedNodes[4] - sortedNodes[0]) / sortedNodes[0].DistanceTo(sortedNodes[4]);
+                        vec_v2 = (sortedNodes[5] - sortedNodes[1]) / sortedNodes[1].DistanceTo(sortedNodes[5]);
+
+                        l_u2 = sortedNodes[4].DistanceTo(sortedNodes[5]) / relativeU;
+                        l_v1 = sortedNodes[0].DistanceTo(sortedNodes[4]) / relativeV;
+                        l_v2 = sortedNodes[1].DistanceTo(sortedNodes[5]) / relativeV;
+
+                        vertices[1] = sortedNodes[4];
+                    }
+                }
+                else if (nodeIndex[1] == 3)
+                {
+                    {
+                        relativeU = v;
+                        relativeV = w;
+                        vec_u1 = (sortedNodes[3] - sortedNodes[0]) / sortedNodes[0].DistanceTo(sortedNodes[3]);
+                        vec_u2 = (sortedNodes[7] - sortedNodes[4]) / sortedNodes[4].DistanceTo(sortedNodes[7]);
+                        vec_v1 = (sortedNodes[4] - sortedNodes[0]) / sortedNodes[0].DistanceTo(sortedNodes[4]);
+                        vec_v2 = (sortedNodes[7] - sortedNodes[3]) / sortedNodes[3].DistanceTo(sortedNodes[7]);
+                        l_u1 = sortedNodes[0].DistanceTo(sortedNodes[3]) / relativeU;
+                        l_u2 = sortedNodes[4].DistanceTo(sortedNodes[7]) / relativeU;
+                        l_v1 = sortedNodes[0].DistanceTo(sortedNodes[4]) / relativeV;
+                        l_v2 = sortedNodes[3].DistanceTo(sortedNodes[7]) / relativeV;
+                        vertices[1] = sortedNodes[4];
+                        vertices[3] = sortedNodes[3];
+                    }
+                }
+            }
+            else if (nodeIndex[0] == 1)
+            {
+                if (nodeIndex[1] == 2)
+                {
+                    relativeU = v;
+                    relativeV = w;
+                    vec_u1 = (sortedNodes[2] - sortedNodes[1]) / sortedNodes[1].DistanceTo(sortedNodes[2]);
+                    vec_u2 = (sortedNodes[6] - sortedNodes[5]) / sortedNodes[5].DistanceTo(sortedNodes[6]);
+                    vec_v1 = (sortedNodes[5] - sortedNodes[1]) / sortedNodes[1].DistanceTo(sortedNodes[5]);
+                    vec_v2 = (sortedNodes[6] - sortedNodes[2]) / sortedNodes[2].DistanceTo(sortedNodes[6]);
+                    l_u1 = sortedNodes[1].DistanceTo(sortedNodes[2]) / relativeU;
+                    l_u2 = sortedNodes[5].DistanceTo(sortedNodes[6]) / relativeU;
+                    l_v1 = sortedNodes[1].DistanceTo(sortedNodes[5]) / relativeV;
+                    l_v2 = sortedNodes[2].DistanceTo(sortedNodes[6]) / relativeV;
+                    vertices[0] = sortedNodes[1];
+                    vertices[1] = sortedNodes[5];
+                    vertices[2] = sortedNodes[1];
+                    vertices[3] = sortedNodes[2];
+                }
+            }
+            else if (nodeIndex[0] == 2)
+            {
+                relativeV = w;
+                vec_u1 = (sortedNodes[2] - sortedNodes[3]) / sortedNodes[3].DistanceTo(sortedNodes[2]);
+                vec_u2 = (sortedNodes[6] - sortedNodes[7]) / sortedNodes[7].DistanceTo(sortedNodes[6]);
+                vec_v1 = (sortedNodes[7] - sortedNodes[3]) / sortedNodes[3].DistanceTo(sortedNodes[7]);
+                vec_v2 = (sortedNodes[6] - sortedNodes[2]) / sortedNodes[2].DistanceTo(sortedNodes[6]);
+                l_u1 = sortedNodes[3].DistanceTo(sortedNodes[2]) / relativeU;
+                l_u2 = sortedNodes[7].DistanceTo(sortedNodes[6]) / relativeU;
+                l_v1 = sortedNodes[3].DistanceTo(sortedNodes[7]) / relativeV;
+                l_v2 = sortedNodes[2].DistanceTo(sortedNodes[6]) / relativeV;
+                vertices[0] = sortedNodes[3];
+                vertices[1] = sortedNodes[7];
+                vertices[2] = sortedNodes[3];
+                vertices[3] = sortedNodes[2];
+            }
+            else
+            {
+                vec_u1 = (sortedNodes[5] - sortedNodes[4]) / sortedNodes[4].DistanceTo(sortedNodes[5]);
+                vec_u2 = (sortedNodes[6] - sortedNodes[7]) / sortedNodes[7].DistanceTo(sortedNodes[6]);
+                vec_v1 = (sortedNodes[7] - sortedNodes[4]) / sortedNodes[4].DistanceTo(sortedNodes[7]);
+                vec_v2 = (sortedNodes[6] - sortedNodes[5]) / sortedNodes[5].DistanceTo(sortedNodes[6]);
+                l_u1 = sortedNodes[4].DistanceTo(sortedNodes[5]) / relativeU;
+                l_u2 = sortedNodes[7].DistanceTo(sortedNodes[6]) / relativeU;
+                l_v1 = sortedNodes[4].DistanceTo(sortedNodes[7]) / relativeV;
+                l_v2 = sortedNodes[5].DistanceTo(sortedNodes[6]) / relativeV;
+                vertices[0] = sortedNodes[4];
+                vertices[1] = sortedNodes[7];
+                vertices[2] = sortedNodes[4];
+                vertices[3] = sortedNodes[5];
+            }
+
 
             //FINDING LINE POINTS
             List<Point3d> linePoints = new List<Point3d>();
@@ -224,15 +317,15 @@ namespace SetUniLoad
             {
                 Point3d p1 = new Point3d(vertices[0].X + l_u1 * i * vec_u1.X, vertices[0].Y + l_u1 * vec_u1.Y * i, vertices[0].Z + l_u1 * vec_u1.Z * i);
                 linePoints.Add(p1);
-                Point3d p2 = new Point3d(vertices[3].X + l_u2 * i * vec_u2.X, vertices[3].Y + l_u2 * vec_u2.Y * i, vertices[3].Z + l_u2 * vec_u2.Z * i);
+                Point3d p2 = new Point3d(vertices[1].X + l_u2 * i * vec_u2.X, vertices[1].Y + l_u2 * vec_u2.Y * i, vertices[1].Z + l_u2 * vec_u2.Z * i);
                 linePoints.Add(p2);
             }
 
             for (int i = 1; i < relativeV; i++)
             {
-                Point3d p1 = new Point3d(vertices[0].X + l_v1 * i * vec_v1.X, vertices[0].Y + l_v1 * vec_v1.Y * i, vertices[0].Z + l_v1 * vec_v1.Z * i);
+                Point3d p1 = new Point3d(vertices[2].X + l_v1 * i * vec_v1.X, vertices[2].Y + l_v1 * vec_v1.Y * i, vertices[2].Z + l_v1 * vec_v1.Z * i);
                 linePoints.Add(p1);
-                Point3d p2 = new Point3d(vertices[1].X + l_v2 * i * vec_v2.X, vertices[1].Y + l_v2 * vec_v2.Y * i, vertices[1].Z + l_v2 * vec_v2.Z * i);
+                Point3d p2 = new Point3d(vertices[3].X + l_v2 * i * vec_v2.X, vertices[3].Y + l_v2 * vec_v2.Y * i, vertices[3].Z + l_v2 * vec_v2.Z * i);
                 linePoints.Add(p2);
             }
 
@@ -242,7 +335,7 @@ namespace SetUniLoad
             for (int i = 1; i < relativeU; i++)
             {
                 Point3d p1_u = new Point3d(vertices[0].X + l_u1 * i * vec_u1.X, vertices[0].Y + l_u1 * vec_u1.Y * i, vertices[0].Z + l_u1 * vec_u1.Z * i);
-                Point3d p2_u = new Point3d(vertices[3].X + l_u2 * i * vec_u2.X, vertices[3].Y + l_u2 * vec_u2.Y * i, vertices[3].Z + l_u2 * vec_u2.Z * i);
+                Point3d p2_u = new Point3d(vertices[1].X + l_u2 * i * vec_u2.X, vertices[1].Y + l_u2 * vec_u2.Y * i, vertices[1].Z + l_u2 * vec_u2.Z * i);
 
                 Vector3d vec_u = (p2_u - p1_u) / (p1_u.DistanceTo(p2_u));
 
@@ -314,6 +407,54 @@ namespace SetUniLoad
             pointLoads.AddRange(cornerPointLoads);
 
             return pointLoads;
+        }
+
+        public Point3d[] SortNodes(Point3d[] nodes, Point3d centroid)
+        {
+
+            Point3d[] lowerNodes = new Point3d[4];
+            Point3d[] upperNodes = new Point3d[4];
+
+            double[] lowerAngles = new double[nodes.Length / 2];
+            double[] upperAngles = new double[nodes.Length / 2];
+
+            //Dividing in lower and upper nodes.
+            for (int i = 0; i < nodes.Length / 2; i++)
+            {
+                lowerNodes[i] = nodes[i];
+                upperNodes[i] = nodes[nodes.Length / 2 + i];
+            }
+
+
+            for (int i = 0; i < nodes.Length / 2; i++)
+            {
+                lowerAngles[i] = (180 / Math.PI) * Math.Atan2(lowerNodes[i].Y - centroid.Y, lowerNodes[i].X - centroid.X);
+            }
+
+            Array.Sort(lowerAngles, lowerNodes);
+
+
+
+            for (int i = 0; i < nodes.Length / 2; i++)
+            {
+                upperAngles[i] = (180 / Math.PI) * Math.Atan2(upperNodes[i].Y - centroid.Y, upperNodes[i].X - centroid.X);
+            }
+
+            Array.Sort(upperAngles, upperNodes);
+
+            Point3d[] sortedNodes = new Point3d[8];
+
+            sortedNodes[0] = lowerNodes[0];
+            sortedNodes[1] = lowerNodes[1];
+            sortedNodes[2] = lowerNodes[2];
+            sortedNodes[3] = lowerNodes[3];
+            sortedNodes[4] = upperNodes[0];
+            sortedNodes[5] = upperNodes[1];
+            sortedNodes[6] = upperNodes[2];
+            sortedNodes[7] = upperNodes[3];
+
+
+            return sortedNodes;
         }
 
         protected override System.Drawing.Bitmap Icon
