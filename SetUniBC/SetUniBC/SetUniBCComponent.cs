@@ -30,50 +30,49 @@ namespace SetUniBC
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddBrepParameter("Surface", "S", "Surface for BC", GH_ParamAccess.item);
-            pManager.AddTextParameter("Restained translations", "BC", "Restained translation in the way (0,0,0)", GH_ParamAccess.item, "0,0,0");
-            pManager.AddIntegerParameter("u-divisions", "U", "U-division", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("v-divisions", "V", "V-division", GH_ParamAccess.item);
+            pManager.AddSurfaceParameter("Surface", "Surface", "Surface for BC", GH_ParamAccess.item);
+            //pManager.AddTextParameter("Restained translations", "BC", "Restained translation in the way 0,0,0", GH_ParamAccess.item, "0,0,0");
+            pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
             pManager.AddBrepParameter("Brep", "B", "Brep as a reference size", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("BC points", "BC", "BC in point, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
-            pManager.AddBrepParameter("BC-cones", "Geometry", "Cones showing the boundary conditions", GH_ParamAccess.list);
+            pManager.AddBrepParameter("BC cones", "Geometry", "Cones showing the boundary conditions", GH_ParamAccess.list);
             pManager.AddColourParameter("Coloring for BC-cones", "Color", "Coloring of cones", GH_ParamAccess.item);
 
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Brep surface = new Brep();
-            string restrains = "";
-            int u = 2;
-            int v = 2;
+            Surface surface = null;
+            string restrains = "0,0,0";
+            int u = 1;
+            int v = 1;
+            int w = 1;
             Brep origBrep = new Brep();
-
-
+            
             if (!DA.GetData(0, ref surface)) return;
-            if (!DA.GetData(1, ref restrains)) return;
-            if (!DA.GetData(2, ref u)) return;
-            if (!DA.GetData(3, ref v)) return;
+            //if (!DA.GetData(1, ref restrains)) return;
+            if (!DA.GetData(1, ref u)) return;
+            if (!DA.GetData(2, ref v)) return;
+            if (!DA.GetData(3, ref w)) return;
             if (!DA.GetData(4, ref origBrep)) return;
-
-
-            List<string> pointsBC = FindBCPoints(surface, restrains, u, v);
+            
+            List<string> pointsBC = FindBCPoints(surface, restrains, u, v, w);
 
             ///////FOR PREVIEWING OF BC///////
 
             //Setting up values for reflength and angle for rotation of area
             VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
             Point3d centroid = vmp.Centroid;
-            double volume = origBrep.GetVolume();
             double sqrt3 = (double)1 / 3;
-            double refLength = Math.Pow(volume, sqrt3);
+            double refLength = Math.Pow(origBrep.GetVolume(), sqrt3);
 
             List<Brep> cones = DrawBC(pointsBC, refLength);
-
             Color color = Color.Green;
 
             DA.SetDataList(0, pointsBC);
@@ -127,30 +126,54 @@ namespace SetUniBC
             return bcCones;
         }
 
-        public List<string> FindBCPoints (Brep surface, string restrains, int u, int v)
+        public List<string> FindBCPoints (Surface surface, string restrains, int u, int v, int w)
         {
             List<Point3d> points = new List<Point3d>();
             List<string> pointsString = new List<string>();
-            Point3d[] vertices = surface.DuplicateVertices();
-
-            //Finding all points
+            Brep surfaceBrep = surface.ToBrep();
+            Point3d[] vertices = surfaceBrep.DuplicateVertices();
+            
+            //Finding all points 
             points.Add(vertices[0]);
             points.Add(vertices[1]);
             points.Add(vertices[2]);
             points.Add(vertices[3]);
-
-            double l_u1 = vertices[0].DistanceTo(vertices[1]) / u;
-            double l_u2 = vertices[3].DistanceTo(vertices[2]) / u;
-            double l_v1 = vertices[0].DistanceTo(vertices[3]) / v;
-            double l_v2 = vertices[1].DistanceTo(vertices[2]) / v;
-
+            
+            //Finding vectors in each directions
             Vector3d vec_u1 = (vertices[1] - vertices[0]) / vertices[0].DistanceTo(vertices[1]);
             Vector3d vec_u2 = (vertices[2] - vertices[3]) / vertices[3].DistanceTo(vertices[2]);
             Vector3d vec_v1 = (vertices[3] - vertices[0]) / vertices[0].DistanceTo(vertices[3]);
             Vector3d vec_v2 = (vertices[2] - vertices[1]) / vertices[1].DistanceTo(vertices[2]);
 
+            int relativeU = u;
+            int relativeV = v;
+            //Use these vectors to find out weather to use u, v or w.
+            ///////////TEMPORARY SOLUTION, ASSUMING CUBE IN X, Y AND Z DIRECTION/////////
+            
+            if (vec_u1 == Vector3d.YAxis)
+            {
+                relativeU = v;
+            }
+            if (vec_u1 == Vector3d.ZAxis)
+            {
+                relativeU = w;
+            }
+            if (vec_v1 == Vector3d.XAxis)
+            {
+                relativeV = u;
+            }
+            if (vec_v1 == Vector3d.ZAxis)
+            {
+                relativeV = w;
+            }
+            /////END TEMP////
 
-            for (int i = 1; i < u; i++)
+            double l_u1 = vertices[0].DistanceTo(vertices[1]) / relativeU;
+            double l_u2 = vertices[3].DistanceTo(vertices[2]) / relativeU;
+            double l_v1 = vertices[0].DistanceTo(vertices[3]) / relativeV;
+            double l_v2 = vertices[1].DistanceTo(vertices[2]) / relativeV;
+
+            for (int i = 1; i < relativeU; i++)
             {
                 Point3d p1 = new Point3d(vertices[0].X + l_u1 * i * vec_u1.X, vertices[0].Y + l_u1 * vec_u1.Y * i, vertices[0].Z + l_u1 * vec_u1.Z * i);
                 points.Add(p1);
@@ -162,16 +185,16 @@ namespace SetUniBC
 
                 Vector3d vec_u = (p2_u - p1_u) / (p1_u.DistanceTo(p2_u));
 
-                Double length_u1 = p1_u.DistanceTo(p2_u) / u;
+                double length_v1 = p1_u.DistanceTo(p2_u) / relativeV;
 
-                for (int j = 1; j < v; j++)
+                for (int j = 1; j < relativeV; j++)
                 {
-                    Point3d p1_v = new Point3d(p1_u.X + length_u1 * j * vec_u.X, p1_u.Y + length_u1 * j * vec_u.Y, p1_u.Z + length_u1 * j * vec_u.Z);
+                    Point3d p1_v = new Point3d(p1_u.X + length_v1 * j * vec_u.X, p1_u.Y + length_v1 * j * vec_u.Y, p1_u.Z + length_v1 * j * vec_u.Z);
                     points.Add(p1_v);
                 }
             }
 
-            for (int i = 1; i < v; i++)
+            for (int i = 1; i < relativeV; i++)
             {
                 Point3d p1 = new Point3d(vertices[0].X + l_v1 * i * vec_v1.X, vertices[0].Y + l_v1 * vec_v1.Y * i, vertices[0].Z + l_v1 * vec_v1.Z * i);
                 points.Add(p1);
