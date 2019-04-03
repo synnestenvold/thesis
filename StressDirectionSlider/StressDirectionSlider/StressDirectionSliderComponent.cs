@@ -82,7 +82,7 @@ namespace StressDirectionSlider
             else direction = "S,xy";
             text.Add("Stress direction: "+direction);
             text.AddRange(new List<string>() { "S,xx", "S,yy", "S,zz", "S,yz", "S,xz", "S,xy" });
-            double refSize = (double)(refLength / 2);
+            double refSize = (double)(refLength / 10);
             List<double> size = new List<double>() { refSize, (double)(refSize / 2) };
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
