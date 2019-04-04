@@ -9,7 +9,7 @@ using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Data;
 using System.Linq;
 
-namespace FEMeshTBrep
+namespace SolidsVR
 {
     class StiffnessMatrix
     {
@@ -26,7 +26,7 @@ namespace FEMeshTBrep
 
        
 
-        public Tuple<Matrix<double>, List<Matrix<Double>>> CreateMatrix(List<GH_Point> pList)
+        public Tuple<Matrix<double>, List<Matrix<Double>>> CreateMatrix(List<Point3d> pList)
 
         {
 
@@ -74,7 +74,7 @@ namespace FEMeshTBrep
 
             for (int i = 0; i < pList.Count; i++)
             {
-                Point3d pointA = new Point3d(pList[i].Value.X - centroid.X, pList[i].Value.Y - centroid.Y, pList[i].Value.Z - centroid.Z);
+                Point3d pointA = new Point3d(pList[i].X - centroid.X, pList[i].Y - centroid.Y, pList[i].Z - centroid.Z);
                 pNatural[i] = pointA;
 
             }
@@ -197,22 +197,22 @@ namespace FEMeshTBrep
 
         }
 
-        public Boolean IsRectangle(List<GH_Point> pList)
+        public Boolean IsRectangle(List<Point3d> pList)
         {
-            double lx1 = pList[0].Value.DistanceTo(pList[1].Value);
-            double lx2 = pList[3].Value.DistanceTo(pList[2].Value);
-            double lx3 = pList[4].Value.DistanceTo(pList[5].Value);
-            double lx4 = pList[7].Value.DistanceTo(pList[6].Value);
+            double lx1 = pList[0].DistanceTo(pList[1]);
+            double lx2 = pList[3].DistanceTo(pList[2]);
+            double lx3 = pList[4].DistanceTo(pList[5]);
+            double lx4 = pList[7].DistanceTo(pList[6]);
 
-            double ly1 = pList[0].Value.DistanceTo(pList[3].Value);
-            double ly2 = pList[1].Value.DistanceTo(pList[2].Value);
-            double ly3 = pList[4].Value.DistanceTo(pList[7].Value);
-            double ly4 = pList[5].Value.DistanceTo(pList[6].Value);
+            double ly1 = pList[0].DistanceTo(pList[3]);
+            double ly2 = pList[1].DistanceTo(pList[2]);
+            double ly3 = pList[4].DistanceTo(pList[7]);
+            double ly4 = pList[5].DistanceTo(pList[6]);
 
-            double lz1 = pList[0].Value.DistanceTo(pList[4].Value);
-            double lz2 = pList[1].Value.DistanceTo(pList[5].Value);
-            double lz3 = pList[2].Value.DistanceTo(pList[6].Value);
-            double lz4 = pList[3].Value.DistanceTo(pList[7].Value);
+            double lz1 = pList[0].DistanceTo(pList[4]);
+            double lz2 = pList[1].DistanceTo(pList[5]);
+            double lz3 = pList[2].DistanceTo(pList[6]);
+            double lz4 = pList[3].DistanceTo(pList[7]);
 
             if(lx1==lx2 && lx3 == lx4 && ly1==ly2 && ly3==ly4 && lz1 == lz4 && lz2 == lz3)
             {
@@ -222,14 +222,14 @@ namespace FEMeshTBrep
             return false;
         }
 
-        public Point3d FindCentroidTwisted(List<GH_Point> pList)
+        public Point3d FindCentroidTwisted(List<Point3d> pList)
         {
 
             Mesh mesh = new Mesh();
 
             for (int i = 0; i < pList.Count; i++)
             {
-                mesh.Vertices.Add(pList[i].Value);
+                mesh.Vertices.Add(pList[i]);
             }
 
             mesh.Faces.AddFace(0, 3, 2, 1); //Bottom
@@ -246,18 +246,18 @@ namespace FEMeshTBrep
             return centroid;
         }
 
-        public Point3d FindCentroidRectangle(List<GH_Point> pList)
+        public Point3d FindCentroidRectangle(List<Point3d> pList)
         {
 
             double c_x = 0;
             double c_y = 0;
             double c_z = 0;
 
-            foreach (GH_Point p in pList)
+            foreach (Point3d p in pList)
             {
-                c_x += p.Value.X;
-                c_y += p.Value.Y;
-                c_z += p.Value.Z;
+                c_x += p.X;
+                c_y += p.Y;
+                c_z += p.Z;
             }
 
             Point3d centroid = new Point3d(c_x / 8, c_y / 8, c_z / 8);
