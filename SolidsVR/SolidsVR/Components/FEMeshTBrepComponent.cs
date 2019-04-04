@@ -27,11 +27,12 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddTextParameter("Boundary conditions", "BC", "Nodes that are constrained", GH_ParamAccess.list);
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
             pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Material", "M", "Material", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -57,6 +58,7 @@ namespace SolidsVR
             List<string> loadtxt = new List<string>();
             List<string> deftxt = new List<string>();
             Brep origBrep = new Brep();
+            Material material = new Material();
 
 
             // --- inputs ---
@@ -66,9 +68,10 @@ namespace SolidsVR
             if (!DA.GetDataList(2, loadtxt)) return;
             if (!DA.GetDataList(3, deftxt)) return;
             if (!DA.GetData(4, ref origBrep)) return;
+            if (!DA.GetData(5, ref material)) return;
 
-            double E = 210000;
-            double nu = 0.3;
+            //double E = 210000;
+            //double nu = 0.3;
 
             // --- solve ---
 
@@ -78,7 +81,7 @@ namespace SolidsVR
             Point3d[] globalPoints = mesh.GetGlobalPoints();
 
             //Create K_tot
-            var tupleK_B = CreateGlobalStiffnessMatrix(connectivity, elementPoints, sizeOfMatrix, E, nu);
+            var tupleK_B = CreateGlobalStiffnessMatrix(connectivity, elementPoints, sizeOfMatrix, material);
             Matrix<double> K_tot = tupleK_B.Item1;
 
             //B_all
@@ -138,7 +141,7 @@ namespace SolidsVR
             List<List<double>> globalStrain = FindGlobalStrain(strain, connectivity, sizeOfMatrix);
 
             //Calculate global stresses from strain
-            List<Vector<double>> globalStress = CalcStress(globalStrain, E, nu);
+            List<Vector<double>> globalStress = CalcStress(globalStrain, material);
 
             DataTree<double> strainTree = new DataTree<double>();
             DataTree<double> stressTree = new DataTree<double>();
@@ -178,12 +181,14 @@ namespace SolidsVR
         }
 
 
-        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(List<List<int>> connectivity, List<List<Point3d>> elementPoints, int sizeOfMatrix, double E, double nu)
+        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(List<List<int>> connectivity, List<List<Point3d>> elementPoints, int sizeOfMatrix, Material material)
         {
             Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
             Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
             List<Matrix<Double>> B_e = new List<Matrix<Double>>();
             List<List<Matrix<double>>> B_all = new List<List<Matrix<double>>>();
+            double E = material.GetE();
+            double nu = material.GetNu();
             StiffnessMatrix sm = new StiffnessMatrix(E, nu);
             Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
 
@@ -435,9 +440,11 @@ namespace SolidsVR
             return globalStrain;
         }
 
-        public List<Vector<double>> CalcStress(List<List<double>> globalStrain, double E, double nu)
+        public List<Vector<double>> CalcStress(List<List<double>> globalStrain, Material material)
         {
             List<Vector<double>> globalStress = new List<Vector<double>>();
+            double E = material.GetE();
+            double nu = material.GetNu();
             Cmatrix C = new Cmatrix(E, nu);
             Matrix<double> C_matrix = C.CreateMatrix();
 

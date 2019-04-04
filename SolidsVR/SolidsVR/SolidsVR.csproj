@@ -65,8 +65,10 @@
   <ItemGroup>
     <Compile Include="Classes\Assembly_StiffnessMatrix.cs" />
     <Compile Include="Classes\Bmatrix.cs" />
+    <Compile Include="Classes\Material.cs" />
     <Compile Include="Components\ClosestPointComponent.cs" />
     <Compile Include="Classes\CMatrix.cs" />
+    <Compile Include="Components\CreateMaterial.cs" />
     <Compile Include="Components\PartitionSliderComponent.cs" />
     <Compile Include="Components\Deformations.cs" />
     <Compile Include="Components\DeformationSliderComponent.cs" />
