@@ -11,7 +11,7 @@ namespace SolidsVR
 {
     class StrainCalc
     {
-        public List<Vector<double>> calcStrain(List<Matrix<double>> B_e, Vector<double> u, List<GH_Integer> c_e)
+        public List<Vector<double>> StrainCalculations(List<Matrix<double>> B_e, Vector<double> u, List<int> c_e)
         {
             
             List<Vector<double>> strain = new List<Vector<double>>();
@@ -22,7 +22,7 @@ namespace SolidsVR
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    u_e[3 * i + j] = u[c_e[i].Value * 3 + j];
+                    u_e[3 * i + j] = u[c_e[i] * 3 + j];
                 }
             }
 

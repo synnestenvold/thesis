@@ -34,8 +34,9 @@ namespace SolidsVR
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             //pManager.AddIntegerParameter("Nodes", "N", "List of new node numbering for each cube", GH_ParamAccess.tree);
-            pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
+            //pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
+            //pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh of Brep", GH_ParamAccess.item);
             
 
         }
@@ -60,89 +61,27 @@ namespace SolidsVR
 
             //Finding the length of the new elements
             Point3d[] nodes = brp.DuplicateVertices();
-            VolumeMassProperties vmp = VolumeMassProperties.Compute(brp);
-            Point3d centroid = vmp.Centroid;
 
+            var tuple = CreateNewBreps(nodes, u, v, w); // Getting corner nodes and connectivity matrix
 
-            Point3d[] sortedNodes = sortNodes(nodes, centroid); //Sorting nodes so its introduced similar for every kind of 8 noded brep.
-
-            var tuple = CreateNewBreps(sortedNodes, u, v, w); // Getting corner nodes and connectivity matrix
-
-            List<List<Point3d>> points = tuple.Item1;
+            List<List<Point3d>> elementPoints = tuple.Item1;
             List<List<int>> connectivity = tuple.Item2;
+            int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
+            Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
-            DataTree<Point3d> treePoints = new DataTree<Point3d>();
-            DataTree<int> treeIndexes = new DataTree<int>();
 
-            int i = 0;
-            //Create a tree structure of the list of new brep-nodes with cartesian coordinates
-            foreach (List<Point3d> innerList in points)
-            {
-                treePoints.AddRange(innerList, new GH_Path(new int[] { 0, i }));
-                i++;
-            }
+            Mesh_class mesh = new Mesh_class(u, v, w);
+            mesh.SetConnectivity(connectivity);
+            mesh.SetElementPoints(elementPoints);
+            mesh.SetSizeOfMatrix(sizeOfMatrix);
+            mesh.SetGlobalPoints(globalPoints);
 
-            i = 0;
 
-            //Create a tree structure of the list of new brep-nodes with indexes
-            foreach (List<int> innerList in connectivity)
-            {
-                treeIndexes.AddRange(innerList, new GH_Path(new int[] { 0, i }));
-                i++;
-            }
-
-            DA.SetDataTree(0, treeIndexes);
-            DA.SetDataTree(1, treePoints);
+            DA.SetData(0, mesh);
 
         }
 
-        public Point3d[] sortNodes(Point3d[] nodes, Point3d centroid)
-        {
-
-            Point3d[] lowerNodes = new Point3d[4];
-            Point3d[] upperNodes = new Point3d[4];
-
-            double[] lowerAngles = new double[nodes.Length / 2];
-            double[] upperAngles = new double[nodes.Length / 2];
-
-            //Dividing in lower and upper nodes.
-            for (int i = 0; i < nodes.Length / 2; i++)
-            {
-                lowerNodes[i] = nodes[i];
-                upperNodes[i] = nodes[nodes.Length / 2 + i];
-            }
-
-
-            for (int i = 0; i < nodes.Length / 2; i++)
-            {
-                lowerAngles[i] = (180 / Math.PI) * Math.Atan2(lowerNodes[i].Y - centroid.Y, lowerNodes[i].X - centroid.X);
-            }
-
-            Array.Sort(lowerAngles, lowerNodes);
-
-
-
-            for (int i = 0; i < nodes.Length / 2; i++)
-            {
-                upperAngles[i] = (180 / Math.PI) * Math.Atan2(upperNodes[i].Y - centroid.Y, upperNodes[i].X - centroid.X);
-            }
-
-            Array.Sort(upperAngles, upperNodes);
-
-            Point3d[] sortedNodes = new Point3d[8];
-            
-            sortedNodes[0] = lowerNodes[0];
-            sortedNodes[1] = lowerNodes[1];
-            sortedNodes[2] = lowerNodes[2];
-            sortedNodes[3] = lowerNodes[3];
-            sortedNodes[4] = upperNodes[0];
-            sortedNodes[5] = upperNodes[1];
-            sortedNodes[6] = upperNodes[2];
-            sortedNodes[7] = upperNodes[3];
         
-
-            return sortedNodes;
-        }
      
         private Tuple<List<List<Point3d>>, List<List<int>>> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
         {
@@ -273,7 +212,28 @@ namespace SolidsVR
 
             return Tuple.Create(points_brep,global_numbering);
            
-        }    
+        }
+
+        public Point3d[] CreatePointList(List<List<int>> treeConnectivity, List<List<Point3d>> treePoints, int sizeOfM)
+        {
+            Point3d[] pointList = new Point3d[sizeOfM / 3];
+
+
+            for (int i = 0; i < treeConnectivity.Count; i++)
+            {
+                List<int> connectedNodes = treeConnectivity[i];
+                List<Point3d> connectedPoints = treePoints[i];
+
+                for (int j = 0; j < connectedNodes.Count; j++)
+                {
+                    pointList[connectedNodes[j]] = connectedPoints[j];
+                }
+            }
+            return pointList;
+
+        }
+
+
 
         protected override System.Drawing.Bitmap Icon
         {

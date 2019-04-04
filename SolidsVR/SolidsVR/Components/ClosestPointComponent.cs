@@ -38,8 +38,8 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGeometryParameter("Sphere", "S", "Sphere to compare closest point", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Brep", "B", "Original brep", GH_ParamAccess.item);
 
         }
 
@@ -62,31 +62,38 @@ namespace SolidsVR
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
-            GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
+            
 
             Brep sphere = new Brep();
+            Mesh_class mesh = new Mesh_class();
+            Brep origBrep = new Brep();
 
             if (!DA.GetData(0, ref sphere)) return;
-            if (!DA.GetDataTree(1, out treeConnectivity)) return;
-            if (!DA.GetDataTree(2, out treePoints)) return;
+            if (!DA.GetData(1, ref mesh)) return;
+            if (!DA.GetData(2, ref origBrep)) return;
+
+
+            //Setting up values for reflength and angle for rotation of area
+            VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
+            double volume = origBrep.GetVolume();
+            double sqrt3 = (double)1 / 3;
+            double refLength = Math.Pow(volume, sqrt3);
 
             // Temporary way of finding the size of stiffness matrix and B matrix
-            int sizeOfM = FindSizeOfM(treeConnectivity);
+            int sizeOfM = mesh.GetSizeOfMatrix();
 
             //List of global points with correct numbering
-            Point3d[] globalPoints = CreatePointList(treeConnectivity, treePoints, sizeOfM);
+            Point3d[] globalPoints = mesh.GetGlobalPoints();
 
-            VolumeMassProperties vmp = VolumeMassProperties.Compute(sphere);
-            Point3d centroid = vmp.Centroid;
+            VolumeMassProperties vmpSphere = VolumeMassProperties.Compute(sphere);
+            Point3d centroidSphere = vmp.Centroid;
 
-            double refLength = 1;
 
-            Point3d closestPoint = FindClosestPoint(globalPoints, centroid, refLength);
+            Point3d closestPoint = FindClosestPoint(globalPoints, centroidSphere, refLength);
 
             String text = "Drag sphere to point";
 
-            Plane textPlane = FindSpherePlane(centroid, refLength);
+            Plane textPlane = FindSpherePlane(centroidSphere, refLength);
 
             Color color = Color.Red;
 
@@ -108,50 +115,6 @@ namespace SolidsVR
             return p;
         }
 
-        public int FindSizeOfM(GH_Structure<GH_Integer> treeConnectivity)
-        {
-            int max = 0;
-
-            for (int i = 0; i < treeConnectivity.PathCount; i++)
-            {
-                List<GH_Integer> cNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-
-                for (int j = 0; j < cNodes.Count; j++)
-                {
-                    if (cNodes[j].Value > max)
-                    {
-                        max = cNodes[j].Value;
-                    }
-                }
-            }
-
-            int sizeOfM = 3 * (max + 1);
-
-            return sizeOfM;
-        }
-
-
-        public Point3d[] CreatePointList(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
-        {
-            Point3d point = new Point3d(0, 0, 0);
-
-            Point3d[] pointList = new Point3d[sizeOfM / 3];
-
-
-            for (int i = 0; i < treeConnectivity.PathCount; i++)
-            {
-                List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-                List<GH_Point> connectedPoints = (List<GH_Point>)treePoints.get_Branch(i);
-
-                for (int j = 0; j < connectedNodes.Count; j++)
-                {
-                    pointList[connectedNodes[j].Value] = connectedPoints[j].Value;
-                }
-            }
-
-            return pointList;
-
-        }
 
         public Point3d FindClosestPoint(Point3d[] globalPoints, Point3d centroid, double refLength)
         {

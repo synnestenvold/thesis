@@ -24,8 +24,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
 
-            pManager.AddIntegerParameter("Connectivity", "C", "", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Points for Breps", "N", "Breps in coordinates", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddNumberParameter("Stresses", "Stress", "Stresses in each node", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Stress direction", "Stress dir", "S11, S22, S33, S12, S13, S23 as 0, 1, 2, 3, 4, 5", GH_ParamAccess.item);
             //pManager.AddNumberParameter("Yield limit", "Y", "The limit for coloring Green/Red", GH_ParamAccess.item);
@@ -50,22 +49,19 @@ namespace SolidsVR
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-
-            GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
-            GH_Structure<GH_Integer> treeConnect = new GH_Structure<GH_Integer>();
+            Mesh_class mesh = new Mesh_class();
             GH_Structure<GH_Number> treeStress = new GH_Structure<GH_Number>();
             int dir = new int();
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = new double();
             Brep origBrep = new Brep();
 
-            if (!DA.GetDataTree(1, out treePoints)) return;
-            if (!DA.GetDataTree(0, out treeConnect)) return;
-            if (!DA.GetDataTree(2, out treeStress)) return;
-            if (!DA.GetData(3, ref dir)) return;
-            if (!DA.GetDataTree(4, out treeDef)) return;
-            if (!DA.GetData(5, ref scale)) return;
-            if (!DA.GetData(6, ref origBrep)) return;
+            if (!DA.GetData(0, ref mesh)) return;
+            if (!DA.GetDataTree(1, out treeStress)) return;
+            if (!DA.GetData(2, ref dir)) return;
+            if (!DA.GetDataTree(3, out treeDef)) return;
+            if (!DA.GetData(4, ref scale)) return;
+            if (!DA.GetData(5, ref origBrep)) return;
 
             //Setting up values for reflength and angle for rotation of area
             VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
@@ -79,11 +75,14 @@ namespace SolidsVR
             //Creating deformation vectors
             Vector3d[] defVectors = CreateVectors(treeDef);
 
+            List<List<int>> connectivity = mesh.GetConnectivity();
+            List<List<Point3d>> elementPoints = mesh.GetElementPoints();
+
             //Creating new deformed breps
-            List<Brep> breps = CreateDefBreps(treePoints, treeConnect, defVectors, angle, center, scale); //output Breps
+            List<Brep> breps = CreateDefBreps(elementPoints, connectivity, defVectors, angle, center, scale); //output Breps
 
             //Getting colors for each brep
-            var tuple1 = ColorBreps(breps, treeConnect, treeStress, dir);
+            var tuple1 = ColorBreps(breps, connectivity, treeStress, dir);
             List<Color> brepColors = tuple1.Item1; //output BrepsColors
             List<string> rangeValues = tuple1.Item2; //output text
 
@@ -274,19 +273,19 @@ namespace SolidsVR
             return vectors;
         }
 
-        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors, double angle, Point3d center, double scale)
+        public List<Brep> CreateDefBreps(List<List<Point3d>> elementPoints, List<List<int>> connectivity, Vector3d[] defVectors, double angle, Point3d center, double scale)
         {
             List<Brep> breps = new List<Brep>();
-            for (int j = 0; j < treePoints.PathCount; j++)
+            for (int j = 0; j < elementPoints.Count; j++)
             {
-                List<GH_Point> vertices = (List<GH_Point>)treePoints.get_Branch(j);
                 var mesh = new Mesh();
-                List<GH_Integer> connect = (List<GH_Integer>)treeConnect.get_Branch(j);
+                List<Point3d> vertices = elementPoints[j];
+                List<int> connect = connectivity[j];
 
                 for (int i = 0; i < vertices.Count; i++)
                 {
-                    GH_Point p = vertices[i];
-                    Point3d new_p = Point3d.Add(p.Value, defVectors[connect[i].Value] * scale);
+                    Point3d p = vertices[i];
+                    Point3d new_p = Point3d.Add(p, defVectors[connect[i]] * scale);
                     mesh.Vertices.Add(new_p);
                 }
                 mesh.Faces.AddFace(0, 1, 5, 4);
@@ -298,7 +297,6 @@ namespace SolidsVR
 
                 Brep new_brep = Brep.CreateFromMesh(mesh, false);
 
-                Point3d[] points = new_brep.DuplicateVertices();
                 Vector3d vecAxis = new Vector3d(0, 0, 1);
                 new_brep.Rotate(angle, vecAxis, center);
 
@@ -307,8 +305,9 @@ namespace SolidsVR
             }
             return breps;
         }
+    
 
-        public Tuple<List<Color>, List<string>> ColorBreps(List<Brep> breps, GH_Structure<GH_Integer> treeConnect, GH_Structure<GH_Number> treeStress, int dir)
+        public Tuple<List<Color>, List<string>> ColorBreps(List<Brep> breps, List<List<int>> connectivity, GH_Structure<GH_Number> treeStress, int dir)
         {
 
             List<Color> brepColors = new List<Color>();
@@ -316,7 +315,7 @@ namespace SolidsVR
             Color color = Color.White;
             List<string> rangeValues = new List<String>();
 
-            double[] averageValues = AverageValuesStress(treeStress, treeConnect, dir);
+            double[] averageValues = AverageValuesStress(treeStress, connectivity, dir);
             double max = averageValues.Max();
             double min = averageValues.Min();
             double range = (max - min) / 13;
@@ -357,17 +356,17 @@ namespace SolidsVR
             return Tuple.Create(brepColors, rangeValues);
         }
 
-        public double[] AverageValuesStress(GH_Structure<GH_Number> treeStress, GH_Structure<GH_Integer> treeConnect, int dir)
+        public double[] AverageValuesStress(GH_Structure<GH_Number> treeStress, List<List<int>> connectivity, int dir)
         {
-            double[] averageList = new double[treeConnect.PathCount];
+            double[] averageList = new double[connectivity.Count];
 
-            for (int i = 0; i < treeConnect.PathCount; i++)
+            for (int i = 0; i < connectivity.Count; i++)
             {
                 double average = 0;
-                List<GH_Integer> connect = (List<GH_Integer>)treeConnect.get_Branch(i);
+                List<int> connect = connectivity[i];
                 for (int j = 0; j < connect.Count; j++)
                 {
-                    List<GH_Number> stresses = (List<GH_Number>)treeStress.get_Branch(connect[j].Value);
+                    List<GH_Number> stresses = (List<GH_Number>)treeStress.get_Branch(connect[j]);
                     average += stresses[dir].Value;
                 }
                 averageList[i] = Math.Round(average / connect.Count, 4);

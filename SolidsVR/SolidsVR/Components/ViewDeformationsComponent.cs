@@ -24,8 +24,7 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Connectivity", "C", "", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Points for Breps", "N", "Breps in coordinates", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
             pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
@@ -53,17 +52,15 @@ namespace SolidsVR
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            GH_Structure<GH_Integer> treeConnect = new GH_Structure<GH_Integer>();
-            GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
+            Mesh_class mesh = new Mesh_class();
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = 1;
             Brep brep = new Brep();
 
-            if (!DA.GetDataTree(0, out treeConnect)) return;
-            if (!DA.GetDataTree(1, out treePoints)) return;
-            if (!DA.GetDataTree(2, out treeDef)) return;
-            if (!DA.GetData(3, ref scale)) return;
-            if (!DA.GetData(4, ref brep)) return;
+            if (!DA.GetData(0, ref mesh)) return;
+            if (!DA.GetDataTree(1, out treeDef)) return;
+            if (!DA.GetData(2, ref scale)) return;
+            if (!DA.GetData(3, ref brep)) return;
 
 
             List<Brep> breps = new List<Brep>();
@@ -79,12 +76,15 @@ namespace SolidsVR
             double angle = 270*Math.PI/180;
             Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 2.5, 0)); //Center for viewpoint
 
+            List<List<int>> connectivity = mesh.GetConnectivity();
+            List<List<Point3d>> elementPoints = mesh.GetElementPoints();
+
             //Creating deformation vectors
             Vector3d[] defVectors = CreateVectors(treeDef);
-            breps = CreateDefBreps(treePoints, treeConnect, defVectors, scale, angle, center);
+            breps = CreateDefBreps(elementPoints, connectivity, defVectors, scale, angle, center);
 
             //Finding point with max deformation
-            var tuple = GetMaxDeformation(defVectors, treePoints, treeConnect);
+            var tuple = GetMaxDeformation(defVectors, elementPoints, connectivity);
             double defMax = tuple.Item1; 
             Point3d pointMax = tuple.Item2;
             int nodeGlobalMax = tuple.Item3;
@@ -236,7 +236,7 @@ namespace SolidsVR
             return vectors;
         }
 
-        public Tuple<double, Point3d, int> GetMaxDeformation(Vector3d[] defVectors, GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect)
+        public Tuple<double, Point3d, int> GetMaxDeformation(Vector3d[] defVectors, List<List<Point3d>> elementPoints, List<List<int>> connectivity)
         {
             double defMax = -1;
             int nodeGlobalMax = new int();
@@ -252,38 +252,38 @@ namespace SolidsVR
                     nodeGlobalMax = i;
                 }
             }
-            for (int j = 0; j < treeConnect.PathCount; j++)
+            for (int j = 0; j < connectivity.Count; j++)
             {
-                List<GH_Integer> connect = (List<GH_Integer>)treeConnect.get_Branch(j);
+                List<int> connect = connectivity[j];
                 for (int k = 0; k < connect.Count; k++)
                 {
-                    if (connect[k].Value == nodeGlobalMax)
+                    if (connect[k] == nodeGlobalMax)
                     {
                         nodeMax = k;
                         elemMax = j;
                     }
                 }
-                List<GH_Point> point = (List<GH_Point>)treePoints.get_Branch(elemMax);
-                pointMax = point[nodeMax].Value;
+                List<Point3d> point = elementPoints[elemMax];
+                pointMax = point[nodeMax];
             }
 
 
             return Tuple.Create(defMax, pointMax, nodeGlobalMax);
         }
 
-        public List<Brep> CreateDefBreps(GH_Structure<GH_Point> treePoints, GH_Structure<GH_Integer> treeConnect, Vector3d[] defVectors, double scale, double angle, Point3d center)
+        public List<Brep> CreateDefBreps(List<List<Point3d>> elementPoints, List<List<int>> connectivity, Vector3d[] defVectors, double scale, double angle, Point3d center)
         {
             List<Brep> breps = new List<Brep>();
-            for (int j = 0; j < treePoints.PathCount; j++)
+            for (int j = 0; j < elementPoints.Count; j++)
             {
-                List<GH_Point> vertices = (List<GH_Point>)treePoints.get_Branch(j);
                 var mesh = new Mesh();
-                List<GH_Integer> connect = (List<GH_Integer>)treeConnect.get_Branch(j);
+                List<Point3d> vertices = elementPoints[j];
+                List<int> connect = connectivity[j];
 
                 for (int i = 0; i < vertices.Count; i++)
                 {
-                    GH_Point p = vertices[i];
-                    Point3d new_p = Point3d.Add(p.Value, defVectors[connect[i].Value]*scale);
+                    Point3d p = vertices[i];
+                    Point3d new_p = Point3d.Add(p, defVectors[connect[i]]*scale);
                     mesh.Vertices.Add(new_p);
                 }
                 mesh.Faces.AddFace(0, 1, 5, 4);

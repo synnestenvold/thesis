@@ -27,8 +27,7 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddTextParameter("Boundary conditions", "BC", "Nodes that are constrained", GH_ParamAccess.list);
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
@@ -51,8 +50,9 @@ namespace SolidsVR
         {
             // --- variables ---
 
-            GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
-            GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
+            //GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
+            //GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
+            Mesh_class mesh = new Mesh_class();
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
             List<string> deftxt = new List<string>();
@@ -61,26 +61,24 @@ namespace SolidsVR
 
             // --- inputs ---
 
-            if (!DA.GetDataTree(0, out treeConnectivity)) return;
-            if (!DA.GetDataTree(1, out treePoints)) return;
-            if (!DA.GetDataList(2, bctxt)) return;
-            if (!DA.GetDataList(3, loadtxt)) return;
-            if (!DA.GetDataList(4, deftxt)) return;
-            if (!DA.GetData(5, ref origBrep)) return;
+            if (!DA.GetData(0, ref mesh)) return;
+            if (!DA.GetDataList(1, bctxt)) return;
+            if (!DA.GetDataList(2, loadtxt)) return;
+            if (!DA.GetDataList(3, deftxt)) return;
+            if (!DA.GetData(4, ref origBrep)) return;
 
             double E = 210000;
             double nu = 0.3;
 
             // --- solve ---
 
-            // Temporary way of finding the size of stiffness matrix and B matrix
-            int sizeOfM = FindSizeOfM(treeConnectivity);
-
-            //List of global points with correct numbering
-            Point3d[] globalPoints = CreatePointList(treeConnectivity, treePoints, sizeOfM);
+            List<List<int>> connectivity = mesh.GetConnectivity();
+            List<List<Point3d>> elementPoints = mesh.GetElementPoints();
+            int sizeOfMatrix = mesh.GetSizeOfMatrix();
+            Point3d[] globalPoints = mesh.GetGlobalPoints();
 
             //Create K_tot
-            var tupleK_B = CreateGlobalStiffnessMatrix(treeConnectivity, treePoints, sizeOfM, E, nu);
+            var tupleK_B = CreateGlobalStiffnessMatrix(connectivity, elementPoints, sizeOfMatrix, E, nu);
             Matrix<double> K_tot = tupleK_B.Item1;
 
             //B_all
@@ -99,8 +97,8 @@ namespace SolidsVR
             K_tot = ApplyBC(K_tot, predefNodes);
 
             //Needs to take the predefs into account
-            Vector<double> R_def = Vector<double>.Build.Dense(sizeOfM);
-            if (deftxt.Any()) R_def = ApplyPreDef(K_tot, predefNodes, predef, sizeOfM);
+            Vector<double> R_def = Vector<double>.Build.Dense(sizeOfMatrix);
+            if (deftxt.Any()) R_def = ApplyPreDef(K_tot, predefNodes, predef, sizeOfMatrix);
 
             //Inverting K matrix
             Matrix<double> K_tot_inverse = K_tot.Inverse();
@@ -134,10 +132,10 @@ namespace SolidsVR
             DataTree<double> defTree = DefToTree(u);
             
             //Calculatin strains for each node in elements
-            List<List<Vector<double>>> strain = CalcStrain(u, B_all, treeConnectivity, E, nu);
+            List<List<Vector<double>>> strain = CalcStrain(u, B_all, connectivity);
 
             //Find the strains in each node from the strains in each element
-            List<List<double>> globalStrain = FindGlobalStrain(strain, treeConnectivity, sizeOfM);
+            List<List<double>> globalStrain = FindGlobalStrain(strain, connectivity, sizeOfMatrix);
 
             //Calculate global stresses from strain
             List<Vector<double>> globalStress = CalcStress(globalStrain, E, nu);
@@ -180,72 +178,25 @@ namespace SolidsVR
         }
 
 
-        //GET FROM MESH CLASS
-        public int FindSizeOfM(GH_Structure<GH_Integer> treeConnectivity)
+        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(List<List<int>> connectivity, List<List<Point3d>> elementPoints, int sizeOfMatrix, double E, double nu)
         {
-            int max = 0;
-
-            for (int i = 0; i < treeConnectivity.PathCount; i++)
-            {
-                List<GH_Integer> cNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-
-                for (int j = 0; j < cNodes.Count; j++)
-                {
-                    if (cNodes[j].Value > max)
-                    {
-                        max = cNodes[j].Value;
-                    }
-                }
-            }
-
-            int sizeOfM = 3 * (max + 1);
-
-            return sizeOfM;
-        }
-
-
-        //GET FROM MESH CLASS
-        public Point3d[] CreatePointList(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM)
-        {
-            Point3d point = new Point3d(0, 0, 0);
-
-            Point3d[] pointList = new Point3d[sizeOfM / 3];
-
-
-            for (int i = 0; i < treeConnectivity.PathCount; i++)
-            {
-                List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-                List<GH_Point> connectedPoints = (List<GH_Point>)treePoints.get_Branch(i);
-
-                for (int j = 0; j < connectedNodes.Count; j++)
-                {
-                    pointList[connectedNodes[j].Value] = connectedPoints[j].Value;
-                }
-            }
-
-            return pointList;
-
-        }
-
-        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(GH_Structure<GH_Integer> treeConnectivity, GH_Structure<GH_Point> treePoints, int sizeOfM, double E, double nu)
-        {
-            Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
-            Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfM, sizeOfM);
+            Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
+            Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
             List<Matrix<Double>> B_e = new List<Matrix<Double>>();
             List<List<Matrix<double>>> B_all = new List<List<Matrix<double>>>();
             StiffnessMatrix sm = new StiffnessMatrix(E, nu);
             Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
 
-            for (int i = 0; i < treeConnectivity.PathCount; i++)
+            for (int i = 0; i < connectivity.Count; i++)
             {
-                List<GH_Integer> connectedNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-                List<GH_Point> connectedPoints = (List<GH_Point>)treePoints.get_Branch(i);
+                List<int> connectedNodes = connectivity[i];
+                List<Point3d> connectedPoints = elementPoints[i];
 
                 var tuple = sm.CreateMatrix(connectedPoints);
                 Matrix<double> K_e = tuple.Item1;
                 B_e = tuple.Item2;
                 B_all.Add(B_e);
-                K_tot = aSM.AssemblyMatrix(K_tot, K_e, connectedNodes, sizeOfM);
+                K_tot = aSM.AssemblyMatrix(K_tot, K_e, connectedNodes, sizeOfMatrix);
             }
             return Tuple.Create(K_tot, B_all);
         }
@@ -423,22 +374,22 @@ namespace SolidsVR
             return defTree;
         }
 
-        public List<List<Vector<double>>> CalcStrain(Vector<double> u, List<List<Matrix<double>>> B_all, GH_Structure<GH_Integer> treeConnectivity, double E, double nu)
+        public List<List<Vector<double>>> CalcStrain(Vector<double> u, List<List<Matrix<double>>> B_all, List<List<int>> connectivity)
         {
             List<Matrix<double>> B_e = new List<Matrix<double>>();
-            List<GH_Integer> c_e = new List<GH_Integer>();
+            List<int> c_e = new List<int>();
             DataTree<double> strain_node = new DataTree<double>();
 
-            Cmatrix C = new Cmatrix(E, nu);
-            Matrix<double> C_matrix = C.CreateMatrix();
+
+            StrainCalc sC = new StrainCalc();
 
             List<List<Vector<double>>> strain = new List<List<Vector<double>>>();
 
             for (int i = 0; i < B_all.Count; i++)
             {
                 B_e = B_all[i];
-                c_e = (List<GH_Integer>)treeConnectivity.get_Branch(i);
-                List<Vector<double>> calcedStrain = CalcStrain(c_e, u, B_e, E, nu);
+                c_e = connectivity[i];
+                List<Vector<double>> calcedStrain = sC.StrainCalculations(B_e, u, c_e);
 
                 strain.Add(calcedStrain);
 
@@ -447,7 +398,7 @@ namespace SolidsVR
             return strain;
         }
 
-        public List<List<double>> FindGlobalStrain(List<List<Vector<double>>> strain, GH_Structure<GH_Integer> treeConnectivity, int sizeOfM)
+        public List<List<double>> FindGlobalStrain(List<List<Vector<double>>> strain, List<List<int>> connectivity, int sizeOfM)
         {
             List<List<double>> globalStrain = new List<List<double>>();
 
@@ -458,23 +409,23 @@ namespace SolidsVR
                 globalStrain.Add(nodeStrain);
             }
 
-            for (int i = 0; i < treeConnectivity.PathCount; i++) //For each element
+            for (int i = 0; i < connectivity.Count(); i++) //For each element
             {
-                List<GH_Integer> cNodes = (List<GH_Integer>)treeConnectivity.get_Branch(i);
+                List<int> cNodes = connectivity[i];
                 for (int j = 0; j < cNodes.Count; j++)
                 {
-                    List<double> TList = globalStrain[cNodes[j].Value];
+                    List<double> TList = globalStrain[cNodes[j]];
                     for (int k = 0; k < 6; k++)
                     {
 
 
-                        if (globalStrain[cNodes[j].Value][k] == 0)
+                        if (globalStrain[cNodes[j]][k] == 0)
                         {
-                            globalStrain[cNodes[j].Value][k] = strain[i][j][k];
+                            globalStrain[cNodes[j]][k] = strain[i][j][k];
                         }
                         else
                         {
-                            globalStrain[cNodes[j].Value][k] = (globalStrain[cNodes[j].Value][k] + strain[i][j][k]) / 2;
+                            globalStrain[cNodes[j]][k] = (globalStrain[cNodes[j]][k] + strain[i][j][k]) / 2;
                         }
 
                     }
@@ -550,21 +501,7 @@ namespace SolidsVR
 
         
 
-        public List<Vector<double>> CalcStrain(List<GH_Integer> c_e, Vector<double> u, List<Matrix<Double>> B_e, double E, double nu)
-        {
-            DataTree<double> treeStrain = new DataTree<double>();
 
-            Cmatrix C_new = new Cmatrix(E, nu);
-            Matrix<double> C = C_new.CreateMatrix();
-
-            StrainCalc sC = new StrainCalc();
-            List<Vector<double>> strain = new List<Vector<double>>();
-
-            //For calculating the strains and stress
-            strain = sC.calcStrain(B_e, u, c_e);
-
-            return strain;
-        }
 
         public List<Vector<double>> CalcStress(List<Vector<double>> calcedStrain, Matrix<double> C_matrix)
         {
