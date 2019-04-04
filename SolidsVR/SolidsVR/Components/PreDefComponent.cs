@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
 namespace SolidsVR
 {
@@ -24,7 +20,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Points", "P", "Points for deformation", GH_ParamAccess.list);
-            pManager.AddVectorParameter("Prescribed deformations", "PreDef", "Prescribed deformation in the way [0,0,0]", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Prescribed deformations", "PreDef", "Prescribed deformation as a vector", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)

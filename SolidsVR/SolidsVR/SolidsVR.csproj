@@ -77,6 +77,7 @@
     <Compile Include="Components\MeshTBrepComponent.cs" />
     <Compile Include="Components\PointsToBrepComponent.cs" />
     <Compile Include="Components\PreDefComponent.cs" />
+    <Compile Include="Components\PreDefSlider.cs" />
     <Compile Include="Components\SetBCComponent.cs" />
     <Compile Include="Components\SetLoadsComponent.cs" />
     <Compile Include="Components\SetUniBCComponent.cs" />
