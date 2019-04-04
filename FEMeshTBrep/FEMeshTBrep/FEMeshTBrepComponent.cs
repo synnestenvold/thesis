@@ -200,21 +200,10 @@ namespace FEMeshTBrep
             double headSize = tuple3.Item2;
             Plane headPlane = tuple3.Item3;
             Color headColor = tuple3.Item4;
-
-            //Text
             DA.SetData(4, headText);
             DA.SetData(5, headSize);
             DA.SetData(6, headPlane);
             DA.SetData(7, headColor);
-
-            /*
-            GH_Boolean => Boolean
-            GH_Integer => int
-            GH_Number => double
-            GH_Vector => Vector3d
-            GH_Matrix => Matrix
-            GH_Surface => Brep
-            */
 
         }
 
