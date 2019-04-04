@@ -14,7 +14,7 @@ namespace SolidsVR
 {
     public class StressDirectionSliderComponent : GH_Component
     {
-        int max = 5;
+        int max = 6;
 
         public StressDirectionSliderComponent()
           : base("StressDirectionSlider", "StressSlider",
@@ -43,13 +43,13 @@ namespace SolidsVR
         {
             Curve curve = null;
             Brep brep = new Brep();
+
             if (!DA.GetData(0, ref curve)) return;
             if (!DA.GetData(1, ref brep)) return;
 
-            double sqrt3 = (double)1 / 3;
-            double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            double refLength = Math.Pow(brep.GetVolume(), (double)(1 / 3));
             double refSize = (double)(refLength / 10);
-            double adjustment = 5 / refLength; //the length should give 5
+            double adjustment = 6 / refLength; //the length should give 6
             
             int dir = Convert.ToInt32(curve.GetLength()*adjustment);
             dir = dir > max ? max : dir;
@@ -77,11 +77,12 @@ namespace SolidsVR
             if (dir <= 1) direction = "S,xx";
             else if (dir <= 2) direction = "S,yy";
             else if (dir <= 3) direction = "S,zz";
-            else if (dir <= 4) direction = "S,yz";
+            else if (dir <= 4) direction = "S,xy";
             else if (dir <= 5) direction = "S,xz";
-            else direction = "S,xy";
+            else if (dir <= 6) direction = "S,yz";
+            else direction = "Mises";
             text.Add("Stress direction: "+direction);
-            text.AddRange(new List<string>() { "S,xx", "S,yy", "S,zz", "S,yz", "S,xz", "S,xy" });
+            text.AddRange(new List<string>() { "S,xx", "S,yy", "S,zz", "S,xy", "S,xz", "S,yz", "Mises" });
             double refSize = (double)(refLength / 10);
             List<double> size = new List<double>() { refSize, (double)(refSize / 2) };
             List<Plane> textPlane = new List<Plane>();
@@ -91,8 +92,8 @@ namespace SolidsVR
             Point3d p1 = Point3d.Add(end, new Point3d(0, -1, 2 * refSize));
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1 + 2 * refSize)));
             textPlane.Add(new Plane(p0, p1, p2));
-            double range = (double)(refLength / 5);
-            for (int i = 0; i < 6; i++)
+            double range = (double)(refLength / 6);
+            for (int i = 0; i < 7; i++)
             {
                 Point3d p3 = Point3d.Add(start, new Point3d(0, range * i, -2 * refSize));
                 Point3d p4 = Point3d.Add(start, new Point3d(0, -1 + range * i, -2 * refSize));

@@ -67,8 +67,7 @@ namespace SolidsVR
             VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
             Point3d centroid = vmp.Centroid;
             double volume = origBrep.GetVolume();
-            double sqrt3 = (double)1 / 3;
-            double refLength = Math.Pow(volume, sqrt3);
+            double refLength = Math.Pow(volume, (double)(1 / 3));
             Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 2.5, 0));
             double angle = 90 * Math.PI / 180;
 

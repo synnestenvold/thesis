@@ -445,8 +445,21 @@ namespace SolidsVR
             for (int i = 0; i < globalStrain.Count; i++)
             {
                 Vector<double> strainVec = Vector<double>.Build.Dense(globalStrain[i].ToArray());
-                globalStress.Add(C_matrix.Multiply(strainVec));
+                Vector<double> stressVec = C_matrix.Multiply(strainVec);
+                //Adding Mises
+                var tempStressVec = Vector<double>.Build.Dense(stressVec.Count + 1);
+                stressVec.Storage.CopySubVectorTo(tempStressVec.Storage, 0, 0, 6);
+                double Sxx = stressVec[0];
+                double Syy = stressVec[1];
+                double Szz = stressVec[2];
+                double Sxy = stressVec[3];
+                double Sxz = stressVec[4];
+                double Syz = stressVec[5];
+                double mises = Math.Sqrt(0.5*(Math.Pow(Sxx-Syy, 2)+Math.Pow(Syy-Szz,2)+Math.Pow(Szz-Sxx, 2))+3*(Math.Pow(Sxy,2)+ Math.Pow(Sxz, 2)+ Math.Pow(Syz, 2)));
+                tempStressVec.At(6, mises);
+                globalStress.Add(tempStressVec);
             }
+
 
             return globalStress;
         }
