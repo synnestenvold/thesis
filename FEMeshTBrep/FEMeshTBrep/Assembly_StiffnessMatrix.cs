@@ -35,6 +35,5 @@ namespace FEMeshTBrep
             }
             return K_tot;
         }
-
     }
 }
