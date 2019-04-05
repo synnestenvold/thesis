@@ -56,7 +56,7 @@ namespace SolidsVR
             int w = 1;
             Brep origBrep = new Brep();
 
-            //---inputs---
+            //---input---
 
             if (!DA.GetData(0, ref surface)) return;
             if (!DA.GetData(1, ref u)) return;

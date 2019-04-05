@@ -46,7 +46,7 @@ namespace SolidsVR
             Curve curve = null;
             Brep brep = new Brep();
 
-            //---inputs---
+            //---input---
 
             if (!DA.GetData(0, ref curve)) return;
             if (!DA.GetData(1, ref brep)) return;

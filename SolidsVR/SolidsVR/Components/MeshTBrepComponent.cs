@@ -50,7 +50,7 @@ namespace SolidsVR
             int v = 1;
             int w = 1;
 
-            // --- inputs ---
+            // --- input ---
 
             if (!DA.GetData(0, ref brp)) return;
             if (!DA.GetData(1, ref u)) return;
@@ -65,7 +65,7 @@ namespace SolidsVR
                 return;
             }
 
-            //Finding the length of the new elements
+            //Getting vertices for brep
             Point3d[] nodes = brp.DuplicateVertices();
 
             var tuple = CreateNewBreps(nodes, u, v, w); // Getting corner nodes and connectivity matrix
@@ -75,7 +75,7 @@ namespace SolidsVR
             int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
             Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
-
+            //Setting values for Mesh class
             Mesh_class mesh = new Mesh_class(u, v, w);
             mesh.SetConnectivity(connectivity);
             mesh.SetElementPoints(elementPoints);
