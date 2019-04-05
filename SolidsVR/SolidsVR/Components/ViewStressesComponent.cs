@@ -49,12 +49,16 @@ namespace SolidsVR
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            //---variables---
+
             Mesh_class mesh = new Mesh_class();
             GH_Structure<GH_Number> treeStress = new GH_Structure<GH_Number>();
             int dir = new int();
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = new double();
             Brep origBrep = new Brep();
+
+            //---input---
 
             if (!DA.GetData(0, ref mesh)) return;
             if (!DA.GetDataTree(1, out treeStress)) return;
@@ -63,6 +67,8 @@ namespace SolidsVR
             if (!DA.GetData(4, ref scale)) return;
             if (!DA.GetData(5, ref origBrep)) return;
 
+            //---setup---
+
             //Setting up values for reflength and angle for rotation of area
             VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
             Point3d centroid = vmp.Centroid;
@@ -70,6 +76,8 @@ namespace SolidsVR
             double refLength = Math.Pow(volume, (double)(1 / 3));
             Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 2.5, 0));
             double angle = 90 * Math.PI / 180;
+
+            //---solve---
 
             //Creating deformation vectors
             Vector3d[] defVectors = CreateVectors(treeDef);
@@ -120,6 +128,8 @@ namespace SolidsVR
 
             textColorRange.Add(headColor);
             List<Color> textColors = textColorRange;
+
+            //---output---
 
             //Geometry
             DA.SetDataList(0, breps);

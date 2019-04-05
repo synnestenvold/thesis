@@ -41,16 +41,24 @@ namespace SolidsVR
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            //---variables---
+
             Curve curve = null;
             Brep brep = new Brep();
+
+            //---inputs---
 
             if (!DA.GetData(0, ref curve)) return;
             if (!DA.GetData(1, ref brep)) return;
 
+            //---setup---
+
             double refLength = Math.Pow(brep.GetVolume(), (double)(1 / 3));
             double refSize = (double)(refLength / 10);
             double adjustment = 6 / refLength; //the length should give 6
-            
+
+            //---solve---
+
             int dir = Convert.ToInt32(curve.GetLength()*adjustment);
             dir = dir > max ? max : dir;
             
@@ -60,7 +68,10 @@ namespace SolidsVR
             List<Plane> textPlane = tuple.Item3;
             Color color = tuple.Item4;
             Sphere sphere = new Sphere(curve.PointAtEnd, (double)(size[0] / 2));
-            
+
+
+            //---output---
+
             DA.SetData(0, dir);
             DA.SetDataList(1, text);
             DA.SetDataList(2, size);

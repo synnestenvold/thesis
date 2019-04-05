@@ -30,11 +30,19 @@ namespace SolidsVR
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+
+            //---variables---
+
             Vector3d def = new Vector3d(0, 0, 0);
             List<Point3d> points = new List<Point3d>();
             List<string> pointsString = new List<string>();
+
+            //---input---
+
             if (!DA.GetDataList(0, points)) return;
             if (!DA.GetData(1, ref def)) return;
+
+            //---solve---
 
             string pointString;
             foreach (Point3d p in points)
@@ -48,6 +56,8 @@ namespace SolidsVR
             {
                 pointDef.Add(s + ";" + def.ToString());
             }
+
+            //---output---
 
             DA.SetDataList(0, pointDef);
         }

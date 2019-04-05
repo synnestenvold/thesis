@@ -43,15 +43,21 @@ namespace SolidsVR
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            // ---variables-- -
+
             Brep brp = new Brep();
             int u = 1;
             int v = 1;
             int w = 1;
 
+            // --- inputs ---
+
             if (!DA.GetData(0, ref brp)) return;
             if (!DA.GetData(1, ref u)) return;
             if (!DA.GetData(2, ref v)) return;
             if (!DA.GetData(3, ref w)) return;
+
+            // --- solve ---
 
             if (u < 1 || v < 1 || w < 1) //None of the sides can be divided in less than one part
             {
@@ -76,6 +82,7 @@ namespace SolidsVR
             mesh.SetSizeOfMatrix(sizeOfMatrix);
             mesh.SetGlobalPoints(globalPoints);
 
+            //---output---
 
             DA.SetData(0, mesh);
 

@@ -52,14 +52,21 @@ namespace SolidsVR
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+
+            //---variables---
+
             Vector3d forceVec = new Vector3d();
             List<Point3d> points = new List<Point3d>();
             List<Point3d> AllPoints = new List<Point3d>();
 
             List<string> pointsString = new List<string>();
 
+            //---input---
+
             if (!DA.GetData(0, ref forceVec)) return;
             if (!DA.GetDataList(1, points)) return;
+
+            //---solve---
 
             string pointString;
 
@@ -80,6 +87,8 @@ namespace SolidsVR
             }
 
             //List<double> output = AssignLoads(pointLoads, AllPoints);
+
+            //---output---
 
             DA.SetDataList(0, pointLoads);
         }

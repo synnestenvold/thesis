@@ -41,14 +41,24 @@ namespace SolidsVR
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+
+            //---variables---
+
             List<Curve> curve = new List<Curve>();
-            Brep brep = new Brep(); 
+            Brep brep = new Brep();
+
+            //---input---
+
             if (!DA.GetDataList(0, curve)) return;
             if (!DA.GetData(1, ref brep)) return;
+
+            //---setup---
 
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
             double adjustment = 10 / refLength; //the length should give 10
+
+            //---solve---
 
             List<int> divAll = new List<int>();
             List<string> textAll = new List<string>();
@@ -75,6 +85,7 @@ namespace SolidsVR
 
             }
 
+            //---output---
 
             DA.SetData(0, divAll[0]);
             DA.SetData(1, divAll[1]);

@@ -36,15 +36,20 @@ namespace SolidsVR
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string restrains="";
+            //---variables---
+
+            string restrains ="";
             List<Point3d> points = new List<Point3d>();
             List<Point3d> AllPoints = new List<Point3d>();
 
             List<string> pointsString = new List<string>();
 
-            
+            //---input---
+
             if (!DA.GetDataList(0, points)) return;
             if (!DA.GetData(1, ref restrains)) return;
+
+            //---solve---
 
             string pointString;
 
@@ -61,6 +66,8 @@ namespace SolidsVR
             {
                 pointBC.Add(s + ";" + restrains);
             }
+
+            //---output---
 
             DA.SetDataList(0, pointBC);
         }

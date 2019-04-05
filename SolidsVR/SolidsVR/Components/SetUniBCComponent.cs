@@ -47,18 +47,24 @@ namespace SolidsVR
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            //---variables---
+
             Surface surface = null;
             string restrains = "0,0,0";
             int u = 1;
             int v = 1;
             int w = 1;
             Brep origBrep = new Brep();
-            
+
+            //---inputs---
+
             if (!DA.GetData(0, ref surface)) return;
             if (!DA.GetData(1, ref u)) return;
             if (!DA.GetData(2, ref v)) return;
             if (!DA.GetData(3, ref w)) return;
             if (!DA.GetData(4, ref origBrep)) return;
+
+            //---solve---
 
             List<string> pointsBC = FindBCPoints(surface, restrains, u, v, w, origBrep);
 
@@ -72,6 +78,8 @@ namespace SolidsVR
 
             List<Brep> cones = DrawBC(pointsBC, refLength);
             Color color = Color.Green;
+
+            //---output---
 
             DA.SetDataList(0, pointsBC);
             DA.SetDataList(1, cones);

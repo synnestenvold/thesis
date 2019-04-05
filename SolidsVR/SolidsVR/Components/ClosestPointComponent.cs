@@ -62,16 +62,19 @@ namespace SolidsVR
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            
+            //---variables---
 
             Brep sphere = new Brep();
             Mesh_class mesh = new Mesh_class();
             Brep origBrep = new Brep();
 
+            //---input---
+
             if (!DA.GetData(0, ref sphere)) return;
             if (!DA.GetData(1, ref mesh)) return;
             if (!DA.GetData(2, ref origBrep)) return;
 
+            //---setup---
 
             //Setting up values for reflength and angle for rotation of area
             VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
@@ -79,8 +82,7 @@ namespace SolidsVR
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(volume, sqrt3);
 
-            // Temporary way of finding the size of stiffness matrix and B matrix
-            int sizeOfM = mesh.GetSizeOfMatrix();
+            //---solve---
 
             //List of global points with correct numbering
             Point3d[] globalPoints = mesh.GetGlobalPoints();
@@ -96,6 +98,8 @@ namespace SolidsVR
             Plane textPlane = FindSpherePlane(centroidSphere, refLength);
 
             Color color = Color.Red;
+
+            //---output---
 
             DA.SetData(0, closestPoint);
             DA.SetData(1, text);

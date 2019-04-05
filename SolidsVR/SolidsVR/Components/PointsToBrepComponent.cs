@@ -32,8 +32,15 @@ namespace SolidsVR
         
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            //---variables---
+
             List<Point3d> points = new List<Point3d>();
+
+            //---input---
+
             if (!DA.GetDataList(0, points)) return;
+
+            //---solve---
 
             Mesh mesh = new Mesh();
 
@@ -47,13 +54,12 @@ namespace SolidsVR
             mesh.Faces.AddFace(0, 4, 7, 3); //Left
             mesh.Faces.AddFace(0, 3, 2, 1); //Bottom
             mesh.Faces.AddFace(4, 5, 6, 7); //Top
-            
-            
-            
-            
 
             Brep brep = Brep.CreateFromMesh(mesh, true);
             //Brep brep = new Brep();
+
+            //---output---
+
             DA.SetData(0, brep);
 
         }

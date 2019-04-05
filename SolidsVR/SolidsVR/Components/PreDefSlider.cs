@@ -37,10 +37,18 @@ namespace SolidsVR.Components
         
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+
+            //---variables---
+
             Curve curve = null;
             Brep brep = new Brep();
+
+            //---input---
+
             if (!DA.GetData(0, ref curve)) return;
             if (!DA.GetData(1, ref brep)) return;
+
+            //---setup---
 
             double volume = brep.GetVolume();
             double sqrt3 = (double)1 / 3;
@@ -50,12 +58,16 @@ namespace SolidsVR.Components
             Vector3d vectorRef = curve.PointAtEnd - curve.PointAtStart;
             Vector3d def = Vector3d.Multiply(adjustment, vectorRef);
 
+            //---solve---
+
             var tuple = CreateText(curve, def, refLength);
             List<string> text = tuple.Item1;
             double refSize = tuple.Item2;
             List<Plane> textPlane = tuple.Item3;
             Color color = tuple.Item4;
             Sphere sphere = new Sphere(curve.PointAtEnd, (double)(refSize / 2));
+
+            //---output---
 
             DA.SetData(0, def);
             DA.SetDataList(1, text);
