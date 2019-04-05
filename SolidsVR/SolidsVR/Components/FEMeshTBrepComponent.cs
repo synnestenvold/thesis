@@ -51,8 +51,6 @@ namespace SolidsVR
         {
             // --- variables ---
 
-            //GH_Structure<GH_Integer> treeConnectivity = new GH_Structure<GH_Integer>();
-            //GH_Structure<GH_Point> treePoints = new GH_Structure<GH_Point>();
             Mesh_class mesh = new Mesh_class();
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
@@ -61,7 +59,7 @@ namespace SolidsVR
             Material material = new Material();
 
 
-            // --- inputs ---
+            // --- input ---
 
             if (!DA.GetData(0, ref mesh)) return;
             if (!DA.GetDataList(1, bctxt)) return;

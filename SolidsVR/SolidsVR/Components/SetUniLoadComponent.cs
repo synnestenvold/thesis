@@ -38,6 +38,8 @@ namespace SolidsVR
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
+            //---variables---
+
             Surface surface = null;
             Vector3d forceVec = new Vector3d();
             int u = 1;
@@ -45,13 +47,16 @@ namespace SolidsVR
             int w = 1;
             Brep origBrep = new Brep();
 
-            
+            //---input---
+
             if (!DA.GetData(0, ref surface)) return;
             if (!DA.GetData(1, ref forceVec)) return;
             if (!DA.GetData(2, ref u)) return;
             if (!DA.GetData(3, ref v)) return;
             if (!DA.GetData(4, ref w)) return;
             if (!DA.GetData(5, ref origBrep)) return; //input as 8 points insted, and create origBrep from this
+
+            //---solve---
 
             List<string> pointLoads = FindPointLoads(surface, forceVec, u, v, w, origBrep);
 
@@ -66,6 +71,8 @@ namespace SolidsVR
             List<Line> arrows = DrawLoads(pointLoads, refLength);
 
             Color color = Color.Blue;
+
+            //---output---
 
             DA.SetDataList(0, pointLoads);
             DA.SetDataList(1, arrows);
