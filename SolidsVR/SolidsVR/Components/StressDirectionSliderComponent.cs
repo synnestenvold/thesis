@@ -67,7 +67,7 @@ namespace SolidsVR
             List<double> size = tuple.Item2;
             List<Plane> textPlane = tuple.Item3;
             Color color = tuple.Item4;
-            Sphere sphere = new Sphere(curve.PointAtEnd, (double)(size[0] / 2));
+            Sphere sphere = new Sphere(curve.PointAtEnd, (double)(refSize / 2));
 
 
             //---output---
@@ -85,12 +85,12 @@ namespace SolidsVR
         {
             List<string> text = new List<string>();
             string direction = "";
-            if (dir <= 1) direction = "S,xx";
-            else if (dir <= 2) direction = "S,yy";
-            else if (dir <= 3) direction = "S,zz";
-            else if (dir <= 4) direction = "S,xy";
-            else if (dir <= 5) direction = "S,xz";
-            else if (dir <= 6) direction = "S,yz";
+            if (dir < 1) direction = "S,xx";
+            else if (dir < 2) direction = "S,yy";
+            else if (dir < 3) direction = "S,zz";
+            else if (dir < 4) direction = "S,xy";
+            else if (dir < 5) direction = "S,xz";
+            else if (dir < 6) direction = "S,yz";
             else direction = "Mises";
             text.Add("Stress direction: "+direction);
             text.AddRange(new List<string>() { "S,xx", "S,yy", "S,zz", "S,xy", "S,xz", "S,yz", "Mises" });
