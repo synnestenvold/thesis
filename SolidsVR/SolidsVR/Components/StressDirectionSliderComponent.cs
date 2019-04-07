@@ -31,7 +31,7 @@ namespace SolidsVR
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Stress direction", "Direction", "Direction of stress (0-5)", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Stress direction", "Stress dir", "Direction of stress (0-5)", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "Text", "Direction text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
@@ -53,7 +53,7 @@ namespace SolidsVR
 
             //---setup---
 
-            double refLength = Math.Pow(brep.GetVolume(), (double)(1 / 3));
+            double refLength = Math.Pow(brep.GetVolume(), (double)1 / 3);
             double refSize = (double)(refLength / 10);
             double adjustment = 6 / refLength; //the length should give 6
 

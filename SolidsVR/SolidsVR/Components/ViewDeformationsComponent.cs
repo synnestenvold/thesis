@@ -24,7 +24,7 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
             pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
@@ -78,7 +78,7 @@ namespace SolidsVR
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
             double refSize = (double)(refLength / 10);
             double angle = 270*Math.PI/180;
-            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 2.5, 0)); //Center for viewpoint
+            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 3.5, 0)); //Center for viewpoint
 
             //---solve---
 
