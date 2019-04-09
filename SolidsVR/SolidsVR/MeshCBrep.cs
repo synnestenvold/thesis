@@ -26,6 +26,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBrepParameter("Brep", "B", "Input geometry as a curved brep", GH_ParamAccess.item);
+            pManager.AddPointParameter("Points", "P", "List of corner points in right order", GH_ParamAccess.list);
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);
@@ -42,6 +43,7 @@ namespace SolidsVR
             // ---variables-- -
 
             Brep brp = new Brep();
+            List<Point3d> corners = new List<Point3d>();
             int u = 1;
             int v = 1;
             int w = 1;
@@ -49,9 +51,10 @@ namespace SolidsVR
             // --- input ---
 
             if (!DA.GetData(0, ref brp)) return;
-            if (!DA.GetData(1, ref u)) return;
-            if (!DA.GetData(2, ref v)) return;
-            if (!DA.GetData(3, ref w)) return;
+            if (!DA.GetDataList(1, corners)) return;
+            if (!DA.GetData(2, ref u)) return;
+            if (!DA.GetData(3, ref v)) return;
+            if (!DA.GetData(4, ref w)) return;
 
             // --- solve ---
 
@@ -62,13 +65,11 @@ namespace SolidsVR
             }
 
             Curve[] edges = brp.DuplicateEdgeCurves();
-
-            Curve[] sortedEdges = SortEdges(edges);
+            Curve[] sortedEdges = SortEdges(corners, edges);
 
             //FrepFaceList face = brp.Faces;
             //Surface facetest = face[0];
             
-
             //var tuple = CreateNewBreps(sortedEdges, u, v, w); // Getting corner nodes and connectivity matrix
 
             //List<List<Point3d>> elementPoints = tuple.Item1;
@@ -159,7 +160,7 @@ namespace SolidsVR
             return points;
         }
 
-        public Curve[] SortEdges(Curve[] edges)
+        public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
         {
             Curve[] sortedEdges = new Curve[12];
 
