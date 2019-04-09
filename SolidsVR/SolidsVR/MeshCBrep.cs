@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using System.Linq;
 
 namespace SolidsVR
 {
@@ -86,26 +87,38 @@ namespace SolidsVR
         private List<Point3d> CreateNewBreps(Curve[] edges, int u, int v, int w)
         {
             List<Point3d> points = new List<Point3d>();
-            List<Point3d> uDiv = new List<Point3d>();
-            List<Point3d> vDiv = new List<Point3d>();
-            List<Point3d> wDiv = new List<Point3d>();
-            Point3d[] p = new Point3d[4];
-            double[] test = edges[0].DivideByCount(3, true, out p);
+            List<List<Point3d>> uDiv = new List<List<Point3d>>();
+            List<List<Point3d>> vDiv = new List<List<Point3d>>();
+            List<List<Point3d>> wDiv = new List<List<Point3d>>();
             
-            //for (int i=0; i<4; i++)
-            //{
-            //    uDiv.Add(edges[i].DivideByCount(u, true));
-            //}
+            
+            
+            for (int i=0; i<4; i++)
+            {
+                Point3d[] uP = new Point3d[u+1];
+                Point3d[] vP = new Point3d[v+1];
+                Point3d[] wP = new Point3d[w+1];
+                edges[i].DivideByCount(u, true, out uP);
+                edges[i+4].DivideByCount(v, true, out vP);
+                edges[i+8].DivideByCount(w, true, out wP);
+                //List<Point2> lst = ints.OfType<int>().ToList();
+                
+                uDiv.Add(uP.ToList());
+                vDiv.Add(vP.ToList());
+                wDiv.Add(wP.ToList());
+
+            }
            
             //W-dir
 
-            for (int i =0; i<=w; i++)
+            for (int i =0; i<w; i++)
             {
                 
-                for (int j=0; j<=v; j++)
+                for (int j=0; j<v; j++)
                 {
                     for (int k =0; k<u; k++)
                     {
+                        points.AddRange(uDiv[k]);
 
                     }
                 }
@@ -121,18 +134,26 @@ namespace SolidsVR
         {
             Curve[] sortedEdges = new Curve[12];
 
-            sortedEdges[0] = edges[5]; //u-dir
-            sortedEdges[1] = edges[7];
-            sortedEdges[2] = edges[3];
-            sortedEdges[3] = edges[1];
+            sortedEdges[0] = edges[7]; //u-dir
+            sortedEdges[0].Reverse();
+            sortedEdges[1] = edges[5];
+            sortedEdges[2] = edges[1];
+            sortedEdges[3] = edges[3];
+            sortedEdges[2].Reverse();
             sortedEdges[4] = edges[4]; //v-dir
             sortedEdges[5] = edges[6];
+            sortedEdges[5].Reverse();
             sortedEdges[6] = edges[2];
             sortedEdges[7] = edges[0];
-            sortedEdges[8] = edges[11]; //w-dir
-            sortedEdges[9] = edges[10];
-            sortedEdges[10] = edges[9];
-            sortedEdges[11] = edges[8];
+            sortedEdges[7].Reverse();
+            sortedEdges[8] = edges[8]; //w-dir
+            sortedEdges[8].Reverse();
+            sortedEdges[9] = edges[9];
+            sortedEdges[9].Reverse();
+            sortedEdges[10] = edges[10];
+            sortedEdges[10].Reverse();
+            sortedEdges[11] = edges[11];
+            sortedEdges[11].Reverse();
 
             return sortedEdges;
         }
