@@ -26,6 +26,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBrepParameter("Brep", "B", "Input geometry as a curved brep", GH_ParamAccess.item);
+            pManager.AddPointParameter("Point", "P", "Corner points in right order", GH_ParamAccess.list);
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);
@@ -44,6 +45,7 @@ namespace SolidsVR
             // ---variables-- -
 
             Brep brp = new Brep();
+            List<Point3d> corners = new List<Point3d>();
             int u = 1;
             int v = 1;
             int w = 1;
@@ -51,9 +53,10 @@ namespace SolidsVR
             // --- input ---
 
             if (!DA.GetData(0, ref brp)) return;
-            if (!DA.GetData(1, ref u)) return;
-            if (!DA.GetData(2, ref v)) return;
-            if (!DA.GetData(3, ref w)) return;
+            if (!DA.GetDataList(1, corners)) return;
+            if (!DA.GetData(2, ref u)) return;
+            if (!DA.GetData(3, ref v)) return;
+            if (!DA.GetData(4, ref w)) return;
 
             // --- solve ---
 
@@ -65,7 +68,7 @@ namespace SolidsVR
 
             Curve[] edges = brp.DuplicateEdgeCurves();
 
-            Curve[] sortedEdges = SortEdges(edges);
+            Curve[] sortedEdges = SortEdges(corners, edges);
 
             //FrepFaceList face = brp.Faces;
             //Surface facetest = face[0];
@@ -286,37 +289,79 @@ namespace SolidsVR
         }
     
 
-        public Curve[] SortEdges(Curve[] edges)
+        public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
         {
             Curve[] sortedEdges = new Curve[12];
-
-            sortedEdges[0] = edges[7]; //u-dir
-            sortedEdges[0].Reverse();
-            sortedEdges[1] = edges[5];
-            sortedEdges[2] = edges[1];
-            sortedEdges[3] = edges[3];
-            sortedEdges[2].Reverse();
-            sortedEdges[4] = edges[4]; //v-dir
-            sortedEdges[5] = edges[6];
-            sortedEdges[5].Reverse();
-            sortedEdges[6] = edges[2];
-            sortedEdges[7] = edges[0];
-            sortedEdges[7].Reverse();
-            sortedEdges[8] = edges[8]; //w-dir
-            sortedEdges[8].Reverse();
-            sortedEdges[9] = edges[9];
-            sortedEdges[9].Reverse();
-            sortedEdges[10] = edges[10];
-            sortedEdges[10].Reverse();
-            sortedEdges[11] = edges[11];
-            sortedEdges[11].Reverse();
-
+            for (int i = 0; i < edges.Length; i++)
+            {
+                List<Point3d> tempP = new List<Point3d>() { edges[i].PointAtStart, edges[i].PointAtEnd };
+                //u-dir
+                if (tempP.Contains(corners[0]) && tempP.Contains(corners[1]))
+                {
+                    sortedEdges[0] = edges[i];
+                    if (edges[i].PointAtEnd == corners[0]) { sortedEdges[0].Reverse(); }
+                }
+                else if (tempP.Contains(corners[3]) && tempP.Contains(corners[2]))
+                {
+                    sortedEdges[1] = edges[i];
+                    if (edges[i].PointAtEnd == corners[3]) { sortedEdges[1].Reverse(); }
+                }
+                else if (tempP.Contains(corners[4]) && tempP.Contains(corners[5]))
+                {
+                    sortedEdges[2] = edges[i];
+                    if (edges[i].PointAtEnd == corners[4]) { sortedEdges[2].Reverse(); }
+                }
+                else if (tempP.Contains(corners[7]) && tempP.Contains(corners[6]))
+                {
+                    sortedEdges[3] = edges[i];
+                    if (edges[i].PointAtEnd == corners[7]) { sortedEdges[3].Reverse(); }
+                }
+                //v-dir
+                else if (tempP.Contains(corners[0]) && tempP.Contains(corners[3]))
+                {
+                    sortedEdges[4] = edges[i];
+                    if (edges[i].PointAtEnd == corners[0]) { sortedEdges[4].Reverse(); }
+                }
+                else if (tempP.Contains(corners[1]) && tempP.Contains(corners[2]))
+                {
+                    sortedEdges[5] = edges[i];
+                    if (edges[i].PointAtEnd == corners[1]) { sortedEdges[5].Reverse(); }
+                }
+                else if (tempP.Contains(corners[5]) && tempP.Contains(corners[6]))
+                {
+                    sortedEdges[6] = edges[i];
+                    if (edges[i].PointAtEnd == corners[5]) { sortedEdges[6].Reverse(); }
+                }
+                else if (tempP.Contains(corners[4]) && tempP.Contains(corners[7]))
+                {
+                    sortedEdges[7] = edges[i];
+                    if (edges[i].PointAtEnd == corners[4]) { sortedEdges[7].Reverse(); }
+                }
+                //w-dir
+                else if (tempP.Contains(corners[0]) && tempP.Contains(corners[4]))
+                {
+                    sortedEdges[8] = edges[i];
+                    if (edges[i].PointAtEnd == corners[0]) { sortedEdges[8].Reverse(); }
+                }
+                else if (tempP.Contains(corners[1]) && tempP.Contains(corners[5]))
+                {
+                    sortedEdges[9] = edges[i];
+                    if (edges[i].PointAtEnd == corners[1]) { sortedEdges[9].Reverse(); }
+                }
+                else if (tempP.Contains(corners[2]) && tempP.Contains(corners[6]))
+                {
+                    sortedEdges[10] = edges[i];
+                    if (edges[i].PointAtEnd == corners[2]) { sortedEdges[10].Reverse(); }
+                }
+                else {
+                    sortedEdges[11] = edges[i];
+                    if (edges[i].PointAtEnd == corners[3]) { sortedEdges[11].Reverse(); }
+                }
+            }
             return sortedEdges;
         }
 
-        /// <summary>
-        /// Gets the unique ID for this component. Do not change this ID after release.
-        /// </summary>
+   
         public override Guid ComponentGuid
         {
             get { return new Guid("0f4702ea-a195-4b83-b3ae-5e067f56a73f"); }
