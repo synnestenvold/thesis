@@ -16,6 +16,8 @@ namespace SolidsVR
 
         List<List<Point3d>> elementPoints = new List<List<Point3d>>();
         List<List<int>> connectivity = new List<List<int>>();
+        List<List<Line>> edgesMesh = new List<List<Line>>();
+        List<List<Brep>> surfacesMesh = new List<List<Brep>>();
 
         Point3d[] globalPoints = null;
         int sizeOfMatrix = 0;
@@ -82,6 +84,26 @@ namespace SolidsVR
         public void SetSizeOfMatrix(int _sizeOfMatrix)
         {
             sizeOfMatrix = _sizeOfMatrix;
+        }
+
+        public void SetEdgesMesh(List<List<Line>> edges)
+        {
+            edgesMesh = edges;
+        }
+
+        public List<List<Line>> GetEdges()
+        {
+            return edgesMesh;
+        }
+
+        public void SetSurfacesMesh(List<List<Brep>> surfaces)
+        {
+            surfacesMesh = surfaces;
+        }
+
+        public List<List<Brep>> GetSurfaces()
+        {
+            return surfacesMesh;
         }
 
 

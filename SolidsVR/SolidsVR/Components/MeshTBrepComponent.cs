@@ -19,7 +19,7 @@ namespace SolidsVR
         public MeshTBrepComponent()
           : base("MeshTBrep", "MeshTBrep",
               "Description",
-              "Category3", "Subcategory3")
+              "Category3", "Mesh")
         {
         }
 
@@ -91,27 +91,6 @@ namespace SolidsVR
 
         }
 
-        public List<Line> CreateEdgesMesh(List<Point3d> elementPoints)
-        {
-            List<Line> edges = new List<Line>
-            {
-                new Line(elementPoints[0], elementPoints[1]),
-                new Line(elementPoints[1], elementPoints[2]),
-                new Line(elementPoints[2], elementPoints[3]),
-                new Line(elementPoints[3], elementPoints[0]),
-                new Line(elementPoints[0], elementPoints[4]),
-                new Line(elementPoints[1], elementPoints[5]),
-                new Line(elementPoints[2], elementPoints[6]),
-                new Line(elementPoints[3], elementPoints[7]),
-                new Line(elementPoints[4], elementPoints[5]),
-                new Line(elementPoints[5], elementPoints[6]),
-                new Line(elementPoints[6], elementPoints[7]),
-                new Line(elementPoints[7], elementPoints[4]),
-
-            };
-
-            return edges;
-        }
 
         private Tuple<List<List<Point3d>>, List<List<int>>> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
         {
@@ -267,23 +246,8 @@ namespace SolidsVR
 
         }
 
-        /*
-        public List<Line> CreateSurfaceMesh(List<Point3d> elementPoints)
-        {
-            List<Surface> surfaces = new List<Surface>
-            {
-                new Surface(elementPoints[0],elementPoints[1], elementPoints[5], elementPoints[4]),
 
-
-            };
-            Surface sur = new Surface();
-
-            return edges;
-        }
-        */
-
-
-
+  
         protected override System.Drawing.Bitmap Icon
         {
             get

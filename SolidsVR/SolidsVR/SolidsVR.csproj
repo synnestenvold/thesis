@@ -86,6 +86,7 @@
     <Compile Include="Components\SetUniBCComponent.cs" />
     <Compile Include="Components\SetUniLoadComponent.cs" />
     <Compile Include="Classes\Mesh_class.cs" />
+    <Compile Include="DeconstructMesh.cs" />
     <Compile Include="MeshCBrep.cs" />
     <Compile Include="SolidsVRInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -16,7 +16,7 @@ namespace SolidsVR
         public MeshCBrep()
           : base("MeshCBrep", "MeshCBrep",
               "Description",
-              "Category3", "Subcategory3")
+              "Category3", "Mesh")
         {
         }
 
@@ -73,6 +73,8 @@ namespace SolidsVR
 
             List<List<Point3d>> elementPoints = tuple.Item1;
             List<List<int>> connectivity = tuple.Item2;
+            List<List<Line>> edgeMesh = tuple.Item3;
+            List<List<Brep>> surfacesMesh = tuple.Item4;
             int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
             Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
@@ -80,6 +82,8 @@ namespace SolidsVR
             Mesh_class mesh = new Mesh_class(u, v, w);
             mesh.SetConnectivity(connectivity);
             mesh.SetElementPoints(elementPoints);
+            mesh.SetEdgesMesh(edgeMesh);
+            mesh.SetSurfacesMesh(surfacesMesh);
             mesh.SetSizeOfMatrix(sizeOfMatrix);
             mesh.SetGlobalPoints(globalPoints);
 
@@ -88,11 +92,15 @@ namespace SolidsVR
             DA.SetData(0, mesh);
         }
 
-        public Tuple<List<List<Point3d>>, List<List<int>>> CreateNewBreps(Curve[] edges, int u, int v, int w)
+        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>> CreateNewBreps(Curve[] edges, int u, int v, int w)
         {
 
             List<List<int>> global_numbering = new List<List<int>>();
             List<List<Point3d>> points_brep = new List<List<Point3d>>();
+            List<List<Line>> edgeMesh = new List<List<Line>>();
+            List <List<Brep>> surfacesMesh = new List<List<Brep>>();
+
+
             List<Point3d> points = new List<Point3d>();
             List<List<Point3d>> uDiv = new List<List<Point3d>>();
             List<List<Point3d>> vDiv = new List<List<Point3d>>();
@@ -226,8 +234,11 @@ namespace SolidsVR
 
                 points_brep.Add(brp);
 
-                List<Line> meshEdges = CreateEdgesMesh(brp);
+                List<Line> edgesElement = CreateEdgesMesh(brp);
+                List<Brep> surfaces = CreateSurfaceMesh(brp);
 
+                edgeMesh.Add(edgesElement);
+                surfacesMesh.Add(surfaces);
                 
                 //Showing the connectivity between local and global nodes
                 List<int> connectivity = new List<int>();
@@ -240,7 +251,6 @@ namespace SolidsVR
                 connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index + 1));
                 connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index));
 
-                Mesh mesh = new Mesh();
 
 
                 global_numbering.Add(connectivity);
@@ -259,7 +269,9 @@ namespace SolidsVR
                 index++;
             }
 
-            return Tuple.Create(points_brep, global_numbering);
+            
+
+            return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh);
 
         }
 
@@ -304,20 +316,30 @@ namespace SolidsVR
             return edges;
         }
 
-        /*
-        public List<Line> CreateSurfaceMesh(List<Point3d> elementPoints)
+
+        public List<Brep> CreateSurfaceMesh(List<Point3d> elementPoints)
         {
-            List<Surface> surfaces = new List<Surface>
+
+            Brep b1 = Brep.CreateFromCornerPoints(elementPoints[0], elementPoints[1], elementPoints[5], elementPoints[4], 0);
+            Brep b2 = Brep.CreateFromCornerPoints(elementPoints[1], elementPoints[2], elementPoints[6], elementPoints[5], 0);
+            Brep b3 = Brep.CreateFromCornerPoints(elementPoints[2], elementPoints[3], elementPoints[7], elementPoints[6], 0);
+            Brep b4 = Brep.CreateFromCornerPoints(elementPoints[0], elementPoints[3], elementPoints[7], elementPoints[4], 0);
+            Brep b5 = Brep.CreateFromCornerPoints(elementPoints[4], elementPoints[5], elementPoints[6], elementPoints[7], 0);
+            Brep b6 = Brep.CreateFromCornerPoints(elementPoints[0], elementPoints[1], elementPoints[2], elementPoints[3], 0);
+
+            List<Brep> surfaces = new List<Brep>()
             {
-                new Surface(elementPoints[0],elementPoints[1], elementPoints[5], elementPoints[4]),
-
-
+                b1,
+                b2,
+                b3,
+                b4,
+                b5,
+                b6
             };
-            Surface sur = new Surface();
 
-            return edges;
+            return surfaces;
         }
-        */
+        
 
         public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
         {
