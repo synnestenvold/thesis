@@ -57,6 +57,10 @@ namespace SolidsVR
 
             Brep brep = Brep.CreateFromMesh(mesh, true);
             //Brep brep = new Brep();
+            Curve[] curves = brep.DuplicateEdgeCurves();
+
+            //curves.DivideByCount(10);
+
 
             //---output---
 
