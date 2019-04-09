@@ -66,17 +66,17 @@ namespace SolidsVR
 
             var tuple = CreateNewBreps(sortedEdges, u, v, w); // Getting corner nodes and connectivity matrix
 
-            List<List<Point3d>> elementPoints = tuple.Item1;
-            List<List<int>> connectivity = tuple.Item2;
+            //List<List<Point3d>> elementPoints = tuple.Item1;
+            //List<List<int>> connectivity = tuple.Item2;
             int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
-            Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
+            //Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
             //Setting values for Mesh class
             Mesh_class mesh = new Mesh_class(u, v, w);
-            mesh.SetConnectivity(connectivity);
-            mesh.SetElementPoints(elementPoints);
-            mesh.SetSizeOfMatrix(sizeOfMatrix);
-            mesh.SetGlobalPoints(globalPoints);
+            //mesh.SetConnectivity(connectivity);
+            //mesh.SetElementPoints(elementPoints);
+            //mesh.SetSizeOfMatrix(sizeOfMatrix);
+            //mesh.SetGlobalPoints(globalPoints);
 
             //---output---
 
@@ -89,7 +89,9 @@ namespace SolidsVR
             List<Point3d> uDiv = new List<Point3d>();
             List<Point3d> vDiv = new List<Point3d>();
             List<Point3d> wDiv = new List<Point3d>();
-            double[] test = edges[0].DivideByCount(3, true);
+            Point3d[] p = new Point3d[4];
+            double[] test = edges[0].DivideByCount(3, true, out p);
+            
             //for (int i=0; i<4; i++)
             //{
             //    uDiv.Add(edges[i].DivideByCount(u, true));
@@ -99,7 +101,7 @@ namespace SolidsVR
 
             for (int i =0; i<=w; i++)
             {
-                edges[i]
+                
                 for (int j=0; j<=v; j++)
                 {
                     for (int k =0; k<u; k++)
