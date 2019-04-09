@@ -163,6 +163,14 @@ namespace SolidsVR
         public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
         {
             Curve[] sortedEdges = new Curve[12];
+            for (int i = 0; i < edges.Length; i++)
+            {
+                List<Point3d> tempP = new List<Point3d>() { edges[i].PointAtStart, edges[i].PointAtEnd };
+                if (tempP.Contains(corners[0]))
+                {
+
+                }
+            }
 
             sortedEdges[0] = edges[7]; //u-dir
             sortedEdges[0].Reverse();
