@@ -67,9 +67,6 @@ namespace SolidsVR
             Curve[] edges = brp.DuplicateEdgeCurves();
 
             Curve[] sortedEdges = SortEdges(corners, edges);
-
-            //FrepFaceList face = brp.Faces;
-            //Surface facetest = face[0];
             
 
             var tuple = CreateNewBreps(sortedEdges, u, v, w); // Getting corner nodes and connectivity matrix
@@ -231,7 +228,6 @@ namespace SolidsVR
 
                 List<Line> meshEdges = CreateEdgesMesh(brp);
 
-                List<Surface> meshSurfaces = CreateSurfaceMesh(brp);
                 
                 //Showing the connectivity between local and global nodes
                 List<int> connectivity = new List<int>();
