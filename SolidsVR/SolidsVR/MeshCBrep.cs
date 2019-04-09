@@ -30,6 +30,7 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            Brep hei = new Brep();
         }
 
         /// <summary>
