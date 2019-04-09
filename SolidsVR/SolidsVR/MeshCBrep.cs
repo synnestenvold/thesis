@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Linq;
+using Rhino.Geometry.Collections;
 
 namespace SolidsVR
 {
@@ -33,7 +34,7 @@ namespace SolidsVR
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -63,9 +64,12 @@ namespace SolidsVR
             Curve[] edges = brp.DuplicateEdgeCurves();
 
             Curve[] sortedEdges = SortEdges(edges);
+
+            //FrepFaceList face = brp.Faces;
+            //Surface facetest = face[0];
             
 
-            var tuple = CreateNewBreps(sortedEdges, u, v, w); // Getting corner nodes and connectivity matrix
+            //var tuple = CreateNewBreps(sortedEdges, u, v, w); // Getting corner nodes and connectivity matrix
 
             //List<List<Point3d>> elementPoints = tuple.Item1;
             //List<List<int>> connectivity = tuple.Item2;
@@ -74,6 +78,7 @@ namespace SolidsVR
 
             //Setting values for Mesh class
             Mesh_class mesh = new Mesh_class(u, v, w);
+            List<Point3d> points = CreateNewBreps(sortedEdges, u, v, w);
             //mesh.SetConnectivity(connectivity);
             //mesh.SetElementPoints(elementPoints);
             //mesh.SetSizeOfMatrix(sizeOfMatrix);
@@ -81,7 +86,7 @@ namespace SolidsVR
 
             //---output---
 
-            DA.SetData(0, mesh);
+            DA.SetDataList(0, points);
         }
 
         private List<Point3d> CreateNewBreps(Curve[] edges, int u, int v, int w)
@@ -108,25 +113,49 @@ namespace SolidsVR
                 wDiv.Add(wP.ToList());
 
             }
-           
+
             //W-dir
 
-            for (int i =0; i<w; i++)
+            for (int i = 0; i <= w; i++)
             {
-                
-                for (int j=0; j<v; j++)
+                //Creating points in w-directoin
+                //Point3d p1_w = new Point3d(nodes[0].X + lz1_new * i * vec_z1.X, nodes[0].Y + lz1_new * vec_z1.Y * i, nodes[0].Z + lz1_new * vec_z1.Z * i);
+                //Point3d p2_w = new Point3d(nodes[1].X + lz2_new * i * vec_z2.X, nodes[1].Y + lz2_new * vec_z2.Y * i, nodes[1].Z + lz2_new * vec_z2.Z * i);
+
+                //Point3d p3_w = new Point3d(nodes[2].X + lz3_new * i * vec_z3.X, nodes[2].Y + lz3_new * vec_z3.Y * i, nodes[2].Z + lz3_new * vec_z3.Z * i);
+                //Point3d p4_w = new Point3d(nodes[3].X + lz4_new * i * vec_z4.X, nodes[3].Y + lz4_new * vec_z4.Y * i, nodes[3].Z + lz4_new * vec_z4.Z * i);
+                Point3d p1_w = wDiv[0][i];
+                Point3d p2_w = wDiv[1][i];
+                Point3d p3_w = wDiv[2][i];
+                Point3d p4_w = wDiv[3][i];
+
+                Vector3d vecV1 = (p4_w - p1_w) / (p1_w.DistanceTo(p4_w));
+                Vector3d vecV2 = (p3_w - p2_w) / (p2_w.DistanceTo(p3_w));
+
+                Double length_v1 = p1_w.DistanceTo(p4_w) / v;
+                Double length_v2 = p2_w.DistanceTo(p3_w) / v;
+
+                for (int j = 0; j <= v; j++)
                 {
-                    for (int k =0; k<u; k++)
+                    //Creating points in v-direction
+                    Point3d p1_v = new Point3d(p1_w.X + length_v1 * j * vecV1.X, p1_w.Y + length_v1 * j * vecV1.Y, p1_w.Z + length_v1 * j * vecV1.Z);
+                    Point3d p2_v = new Point3d(p2_w.X + length_v2 * j * vecV2.X, p2_w.Y + length_v2 * j * vecV2.Y, p2_w.Z + length_v2 * j * vecV2.Z);
+
+                    Vector3d vec_u1 = (p2_v - p1_v) / (p1_v.DistanceTo(p2_v));
+
+                    Double length_u1 = p1_v.DistanceTo(p2_v) / u;
+
+
+                    for (int k = 0; k <= u; k++)
                     {
-                        points.AddRange(uDiv[k]);
+                        //Creating points in u-direction and adding them to the global nodes.
+                        Point3d p1_u = new Point3d(p1_v.X + length_u1 * k * vec_u1.X, p1_v.Y + length_u1 * k * vec_u1.Y, p1_v.Z + length_u1 * k * vec_u1.Z);
+                        points.Add(p1_u);
 
                     }
                 }
             }
 
-            //V-dir
-
-            //W-dir
             return points;
         }
 
