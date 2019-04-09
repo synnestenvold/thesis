@@ -61,10 +61,7 @@ namespace SolidsVR
             DataTree<Line> treeEdges = new DataTree<Line>();
             DataTree<Brep> treeSurfaces = new DataTree<Brep>();
 
-
-
-         
-
+            
             for(int i = 0; i < elementPoints.Count; i++)
             {
                 treePoints.AddRange(elementPoints[i], new GH_Path(new int[] { 0, i }));

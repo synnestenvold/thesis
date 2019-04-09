@@ -65,11 +65,9 @@ namespace SolidsVR
             }
 
             Curve[] edges = brp.DuplicateEdgeCurves();
-
             Curve[] sortedEdges = SortEdges(corners, edges);
             
-
-            var tuple = CreateNewBreps(sortedEdges, u, v, w); // Getting corner nodes and connectivity matrix
+            var tuple = CreateNewBreps(sortedEdges, u, v, w); 
 
             List<List<Point3d>> elementPoints = tuple.Item1;
             List<List<int>> connectivity = tuple.Item2;
