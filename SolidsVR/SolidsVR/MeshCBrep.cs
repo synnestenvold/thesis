@@ -253,6 +253,7 @@ namespace SolidsVR
 
                 points_brep.Add(brp);
 
+                //
                 //Showing the connectivity between local and global nodes
                 List<int> connectivity = new List<int>();
                 connectivity.Add(index);
