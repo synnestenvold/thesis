@@ -59,9 +59,12 @@ namespace SolidsVR
                 return;
             }
 
+            Curve[] edges = brp.DuplicateEdgeCurves();
 
+            Curve[] sortedEdges = SortEdges(edges);
+            
 
-            var tuple = CreateNewBreps(nodes, u, v, w); // Getting corner nodes and connectivity matrix
+            var tuple = CreateNewBreps(sortedEdges, u, v, w); // Getting corner nodes and connectivity matrix
 
             List<List<Point3d>> elementPoints = tuple.Item1;
             List<List<int>> connectivity = tuple.Item2;
@@ -80,24 +83,51 @@ namespace SolidsVR
             DA.SetData(0, mesh);
         }
 
-        private Tuple<List<List<Point3d>>, List<List<int>>> CreateNewBreps(Point3d[] nodes, int u, int v, int w)
+        private List<Point3d> CreateNewBreps(Curve[] edges, int u, int v, int w)
         {
-            return null;
+            List<Point3d> points = new List<Point3d>();
+            List<Point3d> uDiv = new List<Point3d>();
+            List<Point3d> vDiv = new List<Point3d>();
+            List<Point3d> wDiv = new List<Point3d>();
+            double[] test = edges[0].DivideByCount(3, true);
+            //for (int i=0; i<4; i++)
+            //{
+            //    uDiv.Add(edges[i].DivideByCount(u, true));
+            //}
+           
+            //W-dir
+
+            for (int i =0; i<=w; i++)
+            {
+                edges[i]
+                for (int j=0; j<=v; j++)
+                {
+                    for (int k =0; k<u; k++)
+                    {
+
+                    }
+                }
+            }
+
+            //V-dir
+
+            //W-dir
+            return points;
         }
 
-        public Curve[] sortEdges(Curve[] edges)
+        public Curve[] SortEdges(Curve[] edges)
         {
             Curve[] sortedEdges = new Curve[12];
 
-            sortedEdges[0] = edges[5];
+            sortedEdges[0] = edges[5]; //u-dir
             sortedEdges[1] = edges[7];
             sortedEdges[2] = edges[3];
             sortedEdges[3] = edges[1];
-            sortedEdges[4] = edges[4];
+            sortedEdges[4] = edges[4]; //v-dir
             sortedEdges[5] = edges[6];
             sortedEdges[6] = edges[2];
             sortedEdges[7] = edges[0];
-            sortedEdges[8] = edges[11];
+            sortedEdges[8] = edges[11]; //w-dir
             sortedEdges[9] = edges[10];
             sortedEdges[10] = edges[9];
             sortedEdges[11] = edges[8];
