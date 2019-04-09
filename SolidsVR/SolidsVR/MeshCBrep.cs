@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Grasshopper;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
 using Rhino.Geometry;
 using System.Linq;
-using Rhino.Geometry.Collections;
 
 namespace SolidsVR
 {
@@ -34,7 +34,9 @@ namespace SolidsVR
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.list);
+            //pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.list);
+            pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
+            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -69,16 +71,16 @@ namespace SolidsVR
             //Surface facetest = face[0];
             
 
-            //var tuple = CreateNewBreps(sortedEdges, u, v, w); // Getting corner nodes and connectivity matrix
+            var tuple = CreateNewBreps(sortedEdges, u, v, w); // Getting corner nodes and connectivity matrix
 
-            //List<List<Point3d>> elementPoints = tuple.Item1;
-            //List<List<int>> connectivity = tuple.Item2;
+            List<List<Point3d>> elementPoints = tuple.Item1;
+            List<List<int>> connectivity = tuple.Item2;
             int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
             //Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
             //Setting values for Mesh class
             Mesh_class mesh = new Mesh_class(u, v, w);
-            List<Point3d> points = CreateNewBreps(sortedEdges, u, v, w);
+            //List<Point3d> points = CreateNewBreps(sortedEdges, u, v, w);
             //mesh.SetConnectivity(connectivity);
             //mesh.SetElementPoints(elementPoints);
             //mesh.SetSizeOfMatrix(sizeOfMatrix);
@@ -86,17 +88,42 @@ namespace SolidsVR
 
             //---output---
 
-            DA.SetDataList(0, points);
+
+            DataTree<Point3d> treePoints = new DataTree<Point3d>();
+            DataTree<int> treeIndexes = new DataTree<int>();
+
+            int i = 0;
+            //Create a tree structure of the list of new brep-nodes with cartesian coordinates
+            foreach (List<Point3d> innerList in elementPoints)
+            {
+                treePoints.AddRange(innerList, new GH_Path(new int[] { 0, i }));
+                i++;
+            }
+
+            i = 0;
+
+            //Create a tree structure of the list of new brep-nodes with indexes
+            foreach (List<int> innerList in connectivity)
+            {
+                treeIndexes.AddRange(innerList, new GH_Path(new int[] { 0, i }));
+                i++;
+            }
+
+            DA.SetDataTree(0, treeIndexes);
+            DA.SetDataTree(1, treePoints);
+
+            //DA.SetDataList(0, points);
         }
 
-        private List<Point3d> CreateNewBreps(Curve[] edges, int u, int v, int w)
+        public Tuple<List<List<Point3d>>, List<List<int>>> CreateNewBreps(Curve[] edges, int u, int v, int w)
         {
+
+            List<List<int>> global_numbering = new List<List<int>>();
+            List<List<Point3d>> points_brep = new List<List<Point3d>>();
             List<Point3d> points = new List<Point3d>();
             List<List<Point3d>> uDiv = new List<List<Point3d>>();
             List<List<Point3d>> vDiv = new List<List<Point3d>>();
             List<List<Point3d>> wDiv = new List<List<Point3d>>();
-            
-            
             
             for (int i=0; i<4; i++)
             {
@@ -114,6 +141,22 @@ namespace SolidsVR
 
             }
 
+            List<Vector3d> vecV1_ = new List<Vector3d>();
+            List<Vector3d> vecV2_ = new List<Vector3d>();
+            List<Vector3d> vecU_ = new List<Vector3d>();
+            //List<List<Vector3d>> vecV = new List<List<Vector3d>>();
+
+            for (int j = 0; j < (v + 1)-1; j++)
+            {
+                vecV1_.Add(vDiv[0][j+1] - vDiv[0][j]);
+                vecV2_.Add(vDiv[1][j+1] - vDiv[1][j]);
+            }
+
+            for (int j = 0; j < (u + 1) - 1; j++)
+            {
+                vecU_.Add(uDiv[0][j + 1] - uDiv[0][j]);
+            }
+
             //W-dir
 
             for (int i = 0; i <= w; i++)
@@ -128,18 +171,29 @@ namespace SolidsVR
                 Point3d p2_w = wDiv[1][i];
                 Point3d p3_w = wDiv[2][i];
                 Point3d p4_w = wDiv[3][i];
+            
+                
 
                 Vector3d vecV1 = (p4_w - p1_w) / (p1_w.DistanceTo(p4_w));
                 Vector3d vecV2 = (p3_w - p2_w) / (p2_w.DistanceTo(p3_w));
 
                 Double length_v1 = p1_w.DistanceTo(p4_w) / v;
                 Double length_v2 = p2_w.DistanceTo(p3_w) / v;
+                
+                
 
                 for (int j = 0; j <= v; j++)
                 {
                     //Creating points in v-direction
                     Point3d p1_v = new Point3d(p1_w.X + length_v1 * j * vecV1.X, p1_w.Y + length_v1 * j * vecV1.Y, p1_w.Z + length_v1 * j * vecV1.Z);
                     Point3d p2_v = new Point3d(p2_w.X + length_v2 * j * vecV2.X, p2_w.Y + length_v2 * j * vecV2.Y, p2_w.Z + length_v2 * j * vecV2.Z);
+
+                    //Point3d p1_v = Point3d.Add(p1_w + vecV1_[j]);
+
+                    //Point3d p1_v = p1_w + vecV1_[j];
+                   // Point3d p2_v = p2_w + vecV2_[j];
+
+
 
                     Vector3d vec_u1 = (p2_v - p1_v) / (p1_v.DistanceTo(p2_v));
 
@@ -156,8 +210,80 @@ namespace SolidsVR
                 }
             }
 
-            return points;
+            // Putting together the breps:
+
+            //*******So much shitty code. Just trying to make it work:)))((:
+
+            List<int> listJumpOne = new List<int>(); // List with points where it must move in v-direction
+            List<int> listJumpUp = new List<int>(); // List with points where it must move upwards w-direction
+
+
+            //Finding indexes for jumping in v-direction
+            for (int i = 0; i < w; i++)
+            {
+                for (int j = 0; j < v - 1; j++)
+                {
+                    listJumpOne.Add((u - 1) + j * (u + 1) + (u + 1) * (v + 1) * i);
+                }
+
+            }
+
+            //Finding indexes for jumping in w-direction
+            for (int i = 0; i < w; i++)
+            {
+                listJumpUp.Add((u + 1) * (v + 1) - (u + 1) - 2 + (u + 1) * (v + 1) * i);
+            }
+
+            int index = 0;
+
+            for (int i = 0; i < u * v * w; i++) // Creating u*v*w new breps having the 8 corner points
+            {
+
+                List<Point3d> brp = new List<Point3d>();
+
+                //Putting together the 8 points to make the brep
+                brp.Add(points[index]);
+                brp.Add(points[index + 1]);
+                brp.Add(points[(u + 1) + (index + 1)]);
+                brp.Add(points[(u + 1) + (index)]);
+                brp.Add(points[(u + 1) * (v + 1) + index]);
+                brp.Add(points[(u + 1) * (v + 1) + (index + 1)]);
+                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (index + 1)]);
+                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (index)]);
+
+                points_brep.Add(brp);
+
+                //Showing the connectivity between local and global nodes
+                List<int> connectivity = new List<int>();
+                connectivity.Add(index);
+                connectivity.Add(index + 1);
+                connectivity.Add((u + 1) + (index + 1));
+                connectivity.Add((u + 1) + (index));
+                connectivity.Add((u + 1) * (v + 1) + index);
+                connectivity.Add((u + 1) * (v + 1) + (index + 1));
+                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index + 1));
+                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index));
+
+                global_numbering.Add(connectivity);
+
+                if (listJumpOne.Contains(index)) //Checking if we need to move to next row
+                {
+                    index += 1;
+                }
+
+
+                if (listJumpUp.Contains(index)) //Checking if we need to move to next level
+                {
+                    index += (u + 2);
+                }
+
+                index++;
+            }
+
+            return Tuple.Create(points_brep, global_numbering);
+
         }
+    
 
         public Curve[] SortEdges(Curve[] edges)
         {
