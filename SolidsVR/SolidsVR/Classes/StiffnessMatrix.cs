@@ -74,7 +74,8 @@ namespace SolidsVR
 
             for (int i = 0; i < pList.Count; i++)
             {
-                Point3d pointA = new Point3d(pList[i].X - centroid.X, pList[i].Y - centroid.Y, pList[i].Z - centroid.Z);
+                //Point3d pointA = new Point3d(pList[i].X - centroid.X, pList[i].Y - centroid.Y, pList[i].Z - centroid.Z);
+                Point3d pointA = new Point3d(pList[i].X, pList[i].Y, pList[i].Z);
                 pNatural[i] = pointA;
 
             }

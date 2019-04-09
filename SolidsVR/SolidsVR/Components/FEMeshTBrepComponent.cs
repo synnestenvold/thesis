@@ -96,6 +96,7 @@ namespace SolidsVR
             //Apply boundary condition and predeformations
             K_tot = ApplyBC(K_tot, bcNodes);
             K_tot = ApplyBC(K_tot, predefNodes);
+            //ApplyBCRed(K_tot, bcNodes);
 
             //Needs to take the predefs into account
             Vector<double> R_def = Vector<double>.Build.Dense(sizeOfMatrix);
@@ -179,7 +180,7 @@ namespace SolidsVR
         }
 
 
-        public Tuple<Matrix<double>, List<List<Matrix<Double>>>> CreateGlobalStiffnessMatrix(List<List<int>> connectivity, List<List<Point3d>> elementPoints, int sizeOfMatrix, Material material)
+        public Tuple<Matrix<double>, List<List<Matrix<double>>>> CreateGlobalStiffnessMatrix(List<List<int>> connectivity, List<List<Point3d>> elementPoints, int sizeOfMatrix, Material material)
         {
             Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
             Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
@@ -203,6 +204,7 @@ namespace SolidsVR
             }
             return Tuple.Create(K_tot, B_all);
         }
+
 
         public Tuple<List<int>, List<double>> CreateBCList(List<string> bctxt, Point3d[] points)
         {
@@ -275,6 +277,37 @@ namespace SolidsVR
 
             return K;
         }
+
+        public void ApplyBCRed(Matrix<double> K, List<int> bcNodes)
+        {
+            Matrix<double> K_red = K;
+
+            for (int i = 0; i < bcNodes.Count; i++)
+            {
+                K_red = K_red.RemoveColumn(i);
+                K_red = K_red.RemoveRow(i);
+
+            }
+
+            int k = 0;
+        }
+
+        /*
+
+        public void ApplyBCRed(Matrix<double> K, List<int> bcNodes)
+        {
+            Matrix<double> K_red = K;
+
+            for (int i = 0; i < bcNodes.Count; i++)
+            {
+                K_red = K_red.RemoveColumn(i);
+                K_red = K_red.RemoveRow(i);
+
+            }
+
+            int k = 0;
+        }
+        */
 
         public Vector<double> ApplyPreDef(Matrix<double> K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
         {

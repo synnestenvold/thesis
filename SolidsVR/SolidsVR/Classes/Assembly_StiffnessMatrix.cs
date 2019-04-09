@@ -27,7 +27,7 @@ namespace SolidsVR
                     {
                         for (int e = 0; e < 3; e++)
                         {
-                            K_tot[3 * connectivity[i] + k, 3 * connectivity[j] + e] = K_tot[3 * connectivity[i] + k, 3 * connectivity[j] + e] + Math.Round(K_e[3 * i + k, 3 * j + e], 4);
+                            K_tot[3 * connectivity[i] + k, 3 * connectivity[j] + e] = K_tot[3 * connectivity[i] + k, 3 * connectivity[j] + e] + Math.Round(K_e[3 * i + k, 3 * j + e], 8);
 
                         }
                     }
