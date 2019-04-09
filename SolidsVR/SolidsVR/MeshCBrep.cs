@@ -34,9 +34,7 @@ namespace SolidsVR
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            //pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.list);
-            pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -76,43 +74,18 @@ namespace SolidsVR
             List<List<Point3d>> elementPoints = tuple.Item1;
             List<List<int>> connectivity = tuple.Item2;
             int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
-            //Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
+            Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
             //Setting values for Mesh class
             Mesh_class mesh = new Mesh_class(u, v, w);
-            //List<Point3d> points = CreateNewBreps(sortedEdges, u, v, w);
-            //mesh.SetConnectivity(connectivity);
-            //mesh.SetElementPoints(elementPoints);
-            //mesh.SetSizeOfMatrix(sizeOfMatrix);
-            //mesh.SetGlobalPoints(globalPoints);
+            mesh.SetConnectivity(connectivity);
+            mesh.SetElementPoints(elementPoints);
+            mesh.SetSizeOfMatrix(sizeOfMatrix);
+            mesh.SetGlobalPoints(globalPoints);
 
             //---output---
 
-
-            DataTree<Point3d> treePoints = new DataTree<Point3d>();
-            DataTree<int> treeIndexes = new DataTree<int>();
-
-            int i = 0;
-            //Create a tree structure of the list of new brep-nodes with cartesian coordinates
-            foreach (List<Point3d> innerList in elementPoints)
-            {
-                treePoints.AddRange(innerList, new GH_Path(new int[] { 0, i }));
-                i++;
-            }
-
-            i = 0;
-
-            //Create a tree structure of the list of new brep-nodes with indexes
-            foreach (List<int> innerList in connectivity)
-            {
-                treeIndexes.AddRange(innerList, new GH_Path(new int[] { 0, i }));
-                i++;
-            }
-
-            DA.SetDataTree(0, treeIndexes);
-            DA.SetDataTree(1, treePoints);
-
-            //DA.SetDataList(0, points);
+            DA.SetData(0, mesh);
         }
 
         public Tuple<List<List<Point3d>>, List<List<int>>> CreateNewBreps(Curve[] edges, int u, int v, int w)
@@ -253,6 +226,9 @@ namespace SolidsVR
 
                 points_brep.Add(brp);
 
+                List<Line> meshEdges = CreateEdgesMesh(brp);
+
+                List<Surface> meshSurfaces = CreateSurfaceMesh(brp);
                 
                 //Showing the connectivity between local and global nodes
                 List<int> connectivity = new List<int>();
@@ -264,6 +240,9 @@ namespace SolidsVR
                 connectivity.Add((u + 1) * (v + 1) + (index + 1));
                 connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index + 1));
                 connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index));
+
+                Mesh mesh = new Mesh();
+
 
                 global_numbering.Add(connectivity);
 
@@ -284,7 +263,62 @@ namespace SolidsVR
             return Tuple.Create(points_brep, global_numbering);
 
         }
-    
+
+        public Point3d[] CreatePointList(List<List<int>> treeConnectivity, List<List<Point3d>> treePoints, int sizeOfM)
+        {
+            Point3d[] pointList = new Point3d[sizeOfM / 3];
+
+
+            for (int i = 0; i < treeConnectivity.Count; i++)
+            {
+                List<int> connectedNodes = treeConnectivity[i];
+                List<Point3d> connectedPoints = treePoints[i];
+
+                for (int j = 0; j < connectedNodes.Count; j++)
+                {
+                    pointList[connectedNodes[j]] = connectedPoints[j];
+                }
+            }
+            return pointList;
+
+        }
+
+        public List<Line> CreateEdgesMesh(List<Point3d> elementPoints)
+        {
+            List<Line> edges = new List<Line>
+            {
+                new Line(elementPoints[0], elementPoints[1]),
+                new Line(elementPoints[1], elementPoints[2]),
+                new Line(elementPoints[2], elementPoints[3]),
+                new Line(elementPoints[3], elementPoints[0]),
+                new Line(elementPoints[0], elementPoints[4]),
+                new Line(elementPoints[1], elementPoints[5]),
+                new Line(elementPoints[2], elementPoints[6]),
+                new Line(elementPoints[3], elementPoints[7]),
+                new Line(elementPoints[4], elementPoints[5]),
+                new Line(elementPoints[5], elementPoints[6]),
+                new Line(elementPoints[6], elementPoints[7]),
+                new Line(elementPoints[7], elementPoints[4]),
+
+            };
+
+            return edges;
+        }
+
+        /*
+        public List<Line> CreateSurfaceMesh(List<Point3d> elementPoints)
+        {
+            List<Surface> surfaces = new List<Surface>
+            {
+                new Surface(elementPoints[0],elementPoints[1], elementPoints[5], elementPoints[4]),
+
+
+            };
+            Surface sur = new Surface();
+
+            return edges;
+        }
+        */
 
         public Curve[] SortEdges(Curve[] edges)
         {
