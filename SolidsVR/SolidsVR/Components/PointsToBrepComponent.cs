@@ -59,6 +59,12 @@ namespace SolidsVR
             //Brep brep = new Brep();
             Curve[] curves = brep.DuplicateEdgeCurves();
 
+            //Brep[] surfaces = brep.Faces;
+
+            //List<BrepFace> surfaces = brep.Bre;
+
+            BrepFace b = brep.Faces();
+
             //curves.DivideByCount(10);
 
 
