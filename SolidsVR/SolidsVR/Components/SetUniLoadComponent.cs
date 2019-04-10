@@ -21,13 +21,8 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            //pManager.AddSurfaceParameter("Surface", "Surface", "Surface for loading", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Surface number", "Surface no", "Surface number for loading (0.5)", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Surface number", "Surface no", "Surface number for loading (0-5)", GH_ParamAccess.item);
             pManager.AddVectorParameter("Load vector", "Load", "Direction and load amount in kN/m", GH_ParamAccess.item);
-            //pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item);
-            //pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
-            //pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
-            //pManager.AddBrepParameter("Brep", "B", "Brep as a reference size", GH_ParamAccess.item);'
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh class", GH_ParamAccess.item);
         }
 
@@ -42,13 +37,9 @@ namespace SolidsVR
         {
 
             //---variables---
-
-            //Surface surface = null;
+            
             int surfNo = 0;
             Vector3d forceVec = new Vector3d();
-            int u = 1;
-            int v = 1;
-            int w = 1;
             Brep_class brp = new Brep_class();
             Mesh_class mesh = new Mesh_class();
 
@@ -56,22 +47,17 @@ namespace SolidsVR
 
             if (!DA.GetData(0, ref surfNo)) return;
             if (!DA.GetData(1, ref forceVec)) return;
-            //if (!DA.GetData(2, ref u)) return;
-            //if (!DA.GetData(3, ref v)) return;
-            //if (!DA.GetData(4, ref w)) return;
             if (!DA.GetData(2, ref mesh)) return;
 
             //---solve---
 
             brp = mesh.GetBrep();
             List<Node> nodes = mesh.GetNodeList();
-            //List<string> pointLoads = FindPointLoadsOld(surface, forceVec, u, v, w, origBrep);
             List<string> pointLoads = FindPointLoads(surfNo, forceVec, nodes, brp);
 
             ///////FOR PREVIEWING OF LOADS///////
 
             double refLength = brp.GetRefLength();
-
             List<Line> arrows = DrawLoads(pointLoads, refLength);
             Color color = Color.Blue;
 
