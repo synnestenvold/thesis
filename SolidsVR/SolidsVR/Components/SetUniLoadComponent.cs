@@ -175,6 +175,7 @@ namespace SolidsVR
             List<string> edgePointsString = new List<string>();
             for (int i = 0; i < nodes.Count; i++)
             {
+                List<int> test = nodes[i].GetSurfaceNum();
                 if (nodes[i].GetSurfaceNum().Contains(surfNo))
                 {
                     if (nodes[i].GetIsMiddle())
