@@ -135,8 +135,6 @@ namespace SolidsVR
             Point3d[] vertices = surfaceBrep.DuplicateVertices();
             Point3d[] nodesAll = brp.DuplicateVertices();
             
-            
-
             //Finding all points 
             points.Add(vertices[0]);
             points.Add(vertices[1]);

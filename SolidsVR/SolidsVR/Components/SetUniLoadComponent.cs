@@ -52,8 +52,10 @@ namespace SolidsVR
             //---solve---
 
             brp = mesh.GetBrep();
+            Brep surface = mesh.GetSurfaceAsBrep(surfNo);
+            double area = surface.GetArea();
             List<Node> nodes = mesh.GetNodeList();
-            List<string> pointLoads = FindPointLoads(surfNo, forceVec, nodes, brp);
+            List<string> pointLoads = FindPointLoads(surfNo, area, forceVec, nodes, brp);
 
             ///////FOR PREVIEWING OF LOADS///////
 
@@ -167,15 +169,15 @@ namespace SolidsVR
             return arrows;
         }
 
-        public List<string> FindPointLoads(int surfNo, Vector3d forceVec, List<Node> nodes, Brep_class brp)
+        public List<string> FindPointLoads(int surfNo, double area, Vector3d forceVec, List<Node> nodes, Brep_class brp)
         {
             List<string> pointLoads = new List<string>();
             List<string> centerPointsString = new List<string>();
             List<string> cornerPointsString = new List<string>();
             List<string> edgePointsString = new List<string>();
+            forceVec = forceVec * area;
             for (int i = 0; i < nodes.Count; i++)
             {
-                List<int> test = nodes[i].GetSurfaceNum();
                 if (nodes[i].GetSurfaceNum().Contains(surfNo))
                 {
                     if (nodes[i].GetIsMiddle())
@@ -197,39 +199,35 @@ namespace SolidsVR
                         string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
                         edgePointsString.Add(pointString);
                     }
-
-                    double pointsCount = 4 * centerPointsString.Count + cornerPointsString.Count + 2 * edgePointsString.Count;
-                    Brep surfaceBrep = brp.GetSurfaceAsBrep(surfNo); //vil hente ut surfacen for å finne areal
-                    double area = surfaceBrep.GetArea();
-                    forceVec = forceVec * area;
-
-                    List<string> centerPointLoads = new List<string>();
-                    List<string> cornerPointLoads = new List<string>();
-                    List<string> edgePointLoads = new List<string>();
-                    string centerVector = 4 * (forceVec.X) / pointsCount + "," + 4 * (forceVec.Y) / pointsCount + "," + 4 * (forceVec.Z) / pointsCount;
-                    string cornerVector = (forceVec.X) / pointsCount + "," + (forceVec.Y) / pointsCount + "," + (forceVec.Z) / pointsCount;
-                    string edgeVector = 2 * (forceVec.X) / pointsCount + "," + 2 * (forceVec.Y) / pointsCount + "," + 2 * (forceVec.Z) / pointsCount;
-
-                    foreach (string s in centerPointsString)
-                    {
-                        centerPointLoads.Add(s + ";" + centerVector);
-                    }
-                    
-                    foreach (string s in cornerPointsString)
-                    {
-                        cornerPointLoads.Add(s + ";" + cornerVector);
-                    }
-                    foreach (string s in edgePointsString)
-                    {
-                        edgePointLoads.Add(s + ";" + edgeVector);
-                    }
-
-                    pointLoads.AddRange(centerPointLoads);
-                    pointLoads.AddRange(edgePointLoads);
-                    pointLoads.AddRange(cornerPointLoads);
-                    
                 }
             }
+            double pointsCount = 4 * centerPointsString.Count + cornerPointsString.Count + 2 * edgePointsString.Count;
+            
+            List<string> centerPointLoads = new List<string>();
+            List<string> cornerPointLoads = new List<string>();
+            List<string> edgePointLoads = new List<string>();
+            string centerVector = 4 * (forceVec.X) / pointsCount + "," + 4 * (forceVec.Y) / pointsCount + "," + 4 * (forceVec.Z) / pointsCount;
+            string cornerVector = (forceVec.X) / pointsCount + "," + (forceVec.Y) / pointsCount + "," + (forceVec.Z) / pointsCount;
+            string edgeVector = 2 * (forceVec.X) / pointsCount + "," + 2 * (forceVec.Y) / pointsCount + "," + 2 * (forceVec.Z) / pointsCount;
+
+            foreach (string s in centerPointsString)
+            {
+                centerPointLoads.Add(s + ";" + centerVector);
+            }
+
+            foreach (string s in cornerPointsString)
+            {
+                cornerPointLoads.Add(s + ";" + cornerVector);
+            }
+            foreach (string s in edgePointsString)
+            {
+                edgePointLoads.Add(s + ";" + edgeVector);
+            }
+
+            pointLoads.AddRange(centerPointLoads);
+            pointLoads.AddRange(edgePointLoads);
+            pointLoads.AddRange(cornerPointLoads);
+
             return pointLoads;
         }
 

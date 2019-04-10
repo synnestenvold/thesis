@@ -27,8 +27,6 @@ namespace SolidsVR
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
-            pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
-            pManager[3].Optional = true;
         }
 
 
@@ -64,18 +62,15 @@ namespace SolidsVR
             if (!DA.GetData(0, ref mesh)) return;
             if (!DA.GetDataTree(1, out treeDef)) return;
             if (!DA.GetData(2, ref scale)) return;
-            if (!DA.GetData(3, ref brep)) return;
 
             //---setup---
 
             List<Brep> breps = new List<Brep>();
 
             // Setting up values for refLength and angle for rotation of area
-            VolumeMassProperties vmp = VolumeMassProperties.Compute(brep);
-            Point3d centroid = vmp.Centroid;
-            double volume = brep.GetVolume();
-            double sqrt3 = (double)1 / 3;
-            double refLength = Math.Pow(brep.GetVolume(), sqrt3);
+            Brep_class brp = mesh.GetBrep();
+            Point3d centroid = brp.GetCentroid();
+            double refLength = brp.GetRefLength();
             double refSize = (double)(refLength / 10);
             double angle = 270*Math.PI/180;
             Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 3.5, 0)); //Center for viewpoint
