@@ -219,6 +219,7 @@ namespace SolidsVR
                     double pointsCount = 4 * centerPointsString.Count + cornerPointsString.Count + 2 * edgePointsString.Count;
                     Brep surfaceBrep = brp.getSurface(surfNo); //vil hente ut surfacen for å finne areal
                     double area = surfaceBrep.GetArea();
+
                     forceVec = forceVec * area;
 
                     List<string> centerPointLoads = new List<string>();
