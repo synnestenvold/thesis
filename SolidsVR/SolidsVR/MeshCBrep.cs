@@ -266,7 +266,7 @@ namespace SolidsVR
         public void SetNodePosition(Node node, Point3d p, Point3d[] cornerPoints, int i, int j, int k, int u, int v, int w)
         {
             if (cornerPoints.Contains(p)) node.SetIsCorner();
-            else if (i == 0 || j == 0 || k == 0 || i == w || j == v || k == u) node.SetIsEdge();
+            else if (i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k ==0 ||  i == w && j == 0 || i == 0 && k == u ||  j == v && k == 0 || i == 0 && j == v || i == w && k == 0 || j == 0 && k == u || i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0) node.SetIsEdge();
             else node.SetIsMiddle();
         }
 
