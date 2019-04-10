@@ -18,6 +18,7 @@ namespace SolidsVR
         List<List<int>> connectivity = new List<List<int>>();
         List<List<Line>> edgesMesh = new List<List<Line>>();
         List<List<Brep>> surfacesMesh = new List<List<Brep>>();
+        List<Node> nodes = new List<Node>();
 
         Point3d[] globalPoints = null;
         int sizeOfMatrix = 0;
@@ -105,6 +106,18 @@ namespace SolidsVR
         {
             return surfacesMesh;
         }
+
+        public void SetNodeList(List<Node> _nodes)
+        {
+            nodes = _nodes;
+        }
+
+        public List<Node> GetNodeList()
+        {
+            return nodes;
+        }
+
+        
 
 
 
