@@ -28,7 +28,7 @@ namespace SolidsVR
             //pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
             //pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
             //pManager.AddBrepParameter("Brep", "B", "Brep as a reference size", GH_ParamAccess.item);'
-            pManager.AddGenericParameter("Mesh", "M", "Mesh class", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh class", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -50,7 +50,6 @@ namespace SolidsVR
             int v = 1;
             int w = 1;
             Brep_class brp = new Brep_class();
-            Brep origBrep = new Brep();
             Mesh_class mesh = new Mesh_class();
 
             //---input---
@@ -71,14 +70,9 @@ namespace SolidsVR
 
             ///////FOR PREVIEWING OF LOADS///////
 
-            //Setting up values for reflength and angle for rotation of area
-
-            double volume = origBrep.GetVolume();
-            double sqrt3 = (double)1 / 3;
-            double refLength = Math.Pow(volume, sqrt3);
+            double refLength = brp.GetRefLength();
 
             List<Line> arrows = DrawLoads(pointLoads, refLength);
-
             Color color = Color.Blue;
 
             //---output---
@@ -220,7 +214,6 @@ namespace SolidsVR
                     double pointsCount = 4 * centerPointsString.Count + cornerPointsString.Count + 2 * edgePointsString.Count;
                     Brep surfaceBrep = brp.GetSurfaceAsBrep(surfNo); //vil hente ut surfacen for å finne areal
                     double area = surfaceBrep.GetArea();
-
                     forceVec = forceVec * area;
 
                     List<string> centerPointLoads = new List<string>();

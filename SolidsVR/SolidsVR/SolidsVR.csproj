@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="Classes\Assembly_StiffnessMatrix.cs" />
     <Compile Include="Classes\Bmatrix.cs" />
+    <Compile Include="Classes\Brep_class.cs" />
     <Compile Include="Classes\Material.cs" />
     <Compile Include="Classes\Node.cs" />
     <Compile Include="Components\ClosestPointComponent.cs" />
