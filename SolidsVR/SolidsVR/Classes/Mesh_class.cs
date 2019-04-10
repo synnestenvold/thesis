@@ -19,6 +19,7 @@ namespace SolidsVR
         List<List<Line>> edgesMesh = new List<List<Line>>();
         List<List<Brep>> surfacesMesh = new List<List<Brep>>();
         List<Node> nodes = new List<Node>();
+        Brep_class brp = new Brep_class();
 
         Point3d[] globalPoints = null;
         int sizeOfMatrix = 0;
@@ -117,7 +118,17 @@ namespace SolidsVR
             return nodes;
         }
 
-        
+        public Brep_class GetBrep()
+        {
+            return brp;
+        }
+
+        public void SetBrep(Brep_class _brp)
+        {
+            brp = _brp;
+        }
+
+
 
 
 

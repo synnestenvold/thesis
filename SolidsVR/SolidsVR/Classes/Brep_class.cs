@@ -9,11 +9,14 @@ namespace SolidsVR
 {
     public class Brep_class
     {
-        private Brep brp = new Brep();
-        private List<Surface> surfaces = new List<Surface>();
+        Brep brp = new Brep();
+        private List<Brep> surfaces = new List<Brep>();
 
+        //Point3d[] vertices;
+        
         public Brep_class(Brep _brp) {
             brp = _brp;
+            //Point3d[] vertices = brp.DuplicateVertices();
         }
 
         public Brep_class() { }
@@ -22,15 +25,22 @@ namespace SolidsVR
         {
             return brp;
         }
+        public void SetSurfaces(List<Brep> _surf)
+        {
+            surfaces = _surf;
+        }
+        public List<Brep> GetSurfaces()
+        {
+            return surfaces;
+        }
         public void SetBrep(Brep _brp)
         {
             brp = _brp;
         }
 
-        public Brep GetSurfaceAsBrep(int s)
+        public Brep GetSurfaceAsBrep(int surfNo)
         {
-            //hent ut faces??
-            return surfaces[s].ToBrep();
+            return surfaces[surfNo];
         }
     }
 }

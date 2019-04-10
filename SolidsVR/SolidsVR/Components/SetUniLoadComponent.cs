@@ -49,6 +49,7 @@ namespace SolidsVR
             int u = 1;
             int v = 1;
             int w = 1;
+            Brep_class brp = new Brep_class();
             Brep origBrep = new Brep();
             Mesh_class mesh = new Mesh_class();
 
@@ -63,10 +64,10 @@ namespace SolidsVR
 
             //---solve---
 
-            Brep origBrep = mesh.getBrep();
+            brp = mesh.GetBrep();
             List<Node> nodes = mesh.GetNodeList();
             //List<string> pointLoads = FindPointLoadsOld(surface, forceVec, u, v, w, origBrep);
-            List<string> pointLoads = FindPointLoads(surfNo, forceVec, nodes, origBrep);
+            List<string> pointLoads = FindPointLoads(surfNo, forceVec, nodes, brp);
 
             ///////FOR PREVIEWING OF LOADS///////
 
@@ -186,7 +187,7 @@ namespace SolidsVR
             return arrows;
         }
 
-        public List<string> FindPointLoads(int surfNo, Vector3d forceVec, List<Node> nodes, Brep brp)
+        public List<string> FindPointLoads(int surfNo, Vector3d forceVec, List<Node> nodes, Brep_class brp)
         {
             List<string> pointLoads = new List<string>();
             List<string> centerPointsString = new List<string>();
@@ -217,7 +218,7 @@ namespace SolidsVR
                     }
 
                     double pointsCount = 4 * centerPointsString.Count + cornerPointsString.Count + 2 * edgePointsString.Count;
-                    Brep surfaceBrep = brp.getSurface(surfNo); //vil hente ut surfacen for å finne areal
+                    Brep surfaceBrep = brp.GetSurfaceAsBrep(surfNo); //vil hente ut surfacen for å finne areal
                     double area = surfaceBrep.GetArea();
 
                     forceVec = forceVec * area;

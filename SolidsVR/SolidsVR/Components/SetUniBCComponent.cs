@@ -58,6 +58,7 @@ namespace SolidsVR
             int v = 1;
             int w = 1;
             Brep origBrep = new Brep();
+            Brep_class brp = new Brep_class();
             Mesh_class mesh = new Mesh_class();
 
             //---input---
@@ -72,7 +73,7 @@ namespace SolidsVR
             u = mesh.getU();
             v = mesh.getV();
             w = mesh.getW();
-            origBrep = mesh.getBrep();
+            brp = mesh.GetBrep();
             List<Node> nodes = mesh.GetNodeList();
 
             //---solve---
