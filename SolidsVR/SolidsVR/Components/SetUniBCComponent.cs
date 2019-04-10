@@ -30,11 +30,13 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddSurfaceParameter("Surface", "Surface", "Surface for BC", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
-            pManager.AddBrepParameter("Brep", "B", "Brep as a reference size", GH_ParamAccess.item);
+            //pManager.AddSurfaceParameter("Surface", "Surface", "Surface for BC", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Surface number", "Surface number", "Surface number for BC (0-5)", GH_ParamAccess.item);
+            //pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item);
+            //pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
+            //pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
+            //pManager.AddBrepParameter("Brep", "B", "Brep as a reference size", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh class", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -49,24 +51,34 @@ namespace SolidsVR
         {
             //---variables---
 
-            Surface surface = null;
+            //Surface surface = null;
+            int surfNo = 0;
             string restrains = "0,0,0";
             int u = 1;
             int v = 1;
             int w = 1;
             Brep origBrep = new Brep();
+            Mesh_class mesh = new Mesh_class();
 
             //---input---
 
-            if (!DA.GetData(0, ref surface)) return;
-            if (!DA.GetData(1, ref u)) return;
-            if (!DA.GetData(2, ref v)) return;
-            if (!DA.GetData(3, ref w)) return;
-            if (!DA.GetData(4, ref origBrep)) return;
+            if (!DA.GetData(0, ref surfNo)) return;
+            if (!DA.GetData(1, ref mesh)) return;
+            //if (!DA.GetData(1, ref u)) return;
+            //if (!DA.GetData(2, ref v)) return;
+            //if (!DA.GetData(3, ref w)) return;
+            //if (!DA.GetData(4, ref origBrep)) return;
+
+            u = mesh.getU();
+            v = mesh.getV();
+            w = mesh.getW();
+            origBrep = mesh.getBrep();
+            List<Node> nodes = mesh.getNodes();
 
             //---solve---
 
-            List<string> pointsBC = FindBCPoints(surface, restrains, u, v, w, origBrep);
+            //List<string> pointsBCold = FindBCPointsOld(surface, restrains, u, v, w, origBrep);
+            List<string> pointsBC = FindBCPoints(surfNo, restrains, nodes);
 
             ///////FOR PREVIEWING OF BC///////
 
@@ -132,13 +144,30 @@ namespace SolidsVR
             return bcCones;
         }
 
-        public List<string> FindBCPoints (Surface surface, string restrains, int u, int v, int w, Brep brp)
+        public List<string> FindBCPoints (int surfNo, string restrains, List<Node> nodes)
+        {
+            //List<string> pointsString = new List<string>();
+            List<string> pointsBC = new List<string>();
+            for (int i = 0; i<nodes.Count; i++)
+            {
+                if (nodes[i].getSurface() == surfNo)
+                {
+                    Point3d node = nodes[i].getCoord();
+                    string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
+                    pointsBC.Add(pointString + ";" + restrains);
+                }
+            }
+            return pointsBC;
+        }
+
+        public List<string> FindBCPointsOld (Surface surface, string restrains, int u, int v, int w, Brep brp)
         {
             List<Point3d> points = new List<Point3d>();
             List<string> pointsString = new List<string>();
             Brep surfaceBrep = surface.ToBrep();
             Point3d[] vertices = surfaceBrep.DuplicateVertices();
             Point3d[] nodesAll = brp.DuplicateVertices();
+            
             
 
             //Finding all points 
