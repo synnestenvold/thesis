@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Drawing;
+using System.Linq;
 
 
 namespace SolidsVR
@@ -20,12 +21,14 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddSurfaceParameter("Surface", "Surface", "Surface for loading", GH_ParamAccess.item);
+            //pManager.AddSurfaceParameter("Surface", "Surface", "Surface for loading", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Surface number", "Surface no", "Surface number for loading (0.5)", GH_ParamAccess.item);
             pManager.AddVectorParameter("Load vector", "Load", "Direction and load amount in kN/m", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
-            pManager.AddBrepParameter("Brep", "B", "Brep as a reference size", GH_ParamAccess.item);
+            //pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item);
+            //pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
+            //pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
+            //pManager.AddBrepParameter("Brep", "B", "Brep as a reference size", GH_ParamAccess.item);'
+            pManager.AddGenericParameter("Mesh", "M", "Mesh class", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -40,30 +43,35 @@ namespace SolidsVR
 
             //---variables---
 
-            Surface surface = null;
+            //Surface surface = null;
+            int surfNo = 0;
             Vector3d forceVec = new Vector3d();
             int u = 1;
             int v = 1;
             int w = 1;
             Brep origBrep = new Brep();
+            Mesh_class mesh = new Mesh_class();
 
             //---input---
 
-            if (!DA.GetData(0, ref surface)) return;
+            if (!DA.GetData(0, ref surfNo)) return;
             if (!DA.GetData(1, ref forceVec)) return;
-            if (!DA.GetData(2, ref u)) return;
-            if (!DA.GetData(3, ref v)) return;
-            if (!DA.GetData(4, ref w)) return;
-            if (!DA.GetData(5, ref origBrep)) return; //input as 8 points insted, and create origBrep from this
+            //if (!DA.GetData(2, ref u)) return;
+            //if (!DA.GetData(3, ref v)) return;
+            //if (!DA.GetData(4, ref w)) return;
+            if (!DA.GetData(2, ref mesh)) return;
 
             //---solve---
 
-            List<string> pointLoads = FindPointLoads(surface, forceVec, u, v, w, origBrep);
+            Brep origBrep = mesh.getBrep();
+            List<Node> nodes = mesh.GetNodeList();
+            //List<string> pointLoads = FindPointLoadsOld(surface, forceVec, u, v, w, origBrep);
+            List<string> pointLoads = FindPointLoads(surfNo, forceVec, nodes, origBrep);
 
             ///////FOR PREVIEWING OF LOADS///////
 
             //Setting up values for reflength and angle for rotation of area
-            
+
             double volume = origBrep.GetVolume();
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(volume, sqrt3);
@@ -178,7 +186,73 @@ namespace SolidsVR
             return arrows;
         }
 
-        public List<string> FindPointLoads(Surface surface, Vector3d forceVec, int u, int v, int w, Brep brep)
+        public List<string> FindPointLoads(int surfNo, Vector3d forceVec, List<Node> nodes, Brep brp)
+        {
+            List<string> pointLoads = new List<string>();
+            List<string> centerPointsString = new List<string>();
+            List<string> cornerPointsString = new List<string>();
+            List<string> edgePointsString = new List<string>();
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                if (nodes[i].GetSurfaceNum().Contains(surfNo))
+                {
+                    if (nodes[i].GetIsMiddle())
+                    {
+                        Point3d node = nodes[i].GetCoord();
+                        string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
+                        centerPointsString.Add(pointString);
+                     
+                    }
+                    else if (nodes[i].GetIsCorner())
+                    {
+                        Point3d node = nodes[i].GetCoord();
+                        string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
+                        cornerPointsString.Add(pointString);
+                    }
+                    else if (nodes[i].GetIsEdge())
+                    {
+                        Point3d node = nodes[i].GetCoord();
+                        string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
+                        edgePointsString.Add(pointString);
+                    }
+
+                    double pointsCount = 4 * centerPointsString.Count + cornerPointsString.Count + 2 * edgePointsString.Count;
+                    Brep surfaceBrep = brp.getSurface(surfNo); //vil hente ut surfacen for å finne areal
+                    double area = surfaceBrep.GetArea();
+
+                    forceVec = forceVec * area;
+
+                    List<string> centerPointLoads = new List<string>();
+                    List<string> cornerPointLoads = new List<string>();
+                    List<string> edgePointLoads = new List<string>();
+                    string centerVector = 4 * (forceVec.X) / pointsCount + "," + 4 * (forceVec.Y) / pointsCount + "," + 4 * (forceVec.Z) / pointsCount;
+                    string cornerVector = (forceVec.X) / pointsCount + "," + (forceVec.Y) / pointsCount + "," + (forceVec.Z) / pointsCount;
+                    string edgeVector = 2 * (forceVec.X) / pointsCount + "," + 2 * (forceVec.Y) / pointsCount + "," + 2 * (forceVec.Z) / pointsCount;
+
+                    foreach (string s in centerPointsString)
+                    {
+                        centerPointLoads.Add(s + ";" + centerVector);
+                    }
+                    
+                    foreach (string s in cornerPointsString)
+                    {
+                        cornerPointLoads.Add(s + ";" + cornerVector);
+                    }
+                    foreach (string s in edgePointsString)
+                    {
+                        edgePointLoads.Add(s + ";" + edgeVector);
+                    }
+
+                    pointLoads.AddRange(centerPointLoads);
+                    pointLoads.AddRange(edgePointLoads);
+                    pointLoads.AddRange(cornerPointLoads);
+                    
+                }
+            }
+            return pointLoads;
+        }
+
+        public List<string> FindPointLoadsOld(Surface surface, Vector3d forceVec, int u, int v, int w, Brep brep)
         {
             Brep surfaceBrep = surface.ToBrep();
             Point3d [] vertices = surfaceBrep.DuplicateVertices();
