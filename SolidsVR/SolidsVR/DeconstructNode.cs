@@ -32,6 +32,7 @@ namespace SolidsVR
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("Position", "StringPos", "Position of node", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Surfaces", "Surfaces", "Which surface node include", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -54,7 +55,10 @@ namespace SolidsVR
             if (isEdge) text = "Edge";
             if (isMiddle) text = "Middle";
 
+            List<int> i = node.GetSurfaceNum();
+
             DA.SetData(0, text);
+            DA.SetDataList(1, i);
         }
 
         /// <summary>
