@@ -170,6 +170,7 @@ namespace SolidsVR
                         Node node = new Node(p1_u);
 
                         SetNodePosition(node, p1_u, cornerNodes, i, j, k, u, v, w);
+                        SetNodeSurface(node, i, j, k, u, v, w);
                         nodes.Add(node);
 
 
@@ -263,10 +264,20 @@ namespace SolidsVR
 
         }
 
+        public void SetNodeSurface(Node node, int i, int j, int k, int u, int v, int w)
+        {
+            if (j == 0) node.SetSurfaceNum(0);
+            if (k == u) node.SetSurfaceNum(1);
+            if (j == v) node.SetSurfaceNum(2);
+            if (k == 0) node.SetSurfaceNum(3);
+            if (i == 0) node.SetSurfaceNum(4);
+            if (i == w) node.SetSurfaceNum(5);
+        }
+
         public void SetNodePosition(Node node, Point3d p, Point3d[] cornerPoints, int i, int j, int k, int u, int v, int w)
         {
             if (cornerPoints.Contains(p)) node.SetIsCorner();
-            else if (i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k ==0 ||  i == w && j == 0 || i == 0 && k == u ||  j == v && k == 0 || i == 0 && j == v || i == w && k == 0 || j == 0 && k == u || i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0) node.SetIsEdge();
+            else if (i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k ==0 ||  i == w && j == 0 || i == 0 && k == u ||  j == v && k == 0 || i == 0 && j == v || i == w && k == 0 || j == 0 && k == u || i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0 || i == w && j == v || i == w && k == u || j == v && k == u) node.SetIsEdge();
             else node.SetIsMiddle();
         }
 

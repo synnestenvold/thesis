@@ -21,9 +21,9 @@ namespace SolidsVR
            coordinate = _coordinate;
         }
 
-        public void SetSurfaceNum(List<int> _surfaceNum)
+        public void SetSurfaceNum(int i)
         {
-            surfaceNum = _surfaceNum;
+            surfaceNum.Add(i);
         }
 
         public List<int> GetSurfaceNum()
