@@ -17,5 +17,18 @@ namespace SolidsVR.Classes
            coordinate = _coordinate;
         }
 
+        public Point3d Coordinate { get; set; }
+
+        public void SetCoord(Point3d _coord)
+        {
+            coordinate = _coord;
+
+        }
+
+        public Point3d GetCoord()
+        {
+            return coordinate;
+        }
+
     }
 }
