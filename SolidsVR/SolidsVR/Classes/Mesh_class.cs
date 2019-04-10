@@ -20,6 +20,7 @@ namespace SolidsVR
         List<List<Brep>> surfacesMesh = new List<List<Brep>>();
         List<Node> nodes = new List<Node>();
         Brep_class brp = new Brep_class();
+        Brep origBrep = new Brep()
 
         Point3d[] globalPoints = null;
         int sizeOfMatrix = 0;
@@ -128,6 +129,19 @@ namespace SolidsVR
             brp = _brp;
         }
 
+        public void SetOrigBrep(Brep _origBrep)
+        {
+            origBrep = _origBrep;
+        }
+
+        public List<Brep> OrderSurfaces(List<Point3d> corners)
+        {
+            List<Brep> orderedSurfaces = new List<Brep>();
+            
+            //get alle surfacene
+            //finne ut hvilken som er hvilken
+            return orderedSurfaces;
+        }
 
 
 
