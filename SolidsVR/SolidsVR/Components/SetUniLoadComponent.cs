@@ -64,7 +64,7 @@ namespace SolidsVR
             //---solve---
 
             Brep origBrep = mesh.getBrep();
-            List<Node> nodes = mesh.getNodes();
+            List<Node> nodes = mesh.GetNodeList();
             //List<string> pointLoads = FindPointLoadsOld(surface, forceVec, u, v, w, origBrep);
             List<string> pointLoads = FindPointLoads(surfNo, forceVec, nodes, origBrep);
 
@@ -194,24 +194,24 @@ namespace SolidsVR
             List<string> edgePointsString = new List<string>();
             for (int i = 0; i < nodes.Count; i++)
             {
-                if (nodes[i].getSurface() == surfNo)
+                if (nodes[i].GetSurfaceNum().Contains(surfNo))
                 {
-                    if (nodes[i].isCenter())
+                    if (nodes[i].GetIsMiddle())
                     {
-                        Point3d node = nodes[i].getCoord();
+                        Point3d node = nodes[i].GetCoord();
                         string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
                         centerPointsString.Add(pointString);
                      
                     }
-                    else if (nodes[i].isCorner())
+                    else if (nodes[i].GetIsCorner())
                     {
-                        Point3d node = nodes[i].getCoord();
+                        Point3d node = nodes[i].GetCoord();
                         string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
                         cornerPointsString.Add(pointString);
                     }
-                    else if (nodes[i].isEdge())
+                    else if (nodes[i].GetIsEdge())
                     {
-                        Point3d node = nodes[i].getCoord();
+                        Point3d node = nodes[i].GetCoord();
                         string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
                         edgePointsString.Add(pointString);
                     }

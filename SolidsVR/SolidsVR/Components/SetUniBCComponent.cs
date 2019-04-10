@@ -73,7 +73,7 @@ namespace SolidsVR
             v = mesh.getV();
             w = mesh.getW();
             origBrep = mesh.getBrep();
-            List<Node> nodes = mesh.getNodes();
+            List<Node> nodes = mesh.GetNodeList();
 
             //---solve---
 
@@ -150,9 +150,9 @@ namespace SolidsVR
             List<string> pointsBC = new List<string>();
             for (int i = 0; i<nodes.Count; i++)
             {
-                if (nodes[i].getSurface() == surfNo)
+                if (nodes[i].GetSurfaceNum().Contains(surfNo))
                 {
-                    Point3d node = nodes[i].getCoord();
+                    Point3d node = nodes[i].GetCoord();
                     string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
                     pointsBC.Add(pointString + ";" + restrains);
                 }
