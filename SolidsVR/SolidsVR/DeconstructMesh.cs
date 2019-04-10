@@ -37,7 +37,8 @@ namespace SolidsVR
             pManager.AddNumberParameter("Connectivity", "C", "Connectivity for each element", GH_ParamAccess.tree);
             pManager.AddLineParameter("Edges", "E", "Edges for each element", GH_ParamAccess.tree);
             pManager.AddBrepParameter("Surfaces", "S", "Surfaces for each element", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Nodes", "N", "Global coordinates", GH_ParamAccess.list);
+            pManager.AddPointParameter("Points", "P", "Global coordinates", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Nodes", "N", "Nodes class", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -55,6 +56,7 @@ namespace SolidsVR
             List<List<Line>> edgesMesh = mesh.GetEdges();
             List<List<Brep>> surfacesMesh = mesh.GetSurfaces();
             Point3d[] globalPoints = mesh.GetGlobalPoints();
+            List<Node> nodes = mesh.GetNodeList();
 
             DataTree<Point3d> treePoints = new DataTree<Point3d>();
             DataTree<int> treeConnectivity = new DataTree<int>();
@@ -76,6 +78,7 @@ namespace SolidsVR
             DA.SetDataTree(2, treeEdges);
             DA.SetDataTree(3, treeSurfaces);
             DA.SetDataList(4, globalPoints);
+            DA.SetDataList(5, nodes);
 
         }
 

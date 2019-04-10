@@ -20,6 +20,8 @@ namespace SolidsVR
         {
         }
 
+        Node node = new Node(new Point3d(0, 0, 0));
+
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
@@ -64,15 +66,18 @@ namespace SolidsVR
                 return;
             }
 
+            Point3d[] cornerPoints = brp.DuplicateVertices();
+
             Curve[] edges = brp.DuplicateEdgeCurves();
             Curve[] sortedEdges = SortEdges(corners, edges);
             
-            var tuple = CreateNewBreps(sortedEdges, u, v, w); 
+            var tuple = CreateNewBreps(sortedEdges, u, v, w, cornerPoints); 
 
             List<List<Point3d>> elementPoints = tuple.Item1;
             List<List<int>> connectivity = tuple.Item2;
             List<List<Line>> edgeMesh = tuple.Item3;
             List<List<Brep>> surfacesMesh = tuple.Item4;
+            List<Node> nodes = tuple.Item5;
             int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
             Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
@@ -84,19 +89,22 @@ namespace SolidsVR
             mesh.SetSurfacesMesh(surfacesMesh);
             mesh.SetSizeOfMatrix(sizeOfMatrix);
             mesh.SetGlobalPoints(globalPoints);
+            mesh.SetNodeList(nodes);
 
             //---output---
 
             DA.SetData(0, mesh);
         }
 
-        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>> CreateNewBreps(Curve[] edges, int u, int v, int w)
+        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>> CreateNewBreps(Curve[] edges, int u, int v, int w, Point3d[] cornerNodes)
         {
 
             List<List<int>> global_numbering = new List<List<int>>();
             List<List<Point3d>> points_brep = new List<List<Point3d>>();
             List<List<Line>> edgeMesh = new List<List<Line>>();
             List <List<Brep>> surfacesMesh = new List<List<Brep>>();
+
+            List<Node> nodes = new List<Node>();
 
 
             List<Point3d> points = new List<Point3d>();
@@ -123,29 +131,11 @@ namespace SolidsVR
             List<Vector3d> vecV1_ = new List<Vector3d>();
             List<Vector3d> vecV2_ = new List<Vector3d>();
             List<Vector3d> vecU_ = new List<Vector3d>();
-            //List<List<Vector3d>> vecV = new List<List<Vector3d>>();
 
-            for (int j = 0; j < (v + 1)-1; j++)
-            {
-                vecV1_.Add(vDiv[0][j+1] - vDiv[0][j]);
-                vecV2_.Add(vDiv[1][j+1] - vDiv[1][j]);
-            }
-
-            for (int j = 0; j < (u + 1) - 1; j++)
-            {
-                vecU_.Add(uDiv[0][j + 1] - uDiv[0][j]);
-            }
-
-            //W-dir
 
             for (int i = 0; i <= w; i++)
             {
                 //Creating points in w-directoin
-                //Point3d p1_w = new Point3d(nodes[0].X + lz1_new * i * vec_z1.X, nodes[0].Y + lz1_new * vec_z1.Y * i, nodes[0].Z + lz1_new * vec_z1.Z * i);
-                //Point3d p2_w = new Point3d(nodes[1].X + lz2_new * i * vec_z2.X, nodes[1].Y + lz2_new * vec_z2.Y * i, nodes[1].Z + lz2_new * vec_z2.Z * i);
-
-                //Point3d p3_w = new Point3d(nodes[2].X + lz3_new * i * vec_z3.X, nodes[2].Y + lz3_new * vec_z3.Y * i, nodes[2].Z + lz3_new * vec_z3.Z * i);
-                //Point3d p4_w = new Point3d(nodes[3].X + lz4_new * i * vec_z4.X, nodes[3].Y + lz4_new * vec_z4.Y * i, nodes[3].Z + lz4_new * vec_z4.Z * i);
                 Point3d p1_w = wDiv[0][i];
                 Point3d p2_w = wDiv[1][i];
                 Point3d p3_w = wDiv[2][i];
@@ -167,13 +157,6 @@ namespace SolidsVR
                     Point3d p1_v = new Point3d(p1_w.X + length_v1 * j * vecV1.X, p1_w.Y + length_v1 * j * vecV1.Y, p1_w.Z + length_v1 * j * vecV1.Z);
                     Point3d p2_v = new Point3d(p2_w.X + length_v2 * j * vecV2.X, p2_w.Y + length_v2 * j * vecV2.Y, p2_w.Z + length_v2 * j * vecV2.Z);
 
-                    //Point3d p1_v = Point3d.Add(p1_w + vecV1_[j]);
-
-                    //Point3d p1_v = p1_w + vecV1_[j];
-                   // Point3d p2_v = p2_w + vecV2_[j];
-
-
-
                     Vector3d vec_u1 = (p2_v - p1_v) / (p1_v.DistanceTo(p2_v));
 
                     Double length_u1 = p1_v.DistanceTo(p2_v) / u;
@@ -184,10 +167,17 @@ namespace SolidsVR
                         //Creating points in u-direction and adding them to the global nodes.
                         Point3d p1_u = new Point3d(p1_v.X + length_u1 * k * vec_u1.X, p1_v.Y + length_u1 * k * vec_u1.Y, p1_v.Z + length_u1 * k * vec_u1.Z);
                         points.Add(p1_u);
+                        Node node = new Node(p1_u);
+
+                        SetNodePosition(node, p1_u, cornerNodes, i, j, k, u, v, w);
+                        nodes.Add(node);
+
 
                     }
                 }
             }
+
+
 
             // Putting together the breps:
 
@@ -269,8 +259,15 @@ namespace SolidsVR
 
             
 
-            return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh);
+            return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh, nodes);
 
+        }
+
+        public void SetNodePosition(Node node, Point3d p, Point3d[] cornerPoints, int i, int j, int k, int u, int v, int w)
+        {
+            if (cornerPoints.Contains(p)) node.SetIsCorner();
+            else if (i == 0 || j == 0 || k == 0 || i == w || j == v || k == u) node.SetIsEdge();
+            else node.SetIsMiddle();
         }
 
         public Point3d[] CreatePointList(List<List<int>> treeConnectivity, List<List<Point3d>> treePoints, int sizeOfM)
