@@ -5,22 +5,11 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Drawing;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
 namespace SolidsVR
 {
     public class SetUniBCComponent : GH_Component
     {
-        /// <summary>
-        /// Each implementation of GH_Component must provide a public 
-        /// constructor without any arguments.
-        /// Category represents the Tab in which the component will appear, 
-        /// Subcategory the panel. If you use non-existing tab or panel names, 
-        /// new tabs/panels will automatically be created.
-        /// </summary>
         public SetUniBCComponent()
           : base("Uniform BC component for FEA", "UniBC",
               "Description",
@@ -30,13 +19,8 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            //pManager.AddSurfaceParameter("Surface", "Surface", "Surface for BC", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Surface number", "Surface number", "Surface number for BC (0-5)", GH_ParamAccess.item);
-            //pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item);
-            //pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item);
-            //pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item);
-            //pManager.AddBrepParameter("Brep", "B", "Brep as a reference size", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Mesh", "M", "Mesh class", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh class", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -50,45 +34,27 @@ namespace SolidsVR
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             //---variables---
-
-            //Surface surface = null;
+            
             int surfNo = 0;
             string restrains = "0,0,0";
-            int u = 1;
-            int v = 1;
-            int w = 1;
-            Brep origBrep = new Brep();
-            Brep_class brp = new Brep_class();
             Mesh_class mesh = new Mesh_class();
 
             //---input---
 
             if (!DA.GetData(0, ref surfNo)) return;
             if (!DA.GetData(1, ref mesh)) return;
-            //if (!DA.GetData(1, ref u)) return;
-            //if (!DA.GetData(2, ref v)) return;
-            //if (!DA.GetData(3, ref w)) return;
-            //if (!DA.GetData(4, ref origBrep)) return;
 
-            u = mesh.getU();
-            v = mesh.getV();
-            w = mesh.getW();
-            brp = mesh.GetBrep();
+            Brep_class brp = mesh.GetBrep();
             List<Node> nodes = mesh.GetNodeList();
 
             //---solve---
 
-            //List<string> pointsBCold = FindBCPointsOld(surface, restrains, u, v, w, origBrep);
             List<string> pointsBC = FindBCPoints(surfNo, restrains, nodes);
 
             ///////FOR PREVIEWING OF BC///////
 
-            //Setting up values for reflength and angle for rotation of area
-            VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
-            Point3d centroid = vmp.Centroid;
-            double sqrt3 = (double)1 / 3;
-            double refLength = Math.Pow(origBrep.GetVolume(), sqrt3);
-
+           
+            double refLength = brp.GetRefLength();
             List<Brep> cones = DrawBC(pointsBC, refLength);
             Color color = Color.Green;
 

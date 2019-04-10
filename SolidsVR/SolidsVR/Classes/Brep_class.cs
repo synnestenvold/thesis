@@ -12,18 +12,25 @@ namespace SolidsVR
         Brep brp = new Brep();
         private List<Brep> surfaces = new List<Brep>();
 
-        //Point3d[] vertices;
-        
         public Brep_class(Brep _brp) {
             brp = _brp;
-            //Point3d[] vertices = brp.DuplicateVertices();
+            
         }
 
         public Brep_class() { }
 
+        public void SetBrep(Brep _brp)
+        {
+            brp = _brp;
+        }
         public Brep GetBrep()
         {
             return brp;
+        }
+        
+        public double GetVolume()
+        {
+            return brp.GetVolume();
         }
         public void SetSurfaces(List<Brep> _surf)
         {
@@ -33,10 +40,14 @@ namespace SolidsVR
         {
             return surfaces;
         }
-        public void SetBrep(Brep _brp)
+
+        public double GetRefLength()
         {
-            brp = _brp;
+            double sqrt3 = (double)1 / 3;
+            double refLength = Math.Pow(brp.GetVolume(), sqrt3);
+            return refLength;
         }
+
 
         public Brep GetSurfaceAsBrep(int surfNo)
         {
