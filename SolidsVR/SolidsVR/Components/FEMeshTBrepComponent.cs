@@ -105,6 +105,13 @@ namespace SolidsVR
             //Inverting K matrix
             Matrix<double> K_tot_inverse = K_tot.Inverse();
 
+            Matrix<double> K_totI = RoundOf(K_tot_inverse);
+
+            Boolean testK = IsSymmetric(K_tot);
+            Boolean testK_inverse = IsSymmetric(K_totI);
+
+            
+
             //double[] R_array = SetLoads(sizeOfM, loadtxt);
             double[] R_array = AssignLoadsDefAndBC(loadtxt, predefNodes, predef, bcNodes, globalPoints);
 
@@ -202,6 +209,8 @@ namespace SolidsVR
                 B_all.Add(B_e);
                 K_tot = aSM.AssemblyMatrix(K_tot, K_e, connectedNodes, sizeOfMatrix);
             }
+
+
             return Tuple.Create(K_tot, B_all);
         }
 
@@ -546,6 +555,19 @@ namespace SolidsVR
                 }
             }
             return true;
+        }
+
+        public Matrix<double> RoundOf(Matrix<Double> K)
+        {
+            for (int i = 0; i < K.RowCount; i++)
+            {
+                for (int j = 0; j < K.ColumnCount; j++)
+                {
+                    K[i, j] = Math.Round(K[i, j], 1);
+                }
+            }
+
+            return K;
         }
 
         

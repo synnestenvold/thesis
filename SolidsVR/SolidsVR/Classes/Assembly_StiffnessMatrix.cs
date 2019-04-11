@@ -33,7 +33,10 @@ namespace SolidsVR
                     }
                 }
             }
+
+            
             return K_tot;
         }
+
     }
 }
