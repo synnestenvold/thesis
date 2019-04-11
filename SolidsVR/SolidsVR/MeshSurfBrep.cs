@@ -86,7 +86,7 @@ namespace SolidsVR
 
                     List<Point3d> ps = new List<Point3d> {p_1, p_2};
 
-                    Curve c = surF.InterpolatedCurveOnSurface(ps,100);
+                    Curve c = surF.InterpolatedCurveOnSurface(ps,0);
 
                     curveEdges.Add(c);
                     
