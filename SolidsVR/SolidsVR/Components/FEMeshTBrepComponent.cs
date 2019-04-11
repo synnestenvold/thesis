@@ -105,10 +105,6 @@ namespace SolidsVR
             //Inverting K matrix
             Matrix<double> K_tot_inverse = K_tot.Inverse();
 
-            Matrix<double> K_totI = RoundOf(K_tot_inverse);
-
-            Boolean testK = IsSymmetric(K_tot);
-            Boolean testK_inverse = IsSymmetric(K_totI);
 
             
 
