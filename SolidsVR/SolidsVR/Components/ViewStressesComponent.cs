@@ -27,11 +27,8 @@ namespace SolidsVR
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddNumberParameter("Stresses", "Stress", "Stresses in each node", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Stress direction", "Stress dir", "S11, S22, S33, S12, S13, S23 as 0, 1, 2, 3, 4, 5", GH_ParamAccess.item);
-            //pManager.AddNumberParameter("Yield limit", "Y", "The limit for coloring Green/Red", GH_ParamAccess.item);
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
-            pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
-            pManager[5].Optional = true;
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -56,7 +53,6 @@ namespace SolidsVR
             int dir = new int();
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = new double();
-            Brep origBrep = new Brep();
 
             //---input---
 
@@ -65,16 +61,13 @@ namespace SolidsVR
             if (!DA.GetData(2, ref dir)) return;
             if (!DA.GetDataTree(3, out treeDef)) return;
             if (!DA.GetData(4, ref scale)) return;
-            if (!DA.GetData(5, ref origBrep)) return;
 
             //---setup---
 
             //Setting up values for reflength and angle for rotation of area
-            VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
-            Point3d centroid = vmp.Centroid;
-            double volume = origBrep.GetVolume();
-            double sqrt3 = (double)1 / 3;
-            double refLength = Math.Pow(origBrep.GetVolume(), sqrt3);
+            Brep_class brp = mesh.GetBrep();
+            Point3d centroid = brp.GetCentroid();
+            double refLength = brp.GetRefLength();
             Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 3.5, 0));
             double angle = 90 * Math.PI / 180;
 

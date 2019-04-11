@@ -32,6 +32,13 @@ namespace SolidsVR
         {
             return brp.GetVolume();
         }
+        public Point3d GetCentroid()
+        {
+            VolumeMassProperties vmp = VolumeMassProperties.Compute(brp);
+            Point3d centroid = vmp.Centroid;
+            return centroid;
+        }
+
         public void SetSurfaces(List<Brep> _surf)
         {
             surfaces = _surf;
@@ -46,12 +53,6 @@ namespace SolidsVR
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brp.GetVolume(), sqrt3);
             return refLength;
-        }
-
-
-        public Brep GetSurfaceAsBrep(int surfNo)
-        {
-            return surfaces[surfNo];
         }
     }
 }

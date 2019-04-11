@@ -90,6 +90,10 @@ namespace SolidsVR
             mesh.SetSizeOfMatrix(sizeOfMatrix);
             mesh.SetGlobalPoints(globalPoints);
             mesh.SetNodeList(nodes);
+            mesh.SetOrigBrep(brp);
+            mesh.SetBrep(new Brep_class(brp));
+            mesh.OrderSurfaces(corners);
+
 
             //---output---
 

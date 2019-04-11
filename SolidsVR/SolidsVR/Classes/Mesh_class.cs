@@ -21,6 +21,7 @@ namespace SolidsVR
         List<Node> nodes = new List<Node>();
         Brep_class brp = new Brep_class();
         Brep origBrep = new Brep();
+        List<Brep> surfaces = new List<Brep>();
 
         Point3d[] globalPoints = null;
         int sizeOfMatrix = 0;
@@ -133,22 +134,80 @@ namespace SolidsVR
         {
             origBrep = _origBrep;
         }
-
-        public List<Brep> OrderSurfaces(List<Point3d> corners)
+        public Brep GetOrigBrep()
         {
-            List<Brep> orderedSurfaces = new List<Brep>();
-            List<Brep> surfaces = new List<Brep>();
+            return origBrep;
+        }
+        public List<Brep> GetOrderedSurfaces()
+        {
+            return surfaces;
+        }
+        public Brep GetSurfaceAsBrep(int n)
+        {
+            return surfaces[n];
+        }
+
+        public void OrderSurfaces(List<Point3d> orderedPoints)
+        {
+            Brep[] orderedSurfaces = new Brep[6];
+            //List<Brep> surfaces = new List<Brep>();
+            List<int> surfaceNumber = new List<int>();
 
             foreach (BrepFace surf in origBrep.Faces)
             {
                 Brep faceBrep = surf.DuplicateFace(true);
-                surfaces.Add(faceBrep);
-                Point3d [] vertices = faceBrep.DuplicateVertices();
+               
+                Point3d[] vertices = faceBrep.DuplicateVertices();
+
+                
+                int[] nodeIndex = new int[4];
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    for (int j = 0; j < orderedPoints.Count; j++)
+                    {
+                        if (vertices[i] == orderedPoints[j])
+                        {
+                            nodeIndex[i] = j;
+                        }
+                    }
+                }
+                Array.Sort(nodeIndex);
+
+                int number = 4;
+                if (nodeIndex[0] == 0)
+                {
+                    if (nodeIndex[1] == 1)
+                    {
+                        if (nodeIndex[2] == 4)
+                        {
+                            number = 0;
+                        }
+                    }
+                    else if (nodeIndex[1] == 3)
+                    {
+                        number = 3;
+                    }
+                    
+                }
+                else if (nodeIndex[0] == 1)
+                {
+                    if (nodeIndex[1] == 2)
+                    {
+                            number = 1;
+                    }
+                }
+                else if (nodeIndex[0] == 2)
+                {
+                    number = 2;
+                }
+                else
+                {
+                    number = 5;
+                }
+                
+                orderedSurfaces[number] = faceBrep;
             }
-
-            
-
-            return orderedSurfaces;
+            surfaces = orderedSurfaces.ToList();
         }
 
 

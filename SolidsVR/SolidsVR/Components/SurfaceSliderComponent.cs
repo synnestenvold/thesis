@@ -27,7 +27,7 @@ namespace SolidsVR
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddSurfaceParameter("Surface", "Surface", "Surface", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Surface number", "Surface no", "Number of surface (0-5)", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Text placement", GH_ParamAccess.list);
@@ -58,7 +58,7 @@ namespace SolidsVR
 
             int surface = Convert.ToInt32(curve.GetLength() * adjustment);
             surface = surface > max ? max : surface;
-            Surface surf = brep.Surfaces[surface];
+            //Surface surf = brep.Surfaces[surface];
 
             var tuple = CreateText(curve, refLength);
             List<string> text = tuple.Item1;
@@ -70,7 +70,7 @@ namespace SolidsVR
 
             //---output---
 
-            DA.SetData(0, surf);
+            DA.SetData(0, surface);
             DA.SetDataList(1, text);
             DA.SetDataList(2, size);
             DA.SetDataList(3, textPlane);
