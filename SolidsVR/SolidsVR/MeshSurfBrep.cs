@@ -27,7 +27,8 @@ namespace SolidsVR
             pManager.AddIntegerParameter("U value", "U", "U number of panels", GH_ParamAccess.item, 10);
             pManager.AddIntegerParameter("V value", "V", "V number of panels", GH_ParamAccess.item, 10);
             pManager.AddIntegerParameter("W value", "W", "W number of panels", GH_ParamAccess.item, 10);
-            pManager.AddCurveParameter("V value", "V", "V number of panels", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Curve value", "C", "V number of panels", GH_ParamAccess.list);
+            pManager.AddPointParameter("Curve value", "C", "V number of panels", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -55,12 +56,14 @@ namespace SolidsVR
                 int vCount = 0;
                 int wCount = 0;
                 List<Curve> curves = new List<Curve>();
+                List<Point3d> startP = new List<Point3d>();
 
                 if (!DA.GetData(0, ref brep)) { return; }
                 if (!DA.GetData(1, ref uCount)) { return; }
                 if (!DA.GetData(2, ref vCount)) { return; }
                 if (!DA.GetData(3, ref wCount)) { return; }
                 if (!DA.GetDataList(4, curves)) return;
+                if (!DA.GetDataList(5, startP)) return;
 
                 Curve[] edges = brep.DuplicateEdgeCurves();
 
@@ -68,15 +71,24 @@ namespace SolidsVR
                 Curve edge2 = edges[1];
 
                 BrepFace face = brep.Faces[1];
+
                 Surface surF = face.DuplicateSurface();
+                List<NurbsCurve> curveEdges = new List<NurbsCurve>();
+
+                NurbsCurve c = surF.InterpolatedCurveOnSurface(startP, 0);
+
+                curveEdges.Add(c);
+
+                
+                
 
                 Interval dW = surF.Domain(0);
 
-                List<Curve> curveEdges = new List<Curve>();
+                
 
                 Point3d p1 = new Point3d(0, 0, 0);
                 Point3d p2 = new Point3d(0, 1, 0);
-
+                /*
 
                 for (int w= 0; w <= wCount; w++)
                 {
@@ -86,12 +98,13 @@ namespace SolidsVR
 
                     List<Point3d> ps = new List<Point3d> {p_1, p_2};
 
-                    Curve c = surF.InterpolatedCurveOnSurface(ps,0);
+                    NurbsCurve c = surF.InterpolatedCurveOnSurface(ps,0);
 
                     curveEdges.Add(c);
                     
                    
                 }
+                */
 
                 Brep brp = Brep.CreateEdgeSurface(curves);
 
