@@ -133,6 +133,11 @@ namespace SolidsVR
             //Caluculation of the displacement vector u
             Vector<double> u = K_tot_inverse.Multiply(R);
 
+            for(int i = 0; i < u.Count; i++)
+            {
+                u[i] = Math.Round(u[i], 8);
+            }
+
             //Creating tree for output of deformation. Structured in x,y,z for each node.
             DataTree<double> defTree = DefToTree(u);
             
@@ -141,6 +146,13 @@ namespace SolidsVR
 
             //Find the strains in each node from the strains in each element
             List<List<double>> globalStrain = FindGlobalStrain(strain, connectivity, sizeOfMatrix);
+
+            double[,] array = new double[2,2];
+
+            for(int i = 0; i < globalStrain.Count; i++)
+            {
+
+            }
 
             //Calculate global stresses from strain
             List<Vector<double>> globalStress = CalcStress(globalStrain, material);
@@ -443,6 +455,9 @@ namespace SolidsVR
         {
             List<List<double>> globalStrain = new List<List<double>>();
 
+            List<double> strainValues = new List<double>();
+           // Dictionary<int, List<double>> dictStrain = new Dictionary<int, List<double>>();
+
 
             for (int i = 0; i < sizeOfM / 3; i++)
             {
@@ -458,7 +473,9 @@ namespace SolidsVR
                     List<double> TList = globalStrain[cNodes[j]];
                     for (int k = 0; k < 6; k++)
                     {
+                        strainValues.Add(strain[i][j][k]);
 
+                        //dictStrain.Add(j, strainValues);
 
                         if (globalStrain[cNodes[j]][k] == 0)
                         {
@@ -466,7 +483,7 @@ namespace SolidsVR
                         }
                         else
                         {
-                            globalStrain[cNodes[j]][k] = (globalStrain[cNodes[j]][k] + strain[i][j][k]) / 2;
+                            globalStrain[cNodes[j]][k] = (double) (globalStrain[cNodes[j]][k] + strain[i][j][k]) / 2;
                         }
 
                     }

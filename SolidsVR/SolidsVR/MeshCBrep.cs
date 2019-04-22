@@ -20,7 +20,7 @@ namespace SolidsVR
         {
         }
 
-        Node node = new Node(new Point3d(0, 0, 0));
+        Node node = new Node(new Point3d(0, 0, 0),0);
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -171,7 +171,7 @@ namespace SolidsVR
                         //Creating points in u-direction and adding them to the global nodes.
                         Point3d p1_u = new Point3d(p1_v.X + length_u1 * k * vec_u1.X, p1_v.Y + length_u1 * k * vec_u1.Y, p1_v.Z + length_u1 * k * vec_u1.Z);
                         points.Add(p1_u);
-                        Node node = new Node(p1_u);
+                        Node node = new Node(p1_u, points.IndexOf(p1_u));
 
                         SetNodePosition(node, p1_u, cornerNodes, i, j, k, u, v, w);
                         SetNodeSurface(node, i, j, k, u, v, w);

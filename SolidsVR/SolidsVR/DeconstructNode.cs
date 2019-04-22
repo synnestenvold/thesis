@@ -41,7 +41,7 @@ namespace SolidsVR
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Node node = new Node(new Point3d(0,0,0));
+            Node node = new Node(new Point3d(0,0,0),0);
 
             if (!DA.GetData(0, ref node)) return;
 

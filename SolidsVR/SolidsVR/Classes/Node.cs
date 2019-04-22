@@ -11,14 +11,21 @@ namespace SolidsVR
     public class Node
     {
         Point3d coordinate;
+        int nodeNr = 0;
+        List<int> partOfElement = new List<int>();
         List<int> surfaceNum = new List<int>();
         Boolean isCorner = false;
         Boolean isMiddle = false;
         Boolean isEdge = false;
+        List<double> strain = new List<double>();
+        double stress = 0;
+        Dictionary<int, int> elementNode = new Dictionary<int, int>();
 
-        public Node (Point3d _coordinate)
+
+        public Node (Point3d _coordinate, int _nodeNr)
         {
-           coordinate = _coordinate;
+            coordinate = _coordinate;
+            nodeNr = _nodeNr;
         }
 
         public void SetSurfaceNum(int i)
@@ -70,6 +77,26 @@ namespace SolidsVR
         public Point3d GetCoord()
         {
             return coordinate;
+        }
+
+        public void SetStrain(double _strain)
+        {
+            strain.Add(_strain);
+        }
+
+        public double GetStrain()
+        {
+            return strain.Average();
+        }
+
+        public void SetStress(double _stress)
+        {
+            stress = _stress;
+        }
+
+        public double GetStress()
+        {
+            return stress;
         }
 
     }

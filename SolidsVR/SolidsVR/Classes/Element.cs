@@ -10,11 +10,24 @@ namespace SolidsVR.Classes
 {
     class Element
     {
-        List<Point3d> vertices = new List<Point3d>();
+        List<Node> vertices = new List<Node>();
+        int elementNr = 0;
 
-        public Element (List<Point3d> _vertices)
+        public Element (List<Node> _vertices, int _elementNr)
         {
             vertices = _vertices;
+            elementNr = _elementNr;
         }
+
+        public List<Node> GetVertices()
+        {
+            return vertices;
+        }
+
+        public double GetElementNr()
+        {
+            return elementNr;
+        }
+
     }
 }
