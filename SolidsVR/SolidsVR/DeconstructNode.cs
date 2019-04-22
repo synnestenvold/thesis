@@ -31,6 +31,8 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            pManager.AddPointParameter("Point", "Point", "Coordinates of the node", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Elements", "Elements", "Which elements node include", GH_ParamAccess.list);
             pManager.AddTextParameter("Position", "StringPos", "Position of node", GH_ParamAccess.item);
             pManager.AddNumberParameter("Surfaces", "Surfaces", "Which surface node include", GH_ParamAccess.list);
         }
@@ -57,8 +59,15 @@ namespace SolidsVR
 
             List<int> i = node.GetSurfaceNum();
 
-            DA.SetData(0, text);
-            DA.SetDataList(1, i);
+            List<int> elementNr = node.GetElementNr();
+
+            Point3d point = node.GetCoord();
+
+            DA.SetData(0, point);
+            DA.SetDataList(1, elementNr);
+            DA.SetData(2, text);
+            DA.SetDataList(3, i);
+            
         }
 
         /// <summary>

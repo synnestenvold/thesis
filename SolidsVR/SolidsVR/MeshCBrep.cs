@@ -78,6 +78,7 @@ namespace SolidsVR
             List<List<Line>> edgeMesh = tuple.Item3;
             List<List<Brep>> surfacesMesh = tuple.Item4;
             List<Node> nodes = tuple.Item5;
+            List<Element> elements = tuple.Item6;
             int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
             Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
@@ -90,6 +91,7 @@ namespace SolidsVR
             mesh.SetSizeOfMatrix(sizeOfMatrix);
             mesh.SetGlobalPoints(globalPoints);
             mesh.SetNodeList(nodes);
+            mesh.SetElements(elements);
             mesh.SetOrigBrep(brp);
             mesh.SetBrep(new Brep_class(brp));
             mesh.OrderSurfaces(corners);
@@ -100,7 +102,7 @@ namespace SolidsVR
             DA.SetData(0, mesh);
         }
 
-        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>> CreateNewBreps(Curve[] edges, int u, int v, int w, Point3d[] cornerNodes)
+        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>> CreateNewBreps(Curve[] edges, int u, int v, int w, Point3d[] cornerNodes)
         {
 
             List<List<int>> global_numbering = new List<List<int>>();
@@ -109,6 +111,7 @@ namespace SolidsVR
             List <List<Brep>> surfacesMesh = new List<List<Brep>>();
 
             List<Node> nodes = new List<Node>();
+            List<Element> elements = new List<Element>();
 
 
             List<Point3d> points = new List<Point3d>();
@@ -227,6 +230,34 @@ namespace SolidsVR
 
                 points_brep.Add(brp);
 
+                List<Node> elementNodes = new List<Node>();
+
+                //Putting together the 8 points to make the brep
+                elementNodes.Add(nodes[index]);
+                elementNodes.Add(nodes[index + 1]);
+                elementNodes.Add(nodes[(u + 1) + (index + 1)]);
+                elementNodes.Add(nodes[(u + 1) + (index)]);
+                elementNodes.Add(nodes[(u + 1) * (v + 1) + index]);
+                elementNodes.Add(nodes[(u + 1) * (v + 1) + (index + 1)]);
+                elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (index + 1)]);
+                elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (index)]);
+
+
+
+                nodes[index].AddElementNr(i);
+                nodes[index + 1].AddElementNr(i);
+                nodes[(u + 1) + (index + 1)].AddElementNr(i);
+                nodes[(u + 1) + (index)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + index].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (index + 1)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (u + 1) + (index + 1)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (u + 1) + (index)].AddElementNr(i);
+
+
+                Element element = new Element(elementNodes, i);
+
+                elements.Add(element);
+
                 List<Line> edgesElement = CreateEdgesMesh(brp);
                 List<Brep> surfaces = CreateSurfaceMesh(brp);
 
@@ -265,7 +296,7 @@ namespace SolidsVR
           
             
 
-            return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh, nodes);
+            return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh, nodes, elements);
 
         }
 

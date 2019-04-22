@@ -6,9 +6,9 @@ using Grasshopper.Kernel.Data;
 using Rhino.Geometry;
 using System.Linq;
 
-namespace SolidsVR.Classes
+namespace SolidsVR
 {
-    class Element
+    public class Element
     {
         List<Node> vertices = new List<Node>();
         int elementNr = 0;
@@ -24,7 +24,7 @@ namespace SolidsVR.Classes
             return vertices;
         }
 
-        public double GetElementNr()
+        public int GetElementNr()
         {
             return elementNr;
         }

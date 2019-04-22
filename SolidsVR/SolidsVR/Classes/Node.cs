@@ -99,5 +99,15 @@ namespace SolidsVR
             return stress;
         }
 
+        public void AddElementNr(int nr)
+        {
+            partOfElement.Add(nr);
+        }
+
+        public List<int> GetElementNr()
+        {
+            return partOfElement;
+        }
+
     }
 }
