@@ -261,7 +261,8 @@ namespace SolidsVR
 
                 index++;
             }
-
+            
+          
             
 
             return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh, nodes);
