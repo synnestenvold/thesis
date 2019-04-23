@@ -435,9 +435,9 @@ namespace SolidsVR
             for (int i = 0; i < elements.Count; i++)
             {
                 B_e = elements[i].GetBMatrixes();
-                c_e = elements[i].GetConnectivity();
                 nodes_e = elements[i].GetVertices();
 
+                sC.StrainCalculations(B_e, nodes_e);
             }
 
         }

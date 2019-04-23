@@ -11,10 +11,9 @@ namespace SolidsVR
 {
     class StrainCalc
     {
-        public List<Vector<double>> StrainCalculations(List<Matrix<double>> B_e,  List<int> c_e, List<Node> nodes_e)
+        public void StrainCalculations(List<Matrix<double>> B_e, List<Node> nodes_e)
         {
             
-            List<Vector<double>> strain = new List<Vector<double>>();
             Vector<double> u_e = Vector<double>.Build.Dense(24);
            
 
@@ -31,12 +30,7 @@ namespace SolidsVR
             {
                 Vector<double> nodeStrain = B_e[j].Multiply(u_e);
                 nodes_e[j].SetStrain(nodeStrain);
-                strain.Add(nodeStrain);
             }
-
-            return strain;
-
         }
-        
     }
 }
