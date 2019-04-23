@@ -5,6 +5,10 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Rhino.Geometry;
 using System.Linq;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics;
+using Grasshopper.Kernel.Data;
+
 
 namespace SolidsVR
 {
@@ -17,9 +21,11 @@ namespace SolidsVR
         Boolean isCorner = false;
         Boolean isMiddle = false;
         Boolean isEdge = false;
-        List<double> strain = new List<double>();
-        double stress = 0;
+        List<Vector<double>> strain = new List<Vector<double>>();
+        Vector<double> stress;
         Dictionary<int, int> elementNode = new Dictionary<int, int>();
+
+        List<double> deformation = new List<double>();
 
 
         public Node (Point3d _coordinate, int _nodeNr)
@@ -79,22 +85,22 @@ namespace SolidsVR
             return coordinate;
         }
 
-        public void SetStrain(double _strain)
+        public void SetStrain(Vector<double> _strain)
         {
             strain.Add(_strain);
         }
 
-        public double GetStrain()
+        public List<Vector<double>> GetStrain()
         {
-            return strain.Average();
+            return strain;
         }
 
-        public void SetStress(double _stress)
+        public void SetStress(Vector<double> _stress)
         {
             stress = _stress;
         }
 
-        public double GetStress()
+        public Vector<double> GetStress()
         {
             return stress;
         }
@@ -109,5 +115,36 @@ namespace SolidsVR
             return partOfElement;
         }
 
+        public void SetDeformation(List<double> _deformation)
+        {
+            deformation = _deformation;
+        }
+
+        public List<double> GetDeformation()
+        {
+            return deformation;
+        }
+
+        public Vector<double> GetGlobalStrain()
+        {
+            double amount = strain.Count;
+            Vector<double> globalStrain =  Vector<double>.Build.Dense(6);
+            for (int i = 0; i < strain.Count; i++)
+            {
+                globalStrain[0] += strain[i][0];
+                globalStrain[1] += strain[i][1];
+                globalStrain[2] += strain[i][2];
+                globalStrain[3] += strain[i][3];
+                globalStrain[4] += strain[i][4];
+                globalStrain[5] += strain[i][5];
+            }
+
+            for(int j = 0; j < globalStrain.Count; j++)
+            {
+                globalStrain[j] = (double)globalStrain[j] / amount;
+            }
+
+            return globalStrain;
+        }
     }
 }

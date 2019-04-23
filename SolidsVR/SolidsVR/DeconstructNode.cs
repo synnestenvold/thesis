@@ -3,6 +3,14 @@ using System.Collections.Generic;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics;
+using Grasshopper;
+using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
+using System.Linq;
+using System.Drawing;
+
 
 namespace SolidsVR
 {
@@ -35,6 +43,10 @@ namespace SolidsVR
             pManager.AddNumberParameter("Elements", "Elements", "Which elements node include", GH_ParamAccess.list);
             pManager.AddTextParameter("Position", "StringPos", "Position of node", GH_ParamAccess.item);
             pManager.AddNumberParameter("Surfaces", "Surfaces", "Which surface node include", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Deformations", "Deformation", "Deformations in each node", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Strains", "Strains", "Strains in each node", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Global Strain", "Global srains", "Averaged strains in each node", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Global Stress", "Global stress", "Averaged stress in each node", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -57,16 +69,34 @@ namespace SolidsVR
             if (isEdge) text = "Edge";
             if (isMiddle) text = "Middle";
 
-            List<int> i = node.GetSurfaceNum();
+            List<int> j = node.GetSurfaceNum();
 
             List<int> elementNr = node.GetElementNr();
 
             Point3d point = node.GetCoord();
 
+            List<double> def = node.GetDeformation();
+
+            List<Vector<double>> strain = node.GetStrain();
+
+            DataTree<double> strainTree = new DataTree<double>();
+
+            for (int i = 0; i < strain.Count; i++)
+            {
+                strainTree.AddRange(strain[i], new GH_Path(new int[] {0, i }));
+            }
+
+            Vector<double> globalStrain = node.GetGlobalStrain();
+            Vector<double> globalStress = node.GetStress();
+
             DA.SetData(0, point);
             DA.SetDataList(1, elementNr);
             DA.SetData(2, text);
-            DA.SetDataList(3, i);
+            DA.SetDataList(3, j);
+            DA.SetDataList(4, def);
+            DA.SetDataTree(5, strainTree);
+            DA.SetDataList(6, globalStrain);
+            DA.SetDataList(7, globalStress);
             
         }
 

@@ -26,7 +26,7 @@ namespace SolidsVR
 
        
 
-        public Tuple<Matrix<double>, List<Matrix<Double>>> CreateMatrix(List<Point3d> pList)
+        public Tuple<Matrix<double>, List<Matrix<Double>>> CreateMatrix(List<Node> pList)
 
         {
 
@@ -58,24 +58,11 @@ namespace SolidsVR
             Point3d point = new Point3d(0, 0, 0);
             List<Point3d> pNatural = Enumerable.Repeat(point, 8).ToList();
 
-            Point3d centroid = new Point3d(0, 0, 0);
-
-            if (IsRectangle(pList))
-            {
-                centroid = FindCentroidRectangle(pList);
-            }
-            else
-            {
-                
-                centroid = FindCentroidTwisted(pList);
-            }
-           
-            
 
             for (int i = 0; i < pList.Count; i++)
             {
                 //Point3d pointA = new Point3d(pList[i].X - centroid.X, pList[i].Y - centroid.Y, pList[i].Z - centroid.Z);
-                Point3d pointA = new Point3d(pList[i].X, pList[i].Y, pList[i].Z);
+                Point3d pointA = pList[i].GetCoord();
                 pNatural[i] = pointA;
 
             }

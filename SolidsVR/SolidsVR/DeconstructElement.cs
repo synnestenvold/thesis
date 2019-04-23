@@ -33,6 +33,7 @@ namespace SolidsVR
         {
             pManager.AddGenericParameter("Nodes", "Nodes", "Nodes inside element", GH_ParamAccess.list);
             pManager.AddNumberParameter("ElementNr", "ElementNr", "Number of elment in global elements", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Connectivity", "Connectivity", "Connectivity in each element", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -41,16 +42,18 @@ namespace SolidsVR
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Element element = new Element(new List<Node>(), 0);
+            Element element = new Element(new List<Node>(), 0, new List<int>());
 
             if (!DA.GetData(0, ref element)) return;
 
             List<Node> nodes = element.GetVertices();
             int elementNr = element.GetElementNr();
+            List<int> connectivity = element.GetConnectivity();
 
 
             DA.SetDataList(0, nodes);
             DA.SetData(1, elementNr);
+            DA.SetDataList(2, connectivity);
         }
 
         /// <summary>s

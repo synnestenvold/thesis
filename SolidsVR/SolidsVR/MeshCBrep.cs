@@ -254,9 +254,7 @@ namespace SolidsVR
                 nodes[(u + 1) * (v + 1) + (u + 1) + (index)].AddElementNr(i);
 
 
-                Element element = new Element(elementNodes, i);
-
-                elements.Add(element);
+                
 
                 List<Line> edgesElement = CreateEdgesMesh(brp);
                 List<Brep> surfaces = CreateSurfaceMesh(brp);
@@ -274,6 +272,10 @@ namespace SolidsVR
                 connectivity.Add((u + 1) * (v + 1) + (index + 1));
                 connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index + 1));
                 connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index));
+
+                Element element = new Element(elementNodes, i, connectivity);
+
+                elements.Add(element);
 
 
 
