@@ -174,6 +174,8 @@ namespace SolidsVR
                         //Creating points in u-direction and adding them to the global nodes.
                         Point3d p1_u = new Point3d(p1_v.X + length_u1 * k * vec_u1.X, p1_v.Y + length_u1 * k * vec_u1.Y, p1_v.Z + length_u1 * k * vec_u1.Z);
                         points.Add(p1_u);
+
+
                         Node node = new Node(p1_u, points.IndexOf(p1_u));
 
                         SetNodePosition(node, p1_u, cornerNodes, i, j, k, u, v, w);
@@ -242,8 +244,6 @@ namespace SolidsVR
                 elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (index + 1)]);
                 elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (index)]);
 
-
-
                 nodes[index].AddElementNr(i);
                 nodes[index + 1].AddElementNr(i);
                 nodes[(u + 1) + (index + 1)].AddElementNr(i);
@@ -277,8 +277,6 @@ namespace SolidsVR
 
                 elements.Add(element);
 
-
-
                 global_numbering.Add(connectivity);
 
                 if (listJumpOne.Contains(index)) //Checking if we need to move to next row
@@ -294,9 +292,6 @@ namespace SolidsVR
 
                 index++;
             }
-            
-          
-            
 
             return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh, nodes, elements);
 
