@@ -140,21 +140,19 @@ namespace SolidsVR
             DataTree<double> defTree = DefToTree(u, nodes);
             
             //Calculatin strains for each node in elements
-            List<List<Vector<double>>> strain = CalcStrain(u, B_all, connectivity, elements);
-
-            //Find the strains in each node from the strains in each element
-            List<List<double>> globalStrain = FindGlobalStrain(strain, connectivity, sizeOfMatrix);
-
+            CalcStrain(elements);
 
             //Calculate global stresses from strain
-            List<Vector<double>> globalStress = CalcStress(globalStrain, material, nodes);
+
+            CalcStress(nodes, material);
 
             DataTree<double> strainTree = new DataTree<double>();
             DataTree<double> stressTree = new DataTree<double>();
-            for (int i = 0; i < globalStrain.Count; i++)
+
+            for (int i = 0; i < nodes.Count; i++)
             {
-                strainTree.AddRange(globalStrain[i], new GH_Path(new int[] { 0, i }));
-                stressTree.AddRange(globalStress[i], new GH_Path(new int[] { 0, i }));
+                strainTree.AddRange(nodes[i].GetGlobalStrain(), new GH_Path(new int[] { 0, i }));
+                stressTree.AddRange(nodes[i].GetStress(), new GH_Path(new int[] { 0, i }));
             }
 
             //FOR PREVIEW OF HEADLINE
@@ -426,17 +424,13 @@ namespace SolidsVR
             return defTree;
         }
 
-        public List<List<Vector<double>>> CalcStrain(Vector<double> u, List<List<Matrix<double>>> B_all, List<List<int>> connectivity, List<Element> elements)
+        public void CalcStrain(List<Element> elements)
         {
             List<Matrix<double>> B_e = new List<Matrix<double>>();
             List<int> c_e = new List<int>();
             List<Node> nodes_e = new List<Node>();
-            DataTree<double> strain_node = new DataTree<double>();
-
 
             StrainCalc sC = new StrainCalc();
-
-            List<List<Vector<double>>> strain = new List<List<Vector<double>>>();
 
             for (int i = 0; i < elements.Count; i++)
             {
@@ -444,89 +438,38 @@ namespace SolidsVR
                 c_e = elements[i].GetConnectivity();
                 nodes_e = elements[i].GetVertices();
 
-                List<Vector<double>> calcedStrain = sC.StrainCalculations(B_e, u, c_e, nodes_e);
-
-                strain.Add(calcedStrain);
-
             }
 
-            return strain;
         }
 
-        public List<List<double>> FindGlobalStrain(List<List<Vector<double>>> strain, List<List<int>> connectivity, int sizeOfM)
+      
+
+        public void CalcStress(List<Node> nodes, Material material)
         {
-            List<List<double>> globalStrain = new List<List<double>>();
-
-            List<double> strainValues = new List<double>();
-           // Dictionary<int, List<double>> dictStrain = new Dictionary<int, List<double>>();
-
-
-            for (int i = 0; i < sizeOfM / 3; i++)
-            {
-                List<double> nodeStrain = Enumerable.Repeat(0d, 6).ToList();
-                globalStrain.Add(nodeStrain);
-            }
-
-            for (int i = 0; i < connectivity.Count(); i++) //For each element
-            {
-                List<int> cNodes = connectivity[i];
-                for (int j = 0; j < cNodes.Count; j++)
-                {
-                    List<double> TList = globalStrain[cNodes[j]];
-                    for (int k = 0; k < 6; k++)
-                    {
-                        strainValues.Add(strain[i][j][k]);
-
-                        //dictStrain.Add(j, strainValues);
-
-                        if (globalStrain[cNodes[j]][k] == 0)
-                        {
-                            globalStrain[cNodes[j]][k] = strain[i][j][k];
-                        }
-                        else
-                        {
-                            globalStrain[cNodes[j]][k] = (double) (globalStrain[cNodes[j]][k] + strain[i][j][k]) / 2;
-                        }
-
-                    }
-                }
-            }
-
-            return globalStrain;
-        }
-
-        public List<Vector<double>> CalcStress(List<List<double>> globalStrain, Material material, List<Node> nodes)
-        {
-            List<Vector<double>> globalStress = new List<Vector<double>>();
             double E = material.GetE();
             double nu = material.GetNu();
             Cmatrix C = new Cmatrix(E, nu);
             Matrix<double> C_matrix = C.CreateMatrix();
 
-
             for (int i = 0; i < nodes.Count; i++)
             {
-                Vector<double> strainVec = Vector<double>.Build.Dense(globalStrain[i].ToArray());
-                Vector<double> stressVec = C_matrix.Multiply(strainVec);
 
-                Vector<double> globalStressTest = C_matrix.Multiply(nodes[i].GetGlobalStrain());
-                nodes[i].SetStress(globalStressTest);
+                Vector<double> globalStress = C_matrix.Multiply(nodes[i].GetGlobalStrain());
+                
                 //Adding Mises
-                var tempStressVec = Vector<double>.Build.Dense(stressVec.Count + 1);
-                stressVec.Storage.CopySubVectorTo(tempStressVec.Storage, 0, 0, 6);
-                double Sxx = stressVec[0];
-                double Syy = stressVec[1];
-                double Szz = stressVec[2];
-                double Sxy = stressVec[3];
-                double Sxz = stressVec[4];
-                double Syz = stressVec[5];
+                var tempStressVec = Vector<double>.Build.Dense(globalStress.Count + 1);
+                globalStress.Storage.CopySubVectorTo(tempStressVec.Storage, 0, 0, 6);
+                double Sxx = globalStress[0];
+                double Syy = globalStress[1];
+                double Szz = globalStress[2];
+                double Sxy = globalStress[3];
+                double Sxz = globalStress[4];
+                double Syz = globalStress[5];
                 double mises = Math.Sqrt(0.5*(Math.Pow(Sxx-Syy, 2)+Math.Pow(Syy-Szz,2)+Math.Pow(Szz-Sxx, 2))+3*(Math.Pow(Sxy,2)+ Math.Pow(Sxz, 2)+ Math.Pow(Syz, 2)));
                 tempStressVec.At(6, mises);
-                globalStress.Add(tempStressVec);
+
+                nodes[i].SetStress(tempStressVec);
             }
-
-
-            return globalStress;
         }
 
         public Tuple<double, Point3d> GetRefValues(Brep origBrep)

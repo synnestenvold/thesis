@@ -11,7 +11,7 @@ namespace SolidsVR
 {
     class StrainCalc
     {
-        public List<Vector<double>> StrainCalculations(List<Matrix<double>> B_e, Vector<double> u, List<int> c_e, List<Node> nodes_e)
+        public List<Vector<double>> StrainCalculations(List<Matrix<double>> B_e,  List<int> c_e, List<Node> nodes_e)
         {
             
             List<Vector<double>> strain = new List<Vector<double>>();
