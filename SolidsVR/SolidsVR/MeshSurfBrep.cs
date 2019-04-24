@@ -40,6 +40,10 @@ namespace SolidsVR
             pManager.AddVectorParameter("Nr", "Normals", "Surface normal vectors", GH_ParamAccess.list);
             pManager.AddBrepParameter("Nr", "Normals", "Surface normal vectors", GH_ParamAccess.item);
             pManager.AddCurveParameter("C", "Normals", "Surface normal vectors", GH_ParamAccess.list);
+            pManager.AddPointParameter("Pt", "Points", "Surface points", GH_ParamAccess.list);
+            pManager.AddPointParameter("Pt", "Points", "Surface points", GH_ParamAccess.list);
+            pManager.AddPointParameter("Pt", "Points", "Surface points", GH_ParamAccess.list);
+            pManager.AddPointParameter("Pt", "Points", "Surface points", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -67,80 +71,137 @@ namespace SolidsVR
 
                 Curve[] edges = brep.DuplicateEdgeCurves();
 
+          
+
+                Brep brp3 = Brep.CreateEdgeSurface(curves);
+
+                Point3d[] test3 = brp3.DuplicateVertices();
+
                 Curve edge1 = edges[0];
-                Curve edge2 = edges[1];
+                Curve edge2 = edges[11];
+                Curve edge3 = edges[10];
+                Curve edge4 = edges[9];
 
-                BrepFace face = brep.Faces[1];
+                edge1.Reverse();
+                edge2.Reverse();
+                edge3.Reverse();
+                edge4.Reverse();
 
-                Surface surF = face.DuplicateSurface();
+
+                edge1.DivideByCount(wCount, true, out Point3d[] p1s);
+                edge2.DivideByCount(wCount, true, out Point3d[] p2s);
+                edge3.DivideByCount(wCount, true, out Point3d[] p3s);
+                edge4.DivideByCount(wCount, true, out Point3d[] p4s);
+
+                BrepFace face1 = brep.Faces[1];
+                Surface surF1 = face1.DuplicateSurface();
+                BrepFace face2 = brep.Faces[4];
+                Surface surF2 = face2.DuplicateSurface();
+                BrepFace face3 = brep.Faces[3];
+                Surface surF3 = face3.DuplicateSurface();
+                BrepFace face4 = brep.Faces[2];
+                Surface surF4 = face4.DuplicateSurface();
+
+
                 List<NurbsCurve> curveEdges = new List<NurbsCurve>();
 
-                NurbsCurve c = surF.InterpolatedCurveOnSurface(startP, 0);
+                //NurbsCurve c = surF.InterpolatedCurveOnSurface(startP, 0);
 
-                curveEdges.Add(c);
+                //curveEdges.Add(c);
 
-                
-                
+                List<NurbsCurve> curve = new List<NurbsCurve>();
 
-                Interval dW = surF.Domain(0);
+                List<Point3d> meshPoints = new List<Point3d>();
+   
 
-                
-
-                Point3d p1 = new Point3d(0, 0, 0);
-                Point3d p2 = new Point3d(0, 1, 0);
-                /*
+                Interval dW = surF1.Domain(0);
 
                 for (int w= 0; w <= wCount; w++)
                 {
                     double tw = dW.ParameterAt(w / (double)wCount);
-                    Point3d p_1 = p1 + new Vector3d(tw*w, 0, 0);
-                    Point3d p_2 = p2 + new Vector3d(tw * w, 0, 0);
 
-                    List<Point3d> ps = new List<Point3d> {p_1, p_2};
+                    Point3d p_1 = p1s[w];
+                    Point3d p_2 = p2s[w];
+                    Point3d p_3 = p3s[w];
+                    Point3d p_4 = p4s[w];
 
-                    NurbsCurve c = surF.InterpolatedCurveOnSurface(ps,0);
+                    List<Point3d> ps1 = new List<Point3d> {p_1, p_2};
+                    List<Point3d> ps2 = new List<Point3d> {p_2, p_3};
+                    List<Point3d> ps3 = new List<Point3d> {p_3, p_4};
+                    List<Point3d> ps4 = new List<Point3d> {p_4, p_1};
 
-                    curveEdges.Add(c);
-                    
-                   
-                }
-                */
+                    NurbsCurve c1 = surF1.InterpolatedCurveOnSurface(ps1, 0);
+                    NurbsCurve c2 = surF2.InterpolatedCurveOnSurface(ps2, 0);
+                    NurbsCurve c3 = surF3.InterpolatedCurveOnSurface(ps3, 0);
+                    NurbsCurve c4 = surF4.InterpolatedCurveOnSurface(ps4, 0);
 
-                Brep brp = Brep.CreateEdgeSurface(curves);
+                    curveEdges.Add(c1);
+                    curveEdges.Add(c2);
+                    curveEdges.Add(c3);
+                    curveEdges.Add(c4);
 
-                Surface surface = null;
+                    curve = new List<NurbsCurve>() { c1, c2, c3, c4 };
+                    Brep brp = Brep.CreateEdgeSurface(curve);
 
-                foreach (BrepFace surf in brp.Faces)
-                {
-                     surface = surf.DuplicateSurface();
-                }
+                    Brep brp2 = Brep.CreateEdgeSurface(curveEdges);
 
+                    Point3d[] test2 = brp2.DuplicateVertices();
 
-                Interval domainU = surface.Domain(0);
-                Interval domainV = surface.Domain(1);
+                    Point3d[] test = brp.DuplicateVertices();
 
-                List<Point3d> points = new List<Point3d>();
-                List<Vector3d> vectors = new List<Vector3d>();
+                    Surface surface = null;
 
-                for (int u = 0; u <= vCount; u++)
-                {
-                    double tu = domainU.ParameterAt(u / (double)vCount);
-                    for (int v = 0; v <= uCount; v++)
+                    foreach (BrepFace surf in brp.Faces)
                     {
-                        double tv = domainV.ParameterAt(v / (double)uCount);
-                        points.Add(surface.PointAt(tu, tv));
-                        vectors.Add(surface.NormalAt(tu, tv));
+                        surface = surf.DuplicateSurface();
                     }
+
+                    meshPoints.AddRange(CreatePoints(surface, uCount, vCount));
+
                 }
+              
+                
+                
+
+                //List<Point3d> points = CreatePoints(surface, uCount, vCount);
+
+                
 
                 //Surface surf = new Surface();
 
                 // Populate outputs.
-                DA.SetDataList(0, points);
-                DA.SetDataList(1, vectors);
-                DA.SetData(2, surface);
+                DA.SetDataList(0, meshPoints);
+                //DA.SetDataList(1, vectors);
+                //DA.SetData(2, surface);
                 DA.SetDataList(3, curveEdges);
+                DA.SetDataList(4, p1s);
+                DA.SetDataList(5, p2s);
+                DA.SetDataList(6, p3s);
+                DA.SetDataList(7, p4s);
             }
+        }
+
+        public List<Point3d> CreatePoints(Surface surface, int uCount, int vCount)
+        {
+            Interval domainU = surface.Domain(0);
+            Interval domainV = surface.Domain(1);
+
+            List<Point3d> points = new List<Point3d>();
+            List<Vector3d> vectors = new List<Vector3d>();
+
+
+            for (int u = 0; u <= vCount; u++)
+            {
+                double tu = domainU.ParameterAt(u / (double)vCount);
+                for (int v = 0; v <= uCount; v++)
+                {
+                    double tv = domainV.ParameterAt(v / (double)uCount);
+                    points.Add(surface.PointAt(tu, tv));
+                    vectors.Add(surface.NormalAt(tu, tv));
+                }
+            }
+
+            return points;
         }
 
         /// <summary>
