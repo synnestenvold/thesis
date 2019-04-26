@@ -297,12 +297,9 @@ namespace SolidsVR
                 mesh.Faces.AddFace(0, 1, 2, 3);
 
                 Brep new_brep = Brep.CreateFromMesh(mesh, false);
-
                 Vector3d vecAxis = new Vector3d(0, 0, 1);
                 new_brep.Rotate(angle, vecAxis, center);
-
                 breps.Add(new_brep);
-                
             }
             return breps;
         }

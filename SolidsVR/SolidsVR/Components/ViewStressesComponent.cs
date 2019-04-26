@@ -313,9 +313,7 @@ namespace SolidsVR
 
         public Tuple<List<Color>, List<string>> ColorBreps(List<Brep> breps, List<List<int>> connectivity, GH_Structure<GH_Number> treeStress, int dir)
         {
-
             List<Color> brepColors = new List<Color>();
-
             Color color = Color.White;
             List<string> rangeValues = new List<String>();
 
@@ -337,7 +335,6 @@ namespace SolidsVR
             else if (dir == 3) rangeValues.Add("S,yz [Mpa]");
             else if (dir == 4) rangeValues.Add("S,xz [Mpa]");
             else if (dir == 5) rangeValues.Add("S,zy [Mpa]");
-
 
             for (int i = 0; i < breps.Count; i++)
             {
