@@ -148,15 +148,11 @@ namespace SolidsVR
                 Point3d p3_w = wDiv[2][i];
                 Point3d p4_w = wDiv[3][i];
             
-                
-
                 Vector3d vecV1 = (p4_w - p1_w) / (p1_w.DistanceTo(p4_w));
                 Vector3d vecV2 = (p3_w - p2_w) / (p2_w.DistanceTo(p3_w));
 
                 Double length_v1 = p1_w.DistanceTo(p4_w) / v;
                 Double length_v2 = p2_w.DistanceTo(p3_w) / v;
-                
-                
 
                 for (int j = 0; j <= v; j++)
                 {
@@ -213,7 +209,7 @@ namespace SolidsVR
                 listJumpUp.Add((u + 1) * (v + 1) - (u + 1) - 2 + (u + 1) * (v + 1) * i);
             }
 
-            int index = 0;
+            int counter = 0;
 
             for (int i = 0; i < u * v * w; i++) // Creating u*v*w new breps having the 8 corner points
             {
@@ -221,37 +217,37 @@ namespace SolidsVR
                 List<Point3d> brp = new List<Point3d>();
 
                 //Putting together the 8 points to make the brep
-                brp.Add(points[index]);
-                brp.Add(points[index + 1]);
-                brp.Add(points[(u + 1) + (index + 1)]);
-                brp.Add(points[(u + 1) + (index)]);
-                brp.Add(points[(u + 1) * (v + 1) + index]);
-                brp.Add(points[(u + 1) * (v + 1) + (index + 1)]);
-                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (index + 1)]);
-                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (index)]);
+                brp.Add(points[counter]);
+                brp.Add(points[counter + 1]);
+                brp.Add(points[(u + 1) + (counter + 1)]);
+                brp.Add(points[(u + 1) + (counter)]);
+                brp.Add(points[(u + 1) * (v + 1) + counter]);
+                brp.Add(points[(u + 1) * (v + 1) + (counter + 1)]);
+                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (counter + 1)]);
+                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (counter)]);
 
                 points_brep.Add(brp);
 
                 List<Node> elementNodes = new List<Node>();
 
                 //Putting together the 8 points to make the brep
-                elementNodes.Add(nodes[index]);
-                elementNodes.Add(nodes[index + 1]);
-                elementNodes.Add(nodes[(u + 1) + (index + 1)]);
-                elementNodes.Add(nodes[(u + 1) + (index)]);
-                elementNodes.Add(nodes[(u + 1) * (v + 1) + index]);
-                elementNodes.Add(nodes[(u + 1) * (v + 1) + (index + 1)]);
-                elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (index + 1)]);
-                elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (index)]);
+                elementNodes.Add(nodes[counter]);
+                elementNodes.Add(nodes[counter + 1]);
+                elementNodes.Add(nodes[(u + 1) + (counter + 1)]);
+                elementNodes.Add(nodes[(u + 1) + (counter)]);
+                elementNodes.Add(nodes[(u + 1) * (v + 1) + counter]);
+                elementNodes.Add(nodes[(u + 1) * (v + 1) + (counter + 1)]);
+                elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (counter + 1)]);
+                elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (counter)]);
 
-                nodes[index].AddElementNr(i);
-                nodes[index + 1].AddElementNr(i);
-                nodes[(u + 1) + (index + 1)].AddElementNr(i);
-                nodes[(u + 1) + (index)].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + index].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + (index + 1)].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + (u + 1) + (index + 1)].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + (u + 1) + (index)].AddElementNr(i);
+                nodes[counter].AddElementNr(i);
+                nodes[counter + 1].AddElementNr(i);
+                nodes[(u + 1) + (counter + 1)].AddElementNr(i);
+                nodes[(u + 1) + (counter)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + counter].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (counter + 1)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (u + 1) + (counter + 1)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (u + 1) + (counter)].AddElementNr(i);
 
 
                 
@@ -264,14 +260,14 @@ namespace SolidsVR
                 
                 //Showing the connectivity between local and global nodes
                 List<int> connectivity = new List<int>();
-                connectivity.Add(index);
-                connectivity.Add(index + 1);
-                connectivity.Add((u + 1) + (index + 1));
-                connectivity.Add((u + 1) + (index));
-                connectivity.Add((u + 1) * (v + 1) + index);
-                connectivity.Add((u + 1) * (v + 1) + (index + 1));
-                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index + 1));
-                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index));
+                connectivity.Add(counter);
+                connectivity.Add(counter + 1);
+                connectivity.Add((u + 1) + (counter + 1));
+                connectivity.Add((u + 1) + (counter));
+                connectivity.Add((u + 1) * (v + 1) + counter);
+                connectivity.Add((u + 1) * (v + 1) + (counter + 1));
+                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (counter + 1));
+                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (counter));
 
                 Element element = new Element(elementNodes, i, connectivity);
 
@@ -279,18 +275,18 @@ namespace SolidsVR
 
                 global_numbering.Add(connectivity);
 
-                if (listJumpOne.Contains(index)) //Checking if we need to move to next row
+                if (listJumpOne.Contains(counter)) //Checking if we need to move to next row
                 {
-                    index += 1;
+                    counter += 1;
                 }
 
 
-                if (listJumpUp.Contains(index)) //Checking if we need to move to next level
+                if (listJumpUp.Contains(counter)) //Checking if we need to move to next level
                 {
-                    index += (u + 2);
+                    counter += (u + 2);
                 }
 
-                index++;
+                counter++;
             }
 
             return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh, nodes, elements);

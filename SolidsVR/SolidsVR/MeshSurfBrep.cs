@@ -68,6 +68,14 @@ namespace SolidsVR
                 if (!DA.GetData(3, ref v)) return;
                 if (!DA.GetData(4, ref w)) return;
 
+                List<Surface> surfaces = new List<Surface>();
+
+                foreach (Surface surf in brp.Surfaces)
+                {
+                    surfaces.Add(surf);
+                }
+
+                Surface[] sortedSurfaces = SortedSurfaces(corners, surfaces);
 
                 Curve[] edges = brp.DuplicateEdgeCurves();
                 Curve[] sortedEdges = SortEdges(corners, edges); //Index 3 and 7 gives null !!!
@@ -136,6 +144,8 @@ namespace SolidsVR
             edge4.DivideByCount(w, true, out Point3d[] p4s);
 
             BrepFace face1 = brep.Faces[1];
+           
+            
             Surface surF1 = face1.DuplicateSurface();
             BrepFace face2 = brep.Faces[4];
             Surface surF2 = face2.DuplicateSurface();
@@ -467,6 +477,33 @@ namespace SolidsVR
             return surfaces;
         }
 
+        public Surface[] SortedSurfaces(List<Point3d> corners, List<Surface> surfaces)
+        {
+            Surface[] sortedSurfaces = new Surface[6];
+
+            Point3d[] surf0 = new Point3d[] { corners[0], corners[1], corners[4], corners[5] };
+            Point3d[] surf1 = new Point3d[] { corners[1], corners[2], corners[5], corners[6] };
+            Point3d[] surf2 = new Point3d[] { corners[2], corners[3], corners[6], corners[7] };
+            Point3d[] surf3 = new Point3d[] { corners[0], corners[3], corners[4], corners[7] };
+            Point3d[] surf4 = new Point3d[] { corners[0], corners[1], corners[2], corners[3] };
+            Point3d[] surf5 = new Point3d[] { corners[4], corners[5], corners[6], corners[7] };
+
+            for (int i = 0; i < surfaces.Count; i++)
+            {
+                Brep surf = surfaces[i].ToBrep();
+                Point3d[] cornerSurf = surf.DuplicateVertices();
+
+                if (cornerSurf.All(surf0.Contains)) sortedSurfaces[0] = surfaces[i];
+                if (cornerSurf.All(surf1.Contains)) sortedSurfaces[1] = surfaces[i];
+                if (cornerSurf.All(surf2.Contains)) sortedSurfaces[2] = surfaces[i];
+                if (cornerSurf.All(surf3.Contains)) sortedSurfaces[3] = surfaces[i];
+                if (cornerSurf.All(surf4.Contains)) sortedSurfaces[4] = surfaces[i];
+                if (cornerSurf.All(surf5.Contains)) sortedSurfaces[5] = surfaces[i];
+            }
+
+
+            return sortedSurfaces;
+        }
 
         public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
         {
