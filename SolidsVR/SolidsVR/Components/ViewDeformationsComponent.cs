@@ -55,7 +55,6 @@ namespace SolidsVR
             Mesh_class mesh = new Mesh_class();
             GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = 1;
-            Brep brep = new Brep();
 
             //---input---
 
@@ -69,6 +68,7 @@ namespace SolidsVR
 
             // Setting up values for refLength and angle for rotation of area
             Brep_class brp = mesh.GetBrep();
+            Brep brep = brp.GetBrep();
             Point3d centroid = brp.GetCentroid();
             double refLength = brp.GetRefLength();
             double refSize = (double)(refLength / 10);
@@ -297,12 +297,9 @@ namespace SolidsVR
                 mesh.Faces.AddFace(0, 1, 2, 3);
 
                 Brep new_brep = Brep.CreateFromMesh(mesh, false);
-
                 Vector3d vecAxis = new Vector3d(0, 0, 1);
                 new_brep.Rotate(angle, vecAxis, center);
-
                 breps.Add(new_brep);
-                
             }
             return breps;
         }
