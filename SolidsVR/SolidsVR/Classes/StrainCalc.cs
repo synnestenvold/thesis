@@ -13,9 +13,25 @@ namespace SolidsVR
     {
         public void StrainCalculations(List<Matrix<double>> B_e, List<Node> nodes_e)
         {
-            
+
+            List<Vector<double>> elementStrain = new List<Vector<double>>();
             Vector<double> u_e = Vector<double>.Build.Dense(24);
-           
+
+            double g = Math.Sqrt(3);
+
+            List<List<double>> gaussPoints = new List<List<double>>()
+            {
+                new List<double>() { -g, -g, -g },
+                new List<double>() { g, -g, -g },
+                new List<double>() { g, g, -g },
+                new List<double>() { -g, g, -g },
+                new List<double>() { -g, -g, g },
+                new List<double>() { g, -g, g },
+                new List<double>() { g, g, g },
+                new List<double>() { -g, g, g },
+
+            };
+
             for (int i = 0; i < nodes_e.Count; i++)
             {
                 List<double> deformations = nodes_e[i].GetDeformation();
@@ -26,24 +42,52 @@ namespace SolidsVR
 
             for (int j=0; j< B_e.Count; j++)
             {
-                Vector<double> nodeStrain = B_e[j].Multiply(u_e);
-                nodes_e[j].SetStrain(nodeStrain);
+                Vector<double> nodeStrain = B_e[j].Multiply(u_e); /// IN GAUSS POINTS
+                elementStrain.Add(nodeStrain);
+                //nodes_e[j].SetStrain(nodeStrain);
             }
+
+            
+
+            for (int i = 0; i < elementStrain.Count; i++)
+            {
+                Vector<double> intStrain = InterpolateStrain(elementStrain, gaussPoints[i]);
+                nodes_e[i].SetStrain(intStrain); //INTERPOLATED strains
+            }
+
         }
 
-        public Vector<double> InterpolateStrain(List<Vector<double>> gaussStrain, double k, double e, double z)
+        public Vector<double> InterpolateStrain(List<Vector<double>> gaussStrain, List<double> gaussPoints)
         {
-            List<double> shapeF = new List<double> {
-            1 / 8 * ((1 - k) * (1 - e) * (1 - z)),
-            1 / 8 * ((1 + k) * (1 - e) * (1 - z)),
-            1 / 8 * ((1 + k) * (1 + e) * (1 - z)),
-            1 / 8 * ((1 - k) * (1 + e) * (1 - z)),
-            1 / 8 * ((1 - k) * (1 - e) * (1 + z)),
-            1 / 8 * ((1 + k) * (1 - e) * (1 + z)),
-            1 / 8 * ((1 + k) * (1 + e) * (1 + z)),
-            1 / 8 * ((1 - k) * (1 + e) * (1 + z)),
-            };
+            double k = gaussPoints[0];
+            double e = gaussPoints[1];
+            double z = gaussPoints[2];
 
+            List<double> shapeF = new List<double> {
+            (double)1 / 8 * ((1 - k) * (1 - e) * (1 - z)),
+            (double)1 / 8 * ((1 + k) * (1 - e) * (1 - z)),
+            (double)1 / 8 * ((1 + k) * (1 + e) * (1 - z)),
+            (double)1 / 8 * ((1 - k) * (1 + e) * (1 - z)),
+            (double)1 / 8 * ((1 - k) * (1 - e) * (1 + z)),
+            (double)1 / 8 * ((1 + k) * (1 - e) * (1 + z)),
+            (double)1 / 8 * ((1 + k) * (1 + e) * (1 + z)),
+            (double)1 / 8 * ((1 - k) * (1 + e) * (1 + z)),
+            };
+            Vector<double> strainNode = Vector<double>.Build.Dense(6);
+
+
+            for (int i = 0; i <  strainNode.Count; i++)
+            {
+                for(int j = 0; j < shapeF.Count; j++)
+                {
+                    double t = gaussStrain[j][i];
+                    double t2 = shapeF[j];
+                    strainNode[i] += gaussStrain[j][i] * shapeF[j];
+                }
+
+            }
+
+            return strainNode;
 
         }
     }
