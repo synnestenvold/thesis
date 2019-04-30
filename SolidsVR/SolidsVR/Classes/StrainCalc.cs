@@ -30,5 +30,21 @@ namespace SolidsVR
                 nodes_e[j].SetStrain(nodeStrain);
             }
         }
+
+        public Vector<double> InterpolateStrain(List<Vector<double>> gaussStrain, double k, double e, double z)
+        {
+            List<double> shapeF = new List<double> {
+            1 / 8 * ((1 - k) * (1 - e) * (1 - z)),
+            1 / 8 * ((1 + k) * (1 - e) * (1 - z)),
+            1 / 8 * ((1 + k) * (1 + e) * (1 - z)),
+            1 / 8 * ((1 - k) * (1 + e) * (1 - z)),
+            1 / 8 * ((1 - k) * (1 - e) * (1 + z)),
+            1 / 8 * ((1 + k) * (1 - e) * (1 + z)),
+            1 / 8 * ((1 + k) * (1 + e) * (1 + z)),
+            1 / 8 * ((1 - k) * (1 + e) * (1 + z)),
+            };
+
+
+        }
     }
 }
