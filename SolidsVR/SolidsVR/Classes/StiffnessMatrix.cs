@@ -29,14 +29,12 @@ namespace SolidsVR
         public Tuple<Matrix<double>, List<Matrix<Double>>> CreateMatrix(List<Node> pList)
 
         {
-
-            //Matrix<double> Ke_test = Matrix<double>.Build.Sparse(24, 24);
             Matrix<double> Ke = Matrix<double>.Build.Dense(24, 24);
             List<Matrix<double>> Be = new List<Matrix<double>>();
 
 
             //3D Constitutive matrix: C
-            double value = E / ((1 + nu) * (1 - 2 * nu));
+            double value = (double) E / ((1 + nu) * (1 - 2 * nu));
             Matrix<double> C = DenseMatrix.OfArray(new double[,]
             {
                 {1-nu, nu, nu, 0, 0, 0},
@@ -113,12 +111,10 @@ namespace SolidsVR
 
                         auxiliar = JacobiMatrix.Inverse().Multiply(shapeF);
 
-
                         // B matrix
                         Matrix<double> B = Matrix<double>.Build.Dense(6, 24);
 
                         //First three rows
-
                         for (int i = 0; i < 3; i++)
                         {
                             for (int j = 0; j <= 7; j++)
@@ -127,19 +123,16 @@ namespace SolidsVR
                             }
                         }
 
-
                         //Fourth row
                         for (int j = 0; j <= 7; j++)
                         {
                             B[3, 3 * j] = auxiliar[1, j];
                         }
 
-
                         for (int j = 0; j <= 7; j++)
                         {
                             B[3, 3 * j + 1] = auxiliar[0, j];
                         }
-
 
                         //Fifth row
                         for (int j = 0; j <= 7; j++)
@@ -152,7 +145,6 @@ namespace SolidsVR
                             B[4, 3 * j + 1] = auxiliar[2, j];
                         }
 
-
                         //Sixth row
                         for (int j = 0; j <= 7; j++)
                         {
@@ -164,7 +156,6 @@ namespace SolidsVR
                             B[5, 3 * j + 2] = auxiliar[0, j];
                         }
 
-                        
                         Be.Add(B);
                         
                         //Adding the stiffness matrix. Ke = Ke + B'*C*B*Det(JacobiMatrix)

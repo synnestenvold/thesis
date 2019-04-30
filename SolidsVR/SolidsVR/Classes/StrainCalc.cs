@@ -16,7 +16,6 @@ namespace SolidsVR
             
             Vector<double> u_e = Vector<double>.Build.Dense(24);
            
-
             for (int i = 0; i < nodes_e.Count; i++)
             {
                 List<double> deformations = nodes_e[i].GetDeformation();
@@ -24,7 +23,6 @@ namespace SolidsVR
                 u_e[i * 3 + 1] = deformations[1];
                 u_e[i * 3 + 2] = deformations[2];
             }
-
 
             for (int j=0; j< B_e.Count; j++)
             {

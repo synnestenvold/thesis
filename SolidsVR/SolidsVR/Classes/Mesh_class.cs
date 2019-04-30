@@ -170,7 +170,8 @@ namespace SolidsVR
                
                 Point3d[] vertices = faceBrep.DuplicateVertices();
 
-                
+                vertices = RoundPoints(vertices);
+
                 int[] nodeIndex = new int[4];
                 for (int i = 0; i < vertices.Length; i++)
                 {
@@ -222,7 +223,15 @@ namespace SolidsVR
         }
 
 
+        public Point3d[] RoundPoints(Point3d[] vertices)
+        {
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 3), Math.Round(vertices[i].Y, 3), Math.Round(vertices[i].Z, 3));
+            }
 
+            return vertices;
+        }
 
     }
 }

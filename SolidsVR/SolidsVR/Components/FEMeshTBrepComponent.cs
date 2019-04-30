@@ -210,7 +210,7 @@ namespace SolidsVR
                 elements[i].SetBMatrices(B_e);
 
                 B_all.Add(B_e);
-                K_tot = aSM.AssemblyMatrix(K_tot, K_e, connectedNodes, sizeOfMatrix);
+                K_tot = aSM.AssemblyMatrix(K_tot, K_e, connectedNodes);
             }
 
 
@@ -286,7 +286,6 @@ namespace SolidsVR
 
                 }
             }
-
             return K;
         }
 
@@ -453,7 +452,6 @@ namespace SolidsVR
 
             for (int i = 0; i < nodes.Count; i++)
             {
-
                 Vector<double> globalStress = C_matrix.Multiply(nodes[i].GetGlobalStrain());
                 
                 //Adding Mises

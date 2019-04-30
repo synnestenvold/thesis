@@ -111,7 +111,6 @@ namespace SolidsVR
 
             List<Point3d> points = new List<Point3d>();
 
-
             for (int i = 0; i <= w; i++)
             {
                 //Creating points in w-directoin
@@ -143,7 +142,6 @@ namespace SolidsVR
                         //Creating points in u-direction and adding them to the global nodes.
                         Point3d p1_u = new Point3d(p1_v.X + length_u1 * k * vec_u1.X, p1_v.Y + length_u1 * k * vec_u1.Y, p1_v.Z + length_u1 * k * vec_u1.Z);
                         points.Add(p1_u);
-
                     }
                 }
             }

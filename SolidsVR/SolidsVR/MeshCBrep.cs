@@ -68,8 +68,13 @@ namespace SolidsVR
 
             Point3d[] cornerPoints = brp.DuplicateVertices();
 
+            cornerPoints = RoundPoints(cornerPoints);
+
             Curve[] edges = brp.DuplicateEdgeCurves();
+            edges= RoundEdgePoints(edges);
             Curve[] sortedEdges = SortEdges(corners, edges);
+
+            
             
             var tuple = CreateNewBreps(sortedEdges, u, v, w, cornerPoints); 
 
@@ -102,7 +107,28 @@ namespace SolidsVR
             DA.SetData(0, mesh);
         }
 
-        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>> CreateNewBreps(Curve[] edges, int u, int v, int w, Point3d[] cornerNodes)
+        public Point3d [] RoundPoints (Point3d [] vertices)
+        {
+            for(int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 3), Math.Round(vertices[i].Y, 3), Math.Round(vertices[i].Z, 3));
+            }
+
+            return vertices;
+        }
+
+        public Curve[] RoundEdgePoints(Curve[] sortedEdges)
+        {
+            for (int i = 0; i < sortedEdges.Length; i++)
+            {
+                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 3), Math.Round(sortedEdges[i].PointAtStart.Y, 3), Math.Round(sortedEdges[i].PointAtStart.Z, 3)));
+                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 3), Math.Round(sortedEdges[i].PointAtEnd.Y, 3), Math.Round(sortedEdges[i].PointAtEnd.Z, 3)));
+            }
+            return sortedEdges;
+        }
+    
+
+    public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>> CreateNewBreps(Curve[] edges, int u, int v, int w, Point3d[] cornerNodes)
         {
 
             List<List<int>> global_numbering = new List<List<int>>();
@@ -379,6 +405,8 @@ namespace SolidsVR
 
         public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
         {
+            // TODO
+            edges[0].SetStartPoint(new Point3d(Math.Round(edges[0].PointAtStart.X, 3), Math.Round(edges[0].PointAtStart.Y, 3), Math.Round(edges[0].PointAtStart.Z, 3))); ;
             Curve[] sortedEdges = new Curve[12];
             for (int i = 0; i < edges.Length; i++)
             {
