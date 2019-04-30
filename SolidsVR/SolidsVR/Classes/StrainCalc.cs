@@ -17,20 +17,18 @@ namespace SolidsVR
             List<Vector<double>> elementStrain = new List<Vector<double>>();
             Vector<double> u_e = Vector<double>.Build.Dense(24);
 
-            double g = Math.Sqrt(3);
-
-            List<List<double>> gaussPoints = new List<List<double>>()
-            {
-                new List<double>() { -g, -g, -g },
-                new List<double>() { g, -g, -g },
-                new List<double>() { g, g, -g },
-                new List<double>() { -g, g, -g },
-                new List<double>() { -g, -g, g },
-                new List<double>() { g, -g, g },
-                new List<double>() { g, g, g },
-                new List<double>() { -g, g, g },
-
-            };
+            //double g = Math.Sqrt(3);
+            //List<List<double>> gaussPoints = new List<List<double>>()
+            //{
+            //    new List<double>() { -g, -g, -g },
+            //    new List<double>() { g, -g, -g },
+            //    new List<double>() { g, g, -g },
+            //    new List<double>() { -g, g, -g },
+            //    new List<double>() { -g, -g, g },
+            //    new List<double>() { g, -g, g },
+            //    new List<double>() { g, g, g },
+            //    new List<double>() { -g, g, g },
+            //};
 
             for (int i = 0; i < nodes_e.Count; i++)
             {
@@ -46,22 +44,20 @@ namespace SolidsVR
                 elementStrain.Add(nodeStrain);
                 //nodes_e[j].SetStrain(nodeStrain);
             }
-
             
-
             for (int i = 0; i < elementStrain.Count; i++)
             {
-                Vector<double> intStrain = InterpolateStrain(elementStrain, gaussPoints[i]);
-                nodes_e[i].SetStrain(intStrain); //INTERPOLATED strains
+                Vector<double> intStrain = InterpolateStrain(elementStrain);
+                nodes_e[i].SetStrain(intStrain); //INTERPOLATED 
             }
 
         }
 
-        public Vector<double> InterpolateStrain(List<Vector<double>> gaussStrain, List<double> gaussPoints)
+        public Vector<double> InterpolateStrain(List<Vector<double>> gaussStrain)
         {
-            double k = gaussPoints[0];
-            double e = gaussPoints[1];
-            double z = gaussPoints[2];
+            double k = -Math.Sqrt(3);
+            double e = -Math.Sqrt(3);
+            double z = -Math.Sqrt(3);
 
             List<double> shapeF = new List<double> {
             (double)1 / 8 * ((1 - k) * (1 - e) * (1 - z)),
@@ -74,14 +70,11 @@ namespace SolidsVR
             (double)1 / 8 * ((1 - k) * (1 + e) * (1 + z)),
             };
             Vector<double> strainNode = Vector<double>.Build.Dense(6);
-
-
+           
             for (int i = 0; i <  strainNode.Count; i++)
             {
                 for(int j = 0; j < shapeF.Count; j++)
                 {
-                    double t = gaussStrain[j][i];
-                    double t2 = shapeF[j];
                     strainNode[i] += gaussStrain[j][i] * shapeF[j];
                 }
 
