@@ -62,19 +62,19 @@ namespace SolidsVR
             double e = -Math.Sqrt(3);
             double z = -Math.Sqrt(3);
             */
-            double k = gaussPoints[0];
-            double e = gaussPoints[1];
-            double z = gaussPoints[2];
+            double r = gaussPoints[0];
+            double s = gaussPoints[1];
+            double t = gaussPoints[2];
 
             List<double> shapeF = new List<double> {
-            (double)1 / 8 * ((1 - k) * (1 - e) * (1 - z)),
-            (double)1 / 8 * ((1 + k) * (1 - e) * (1 - z)),
-            (double)1 / 8 * ((1 + k) * (1 + e) * (1 - z)),
-            (double)1 / 8 * ((1 - k) * (1 + e) * (1 - z)),
-            (double)1 / 8 * ((1 - k) * (1 - e) * (1 + z)),
-            (double)1 / 8 * ((1 + k) * (1 - e) * (1 + z)),
-            (double)1 / 8 * ((1 + k) * (1 + e) * (1 + z)),
-            (double)1 / 8 * ((1 - k) * (1 + e) * (1 + z)),
+            (double)1 / 8 * ((1 - r) * (1 - s) * (1 - t)),
+            (double)1 / 8 * ((1 + r) * (1 - s) * (1 - t)),
+            (double)1 / 8 * ((1 + r) * (1 + s) * (1 - t)),
+            (double)1 / 8 * ((1 - r) * (1 + s) * (1 - t)),
+            (double)1 / 8 * ((1 - r) * (1 - s) * (1 + t)),
+            (double)1 / 8 * ((1 + r) * (1 - s) * (1 + t)),
+            (double)1 / 8 * ((1 + r) * (1 + s) * (1 + t)),
+            (double)1 / 8 * ((1 - r) * (1 + s) * (1 + t)),
             };
             Vector<double> strainNode = Vector<double>.Build.Dense(6);
            
