@@ -73,7 +73,7 @@ namespace SolidsVR
             double refLength = brp.GetRefLength();
             double refSize = (double)(refLength / 10);
             double angle = 270*Math.PI/180;
-            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 3.5, 0)); //Center for viewpoint
+            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 5, 0)); //Center for viewpoint
 
             //---solve---
 
@@ -94,7 +94,7 @@ namespace SolidsVR
             Color colorSphere = Color.Red;
 
             //Creating text for displaying it for max value
-            var tuple2 = CreateText(defMax, pointMax, refSize, angle, center);
+            var tuple2 = CreateText(defMax, pointMax, nodeGlobalMax, defVectors, scale, refSize, angle, center);
             string textDef = tuple2.Item1;
             double textDefSize = tuple2.Item2;
             Plane textDefPlane = tuple2.Item3;
@@ -304,15 +304,16 @@ namespace SolidsVR
             return breps;
         }
 
-        public Tuple<string, double, Plane, Color> CreateText(double defMax, Point3d pointMax, double refSize, double angle, Point3d center)
+        public Tuple<string, double, Plane, Color> CreateText(double defMax, Point3d pointMax, int nodeGlobalMax, Vector3d[] defVectors, double scale, double refSize, double angle, Point3d center)
         {
- 
+            Point3d newPoint = pointMax + defVectors[nodeGlobalMax] * scale;
+
             string text = defMax.ToString();
             double textSize = refSize;
 
-            Point3d p0 = pointMax;
-            Point3d p1 = Point3d.Add(pointMax, new Point3d(-1, 0, 0));
-            Point3d p2 = Point3d.Add(pointMax, new Point3d(0, 0, 1));
+            Point3d p0 = newPoint;
+            Point3d p1 = Point3d.Add(newPoint, new Point3d(-1, 0, 0));
+            Point3d p2 = Point3d.Add(newPoint, new Point3d(0, 0, 1));
 
             Plane textplane = new Plane(p0, p1, p2);
             textplane.Rotate(angle, new Vector3d(0,0,1), center);

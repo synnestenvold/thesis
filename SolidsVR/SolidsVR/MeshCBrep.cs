@@ -45,7 +45,7 @@ namespace SolidsVR
             // ---variables-- -
 
             Brep brp = new Brep();
-            List<Point3d> corners = new List<Point3d>();
+            List<Point3d> cornersList = new List<Point3d>();
             int u = 1;
             int v = 1;
             int w = 1;
@@ -53,7 +53,7 @@ namespace SolidsVR
             // --- input ---
 
             if (!DA.GetData(0, ref brp)) return;
-            if (!DA.GetDataList(1, corners)) return;
+            if (!DA.GetDataList(1, cornersList)) return;
             if (!DA.GetData(2, ref u)) return;
             if (!DA.GetData(3, ref v)) return;
             if (!DA.GetData(4, ref w)) return;
@@ -67,11 +67,13 @@ namespace SolidsVR
             }
 
             Point3d[] cornerPoints = brp.DuplicateVertices();
+            //Round corners from input
 
             cornerPoints = RoundPoints(cornerPoints);
 
             Curve[] edges = brp.DuplicateEdgeCurves();
             edges= RoundEdgePoints(edges);
+            List<Point3d> corners = RoundPointsList(cornersList);
             Curve[] sortedEdges = SortEdges(corners, edges);
 
             
@@ -110,6 +112,16 @@ namespace SolidsVR
         public Point3d [] RoundPoints (Point3d [] vertices)
         {
             for(int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 3), Math.Round(vertices[i].Y, 3), Math.Round(vertices[i].Z, 3));
+            }
+
+            return vertices;
+        }
+
+        public List<Point3d> RoundPointsList(List<Point3d> vertices)
+        {
+            for (int i = 0; i < vertices.Count; i++)
             {
                 vertices[i] = new Point3d(Math.Round(vertices[i].X, 3), Math.Round(vertices[i].Y, 3), Math.Round(vertices[i].Z, 3));
             }

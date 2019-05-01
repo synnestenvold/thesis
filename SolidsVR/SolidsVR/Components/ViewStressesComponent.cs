@@ -69,7 +69,7 @@ namespace SolidsVR
             Brep brep = brp.GetBrep();
             Point3d centroid = brp.GetCentroid();
             double refLength = brp.GetRefLength();
-            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 3.5, 0));
+            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 5, 0));
             double angle = 90 * Math.PI / 180;
 
             //---solve---
@@ -336,6 +336,7 @@ namespace SolidsVR
             else if (dir == 3) rangeValues.Add("S,yz [Mpa]");
             else if (dir == 4) rangeValues.Add("S,xz [Mpa]");
             else if (dir == 5) rangeValues.Add("S,zy [Mpa]");
+            else if (dir == 6) rangeValues.Add("Mises [Mpa]");
 
             for (int i = 0; i < breps.Count; i++)
             {
