@@ -66,6 +66,7 @@ namespace SolidsVR
 
             //Setting up values for reflength and angle for rotation of area
             Brep_class brp = mesh.GetBrep();
+            Brep brep = brp.GetBrep();
             Point3d centroid = brp.GetCentroid();
             double refLength = brp.GetRefLength();
             Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 3.5, 0));
