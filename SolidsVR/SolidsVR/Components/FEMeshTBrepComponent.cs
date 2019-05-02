@@ -96,7 +96,7 @@ namespace SolidsVR
             List<int> predefNodes = tupleDef.Item1;
             List<double> predef = tupleDef.Item2;
 
-            //Apply boundary condition and predeformations
+            //Apply boundary condition and predeformations (putting 0 in rows and columns)
             K_tot = ApplyBC(K_tot, bcNodes);
             K_tot = ApplyBC(K_tot, predefNodes);
             //ApplyBCRed(K_tot, bcNodes);
@@ -299,27 +299,10 @@ namespace SolidsVR
                 K_red = K_red.RemoveRow(i);
 
             }
-
-            int k = 0;
+            
         }
 
-        /*
-
-        public void ApplyBCRed(Matrix<double> K, List<int> bcNodes)
-        {
-            Matrix<double> K_red = K;
-
-            for (int i = 0; i < bcNodes.Count; i++)
-            {
-                K_red = K_red.RemoveColumn(i);
-                K_red = K_red.RemoveRow(i);
-
-            }
-
-            int k = 0;
-        }
-        */
-
+     
         public Vector<double> ApplyPreDef(Matrix<double> K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
         {
             if (predefNodes.Count == 0) return Vector<double>.Build.Dense(sizeOfM);
@@ -397,7 +380,7 @@ namespace SolidsVR
             }
             for (int i = 0; i < predefNodes.Count; i++)
             {
-                loads[predefNodes[i]] = predef[i];
+                loads[predefNodes[i]] =  predef[i];
             }
 
             return loads;
