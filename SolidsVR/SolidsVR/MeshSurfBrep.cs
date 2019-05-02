@@ -80,7 +80,7 @@ namespace SolidsVR
                 Curve[] edges = brp.DuplicateEdgeCurves();
                 Curve[] sortedEdges = SortEdges(corners, edges); //Index 3 and 7 gives null !!!
 
-                var tuple = CreateNewBreps(brp, u, v, w, sortedEdges);
+                var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, sortedSurfaces);
 
                 List<List<Point3d>> elementPoints = tuple.Item1;
                 List<List<int>> connectivity = tuple.Item2;
@@ -110,11 +110,12 @@ namespace SolidsVR
 
                 DA.SetData(0, mesh);
                 DA.SetDataList(1, sortedEdges);
+                DA.SetDataList(2, sortedSurfaces);
 
             }
         }
 
-        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>> CreateNewBreps(Brep brep, int u, int v, int w, Curve[] edges)
+        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>> CreateNewBreps(Brep brep, int u, int v, int w, Curve[] edges, Surface [] oSurfaces)
         {
             List<Point3d> points = new List<Point3d>();
             List<List<int>> global_numbering = new List<List<int>>();
@@ -132,10 +133,12 @@ namespace SolidsVR
             Curve edge3 = edges[10];
             Curve edge4 = edges[11];
 
+            /*
             edge1.Reverse();
             edge2.Reverse();
             edge3.Reverse();
             edge4.Reverse();
+            */
 
 
             edge1.DivideByCount(w, true, out Point3d[] p1s);
@@ -143,9 +146,14 @@ namespace SolidsVR
             edge3.DivideByCount(w, true, out Point3d[] p3s);
             edge4.DivideByCount(w, true, out Point3d[] p4s);
 
+            Surface surF1 = oSurfaces[0];
+            Surface surF2 = oSurfaces[1];
+            Surface surF3 = oSurfaces[2];
+            Surface surF4 = oSurfaces[3];
+
+            /*
             BrepFace face1 = brep.Faces[1];
-           
-            
+
             Surface surF1 = face1.DuplicateSurface();
             BrepFace face2 = brep.Faces[4];
             Surface surF2 = face2.DuplicateSurface();
@@ -153,6 +161,7 @@ namespace SolidsVR
             Surface surF3 = face3.DuplicateSurface();
             BrepFace face4 = brep.Faces[2];
             Surface surF4 = face4.DuplicateSurface();
+            */
 
             List<NurbsCurve> curve = new List<NurbsCurve>();
 
@@ -178,7 +187,7 @@ namespace SolidsVR
                 NurbsCurve c3 = surF3.InterpolatedCurveOnSurface(ps3, 0);
                 NurbsCurve c4 = surF4.InterpolatedCurveOnSurface(ps4, 0);
 
-                c1.Reverse();
+                //c1.Reverse();
                 //c2.Reverse();
                 //c4.Reverse();
 
@@ -197,6 +206,8 @@ namespace SolidsVR
 
                 List<Point3d> pointList = new List<Point3d>() { p_1, p_2, p_3, p_4 };
 
+                Brep b = surface.ToBrep();
+                Point3d[] vertices = b.DuplicateVertices();
 
                 var tuple = CreatePoints(surface, u, v, w, i, cornerPoints, pointList);
 
@@ -321,6 +332,8 @@ namespace SolidsVR
             Interval domainV = surface.Domain(1);
 
             List<Node> nodes = new List<Node>();
+
+            
 
 
             if (domainU[1] == 0) domainU.Swap();
