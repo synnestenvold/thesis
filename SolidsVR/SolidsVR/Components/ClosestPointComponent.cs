@@ -39,7 +39,6 @@ namespace SolidsVR
         {
             pManager.AddGeometryParameter("Sphere", "S", "Sphere to compare closest point", GH_ParamAccess.item);
             pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
-            pManager.AddBrepParameter("Brep", "B", "Original brep", GH_ParamAccess.item);
 
         }
 
@@ -66,17 +65,16 @@ namespace SolidsVR
 
             Brep sphere = new Brep();
             Mesh_class mesh = new Mesh_class();
-            Brep origBrep = new Brep();
 
             //---input---
 
             if (!DA.GetData(0, ref sphere)) return;
             if (!DA.GetData(1, ref mesh)) return;
-            if (!DA.GetData(2, ref origBrep)) return;
 
             //---setup---
 
             //Setting up values for reflength and angle for rotation of area
+            Brep origBrep = mesh.GetOrigBrep();
             VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
             double volume = origBrep.GetVolume();
             double sqrt3 = (double)1 / 3;
@@ -88,7 +86,7 @@ namespace SolidsVR
             Point3d[] globalPoints = mesh.GetGlobalPoints();
 
             VolumeMassProperties vmpSphere = VolumeMassProperties.Compute(sphere);
-            Point3d centroidSphere = vmp.Centroid;
+            Point3d centroidSphere = vmpSphere.Centroid;
 
 
             Point3d closestPoint = FindClosestPoint(globalPoints, centroidSphere, refLength);
@@ -130,7 +128,7 @@ namespace SolidsVR
             {
                 double checkLength = globalPoints[i].DistanceTo(centroid);
 
-                if (checkLength < length && checkLength < refLength)
+                if (checkLength < length && checkLength < refLength/2)
                 {
                     length = checkLength;
                     closestPoint = globalPoints[i];

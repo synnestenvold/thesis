@@ -159,16 +159,15 @@ namespace SolidsVR
             
             for (int i=0; i<4; i++)
             {
-                Point3d[] uP = new Point3d[u+1];
-                Point3d[] vP = new Point3d[v+1];
+                //Point3d[] uP = new Point3d[u+1];
+                //Point3d[] vP = new Point3d[v+1];
                 Point3d[] wP = new Point3d[w+1];
-                edges[i].DivideByCount(u, true, out uP);
-                edges[i+4].DivideByCount(v, true, out vP);
+                //edges[i].DivideByCount(u, true, out uP);
+                //edges[i+4].DivideByCount(v, true, out vP);
                 edges[i+8].DivideByCount(w, true, out wP);
-                //List<Point2> lst = ints.OfType<int>().ToList();
                 
-                uDiv.Add(uP.ToList());
-                vDiv.Add(vP.ToList());
+                //uDiv.Add(uP.ToList());
+                //vDiv.Add(vP.ToList());
                 wDiv.Add(wP.ToList());
 
             }
