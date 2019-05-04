@@ -31,6 +31,7 @@ namespace SolidsVR
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);
+            pManager.AddCurveParameter("Curves", "C", "Corner points in right order", GH_ParamAccess.list);
 
         }
 
@@ -59,6 +60,7 @@ namespace SolidsVR
                 int u = 1;
                 int v = 1;
                 int w = 1;
+                List<Curve> c = new List<Curve>();
 
                 // --- input ---
 
@@ -67,20 +69,18 @@ namespace SolidsVR
                 if (!DA.GetData(2, ref u)) return;
                 if (!DA.GetData(3, ref v)) return;
                 if (!DA.GetData(4, ref w)) return;
+                if (!DA.GetDataList(5, c)) return;
 
-                List<Surface> surfaces = new List<Surface>();
 
-                foreach (Surface surf in brp.Surfaces)
-                {
-                    surfaces.Add(surf);
-                }
-
-                Surface[] sortedSurfaces = SortedSurfaces(corners, surfaces);
 
                 Curve[] edges = brp.DuplicateEdgeCurves();
-                Curve[] sortedEdges = SortEdges(corners, edges); //Index 3 and 7 gives null !!!
+                edges = RoundEdgePoints(edges);
+                Curve[] sortedEdges = SortEdges(corners, edges); 
 
-                var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, sortedSurfaces);
+                Surface[] sortedSurf = CreateSurfaces(sortedEdges);
+
+                
+                var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, sortedSurf);
 
                 List<List<Point3d>> elementPoints = tuple.Item1;
                 List<List<int>> connectivity = tuple.Item2;
@@ -110,7 +110,8 @@ namespace SolidsVR
 
                 DA.SetData(0, mesh);
                 DA.SetDataList(1, sortedEdges);
-                DA.SetDataList(2, sortedSurfaces);
+                
+                DA.SetDataList(2, sortedSurf);
 
             }
         }
@@ -133,35 +134,26 @@ namespace SolidsVR
             Curve edge3 = edges[10];
             Curve edge4 = edges[11];
 
-            /*
+           /*
             edge1.Reverse();
             edge2.Reverse();
             edge3.Reverse();
             edge4.Reverse();
             */
+            
 
 
             edge1.DivideByCount(w, true, out Point3d[] p1s);
             edge2.DivideByCount(w, true, out Point3d[] p2s);
             edge3.DivideByCount(w, true, out Point3d[] p3s);
             edge4.DivideByCount(w, true, out Point3d[] p4s);
-
+            
             Surface surF1 = oSurfaces[0];
             Surface surF2 = oSurfaces[1];
             Surface surF3 = oSurfaces[2];
             Surface surF4 = oSurfaces[3];
+            
 
-            /*
-            BrepFace face1 = brep.Faces[1];
-
-            Surface surF1 = face1.DuplicateSurface();
-            BrepFace face2 = brep.Faces[4];
-            Surface surF2 = face2.DuplicateSurface();
-            BrepFace face3 = brep.Faces[3];
-            Surface surF3 = face3.DuplicateSurface();
-            BrepFace face4 = brep.Faces[2];
-            Surface surF4 = face4.DuplicateSurface();
-            */
 
             List<NurbsCurve> curve = new List<NurbsCurve>();
 
@@ -194,7 +186,9 @@ namespace SolidsVR
 
 
                 curve = new List<NurbsCurve>() { c1, c2, c3, c4 };
-                Brep brepSurf = Brep.CreateEdgeSurface(curve);
+                Brep brepSurf = Brep.CreateEdgeSurface(curve); 
+
+                //Point3d[] vert = brepSurf.DuplicateVertices();
 
                 Surface surface = null;
 
@@ -203,6 +197,8 @@ namespace SolidsVR
                 {
                     surface = surf.DuplicateSurface();
                 }
+
+
 
                 List<Point3d> pointList = new List<Point3d>() { p_1, p_2, p_3, p_4 };
 
@@ -331,32 +327,150 @@ namespace SolidsVR
             Interval domainU = surface.Domain(0);
             Interval domainV = surface.Domain(1);
 
+            //surface.SetDomain(0, new Interval(0,1));
+
             List<Node> nodes = new List<Node>();
 
-            
 
 
-            if (domainU[1] == 0) domainU.Swap();
-            if (domainV[1] == 0) domainV.Swap();
-         
+
+            //if (domainU[1] == 0) domainU.Swap();
+            //if (domainV[1] == 0) domainV.Swap();
+
             double tu0 = domainU.ParameterAt(0);
             double tu1 = domainU.ParameterAt(1);
             double tv0 = domainV.ParameterAt(0);
             double tv1 = domainV.ParameterAt(1);
+
+            List<Point3d> tempPoints = new List<Point3d>()
+            {
+                surface.PointAt(tu0, tv0),
+                surface.PointAt(tu0, tv1),
+                surface.PointAt(tu1, tv0),
+                surface.PointAt(tu1, tv1),
+            };
+
+            pointList = RoundPointsList(pointList);
+            tempPoints = RoundPointsList(tempPoints);
+
+            for(int j = 0; j < pointList.Count; j++)
+            {
+                for(int k = 0; k < tempPoints.Count; k++)
+                {
+                    if (pointList[j].DistanceTo(tempPoints[k]) < 0.001)
+                    {
+
+                    }
+                }
+            }
+
+            double domainU0 = 0;
+            double domainU1 = 0;
+            double domainV0 = 0;
+            double domainV1 = 0;
+
+            Interval point1 = new Interval(0, 0);
+            Interval point2 = new Interval(0, 0);
+            Interval point3 = new Interval(0, 0);
+
+            for (int k = 0; k < tempPoints.Count; k++)
+            {
+                double test = tempPoints[k].DistanceTo(pointList[0]);
+                if (tempPoints[k].DistanceTo(pointList[0]) < 0.001)
+                {
+                    if (k == 0) point1 = new Interval(tu0, tv0);
+                    if (k == 1) point1 = new Interval(tu0, tv1);
+                    if (k == 2) point1 = new Interval(tu1, tv0);
+                    if (k == 3) point1 = new Interval(tu1, tv1);
+
+                }
+                double test2 = tempPoints[k].DistanceTo(pointList[1]);
+                if (tempPoints[k].DistanceTo(pointList[1]) < 0.001)
+                {
+                    if (k == 0) point2 = new Interval(tu0, tv0);
+                    if (k == 1) point2 = new Interval(tu0, tv1);
+                    if (k == 2) point2 = new Interval(tu1, tv0);
+                    if (k == 3) point2 = new Interval(tu1, tv1);
+                }
+
+                double test3 = tempPoints[k].DistanceTo(pointList[3]);
+
+                if (tempPoints[k].DistanceTo(pointList[3]) < 0.001)
+                {
+                    if (k == 0) point3 = new Interval(tu0, tv0);
+                    if (k == 1) point3 = new Interval(tu0, tv1);
+                    if (k == 2) point3 = new Interval(tu1, tv0);
+                    if (k == 3) point3 = new Interval(tu1, tv1);
+                }
+            }
+
+            Interval domain1 = new Interval(point2.ParameterAt(0) - point1.ParameterAt(0), point2.ParameterAt(1) - point1.ParameterAt(1));
+            Interval domain2 = new Interval(point3.ParameterAt(0) - point1.ParameterAt(0), point3.ParameterAt(1) - point1.ParameterAt(1));
 
             Point3d p_temp1 = surface.PointAt(tu0, tv0);
             Point3d p_temp2 = surface.PointAt(tu0, tv1);
             Point3d p_temp3 = surface.PointAt(tu1, tv0);
             Point3d p_temp4 = surface.PointAt(tu1, tv1);
 
+            double p11 = point1.ParameterAt(0);
+            double p12 = point1.ParameterAt(1);
+
+            double p21 = point2.ParameterAt(0);
+            double p22 = point2.ParameterAt(1);
+
+            double p31 = point3.ParameterAt(0);
+            double p32 = point3.ParameterAt(1);
+
             Boolean reverse = false;
+
 
             if (Math.Round(p_temp2.X,4) == Math.Round(pointList[3].X,4) && (Math.Round(p_temp2.Y, 4) == Math.Round(pointList[3].Y, 4)) && (Math.Round(p_temp2.Z, 4) == Math.Round(pointList[3].Z, 4))) reverse = true;
 
             List<Point3d> points = new List<Point3d>();
             List<Vector3d> vectors = new List<Vector3d>();
 
-            if(reverse == false)
+            double stepU = domainU.ParameterAt(0) - domainU.ParameterAt(1);
+
+
+            double tu = 0;
+            double tv = 0;
+
+            for (int j = 0; j <= v; j++)
+            {
+                if ((p31 - p11) != 0)
+                {
+                    tu = (double) (p11 - j * (p11 - p31) / v);
+                }
+                else
+                {
+                    tv = (double) (p12 - j * (p12 - p32) / v);
+                }
+                for (int k = 0; k <= u; k++)
+                {
+                    if ((p21 - p11) != 0)
+                    {
+                        tu = (double) (p11 - k * (p11 - p21) / u);
+                    }
+                    else
+                    {
+                        tv = (double) (p12 - k * (p12 - p22) / u);
+                    }
+
+                    Point3d p1 = surface.PointAt(tu, tv);
+
+                    points.Add(p1);
+
+                    Node node = new Node(p1, points.IndexOf(p1));
+
+                    SetNodePosition(node, p1, cornerNodes, i, j, k, u, v, w);
+                    SetNodeSurface(node, i, j, k, u, v, w);
+                    nodes.Add(node);
+
+                }
+            }
+            /*
+
+            if (reverse == false)
             {
                 for (int j = 0; j <= v; j++)
                 {
@@ -401,7 +515,7 @@ namespace SolidsVR
                     }
                 }
             }
-
+            */
             
 
             return Tuple.Create(points, nodes);
@@ -590,6 +704,62 @@ namespace SolidsVR
             }
             return sortedEdges;
         }
+
+        public Curve[] RoundEdgePoints(Curve[] sortedEdges)
+        {
+            for (int i = 0; i < sortedEdges.Length; i++)
+            {
+                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 3), Math.Round(sortedEdges[i].PointAtStart.Y, 3), Math.Round(sortedEdges[i].PointAtStart.Z, 3)));
+                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 3), Math.Round(sortedEdges[i].PointAtEnd.Y, 3), Math.Round(sortedEdges[i].PointAtEnd.Z, 3)));
+            }
+            return sortedEdges;
+        }
+
+        public Surface[] CreateSurfaces(Curve[] edges)
+        {
+            Surface[] sortedSurfaces = new Surface[6];
+
+            List<NurbsCurve> curves1 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[9].ToNurbsCurve(), edges[2].ToNurbsCurve(), edges[8].ToNurbsCurve() };
+            List<NurbsCurve> curves2 = new List<NurbsCurve>() { edges[9].ToNurbsCurve(), edges[6].ToNurbsCurve(), edges[10].ToNurbsCurve(), edges[5].ToNurbsCurve() };
+            List<NurbsCurve> curves3 = new List<NurbsCurve>() { edges[1].ToNurbsCurve(), edges[11].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[10].ToNurbsCurve() };
+            List<NurbsCurve> curves4 = new List<NurbsCurve>() { edges[4].ToNurbsCurve(), edges[8].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[11].ToNurbsCurve() };
+            List<NurbsCurve> curves5 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[5].ToNurbsCurve(), edges[1].ToNurbsCurve(), edges[4].ToNurbsCurve() };
+            List<NurbsCurve> curves6 = new List<NurbsCurve>() { edges[2].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[6].ToNurbsCurve() };
+
+            Brep brebSurf1 = Brep.CreateEdgeSurface(curves1);
+            Brep brebSurf2 = Brep.CreateEdgeSurface(curves2);
+            Brep brebSurf3 = Brep.CreateEdgeSurface(curves3);
+            Brep brebSurf4 = Brep.CreateEdgeSurface(curves4);
+            Brep brebSurf5 = Brep.CreateEdgeSurface(curves5);
+            Brep brebSurf6 = Brep.CreateEdgeSurface(curves6);
+
+            BrepFace face1 = brebSurf1.Faces[0];
+            sortedSurfaces[0] = face1.DuplicateSurface();
+            BrepFace face2 = brebSurf2.Faces[0];
+            sortedSurfaces[1] = face2.DuplicateSurface();
+            BrepFace face3 = brebSurf3.Faces[0];
+            sortedSurfaces[2] = face3.DuplicateSurface();
+            BrepFace face4 = brebSurf4.Faces[0];
+            sortedSurfaces[3] = face4.DuplicateSurface();
+            BrepFace face5 = brebSurf5.Faces[0];
+            sortedSurfaces[4] = face5.DuplicateSurface();
+            BrepFace face6 = brebSurf6.Faces[0];
+            sortedSurfaces[5] = face6.DuplicateSurface();
+
+            return sortedSurfaces;
+
+
+        }
+        public List<Point3d> RoundPointsList(List<Point3d> vertices)
+        {
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 3), Math.Round(vertices[i].Y, 3), Math.Round(vertices[i].Z, 3));
+            }
+
+            return vertices;
+        }
+
 
         /// <summary>
         /// Provides an Icon for the component.
