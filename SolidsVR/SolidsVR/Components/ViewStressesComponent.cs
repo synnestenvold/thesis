@@ -12,7 +12,6 @@ namespace SolidsVR
 {
     public class ViewStressesComponent : GH_Component
     {
-        Dictionary<Brep, Color> models = new Dictionary<Brep, Color>();
 
         public ViewStressesComponent()
           : base("ViewStresses", "ViewStress",
