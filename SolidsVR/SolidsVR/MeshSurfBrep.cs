@@ -327,15 +327,7 @@ namespace SolidsVR
             Interval domainU = surface.Domain(0);
             Interval domainV = surface.Domain(1);
 
-            //surface.SetDomain(0, new Interval(0,1));
-
             List<Node> nodes = new List<Node>();
-
-
-
-
-            //if (domainU[1] == 0) domainU.Swap();
-            //if (domainV[1] == 0) domainV.Swap();
 
             double tu0 = domainU.ParameterAt(0);
             double tu1 = domainU.ParameterAt(1);
@@ -352,22 +344,6 @@ namespace SolidsVR
 
             pointList = RoundPointsList(pointList);
             tempPoints = RoundPointsList(tempPoints);
-
-            for(int j = 0; j < pointList.Count; j++)
-            {
-                for(int k = 0; k < tempPoints.Count; k++)
-                {
-                    if (pointList[j].DistanceTo(tempPoints[k]) < 0.001)
-                    {
-
-                    }
-                }
-            }
-
-            double domainU0 = 0;
-            double domainU1 = 0;
-            double domainV0 = 0;
-            double domainV1 = 0;
 
             Interval point1 = new Interval(0, 0);
             Interval point2 = new Interval(0, 0);
@@ -404,14 +380,6 @@ namespace SolidsVR
                 }
             }
 
-            Interval domain1 = new Interval(point2.ParameterAt(0) - point1.ParameterAt(0), point2.ParameterAt(1) - point1.ParameterAt(1));
-            Interval domain2 = new Interval(point3.ParameterAt(0) - point1.ParameterAt(0), point3.ParameterAt(1) - point1.ParameterAt(1));
-
-            Point3d p_temp1 = surface.PointAt(tu0, tv0);
-            Point3d p_temp2 = surface.PointAt(tu0, tv1);
-            Point3d p_temp3 = surface.PointAt(tu1, tv0);
-            Point3d p_temp4 = surface.PointAt(tu1, tv1);
-
             double p11 = point1.ParameterAt(0);
             double p12 = point1.ParameterAt(1);
 
@@ -421,16 +389,9 @@ namespace SolidsVR
             double p31 = point3.ParameterAt(0);
             double p32 = point3.ParameterAt(1);
 
-            Boolean reverse = false;
-
-
-            if (Math.Round(p_temp2.X,4) == Math.Round(pointList[3].X,4) && (Math.Round(p_temp2.Y, 4) == Math.Round(pointList[3].Y, 4)) && (Math.Round(p_temp2.Z, 4) == Math.Round(pointList[3].Z, 4))) reverse = true;
 
             List<Point3d> points = new List<Point3d>();
             List<Vector3d> vectors = new List<Vector3d>();
-
-            double stepU = domainU.ParameterAt(0) - domainU.ParameterAt(1);
-
 
             double tu = 0;
             double tv = 0;
@@ -468,55 +429,6 @@ namespace SolidsVR
 
                 }
             }
-            /*
-
-            if (reverse == false)
-            {
-                for (int j = 0; j <= v; j++)
-                {
-                    double tu = domainU.ParameterAt(j / (double)v);
-                    for (int k = 0; k <= u; k++)
-                    {
-                        double tv = domainV.ParameterAt(k / (double)u);
-
-                        Point3d p1 = surface.PointAt(tu, tv);
-
-                        points.Add(p1);
-
-                        Node node = new Node(p1, points.IndexOf(p1));
-
-                        SetNodePosition(node, p1, cornerNodes, i, j, k, u, v, w);
-                        SetNodeSurface(node, i, j, k, u, v, w);
-                        nodes.Add(node);
-
-                    }
-                }
-            }
-
-            else
-            {
-                for (int j = 0; j <= v; j++)
-                {
-                    double tv = domainV.ParameterAt(j / (double)v);
-                    for (int k = 0; k <= u; k++)
-                    {
-                        double tu = domainU.ParameterAt(k / (double)u);
-
-                        Point3d p1 = surface.PointAt(tu, tv);
-
-                        points.Add(p1);
-
-                        Node node = new Node(p1, points.IndexOf(p1));
-
-                        SetNodePosition(node, p1, cornerNodes, i, j, k, u, v, w);
-                        SetNodeSurface(node, i, j, k, u, v, w);
-                        nodes.Add(node);
-
-                    }
-                }
-            }
-            */
-            
 
             return Tuple.Create(points, nodes);
         }
