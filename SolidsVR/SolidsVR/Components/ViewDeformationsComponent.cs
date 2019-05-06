@@ -79,6 +79,7 @@ namespace SolidsVR
 
             List<List<int>> connectivity = mesh.GetConnectivity();
             List<List<Point3d>> elementPoints = mesh.GetElementPoints();
+            List<Element> elements = mesh.GetElements();
 
             //Creating deformation vectors
             Vector3d[] defVectors = CreateVectors(treeDef);
@@ -220,8 +221,12 @@ namespace SolidsVR
 
         public Curve[] DrawOuterCurves(Brep brep, double angle, Point3d center)
         {
+
             brep.Rotate(angle, new Vector3d(0, 0, 1), center);
+
             Curve[] curves = brep.DuplicateEdgeCurves();
+
+            brep.Rotate(-angle, new Vector3d(0, 0, 1), center);
 
             return curves;
         }
