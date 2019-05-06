@@ -111,9 +111,9 @@ namespace SolidsVR
             var V = Vector<double>.Build;
             Vector<double> R = (V.DenseOfArray(R_array)).Subtract(R_def);
 
-            //Apply boundary condition and predeformations (putting 0 in rows and columns of K)
-            K_tot = ApplyBC(K_tot, bcNodes);
-            K_tot = ApplyBC(K_tot, predefNodes);
+            //Apply boundary condition and predeformations (Puts 0 in columns of K)
+            K_tot = ApplyBC_Col(K_tot, bcNodes);
+            K_tot = ApplyBC_Col(K_tot, predefNodes);
             
             //Inverting K matrix
             Matrix<double> K_tot_inverse = K_tot.Inverse();
@@ -266,7 +266,7 @@ namespace SolidsVR
             return Tuple.Create(BC, restrains);
         }
 
-        public Matrix<double> ApplyBC(Matrix<double> K, List<int> bcNodes)
+        public Matrix<double> ApplyBC_Col(Matrix<double> K, List<int> bcNodes)
         {
             for (int i = 0; i < bcNodes.Count; i++)
             {
