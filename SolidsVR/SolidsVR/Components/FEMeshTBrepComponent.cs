@@ -104,24 +104,21 @@ namespace SolidsVR
             Vector<double> R_def = Vector<double>.Build.Dense(sizeOfMatrix);
             if (deftxt.Any()) R_def = ApplyPreDef(K_tot, predefNodes, predef, sizeOfMatrix);
 
-            //Apply boundary condition and predeformations (putting 0 in rows and columns of K)
-            K_tot = ApplyBC(K_tot, bcNodes);
-            K_tot = ApplyBC(K_tot, predefNodes);
-            
-            
-
-            //Inverting K matrix
-            Matrix<double> K_tot_inverse = K_tot.Inverse();
-
-
-            
-
             //double[] R_array = SetLoads(sizeOfM, loadtxt);
             double[] R_array = AssignLoadsDefAndBC(loadtxt, predefNodes, predef, bcNodes, globalPoints);
 
             //Adding R-matrix for pre-deformations.
             var V = Vector<double>.Build;
-            Vector<double> R = (V.DenseOfArray(R_array)).Add(R_def);
+            Vector<double> R = (V.DenseOfArray(R_array)).Subtract(R_def);
+
+            //Apply boundary condition and predeformations (putting 0 in rows and columns of K)
+            K_tot = ApplyBC(K_tot, bcNodes);
+            K_tot = ApplyBC(K_tot, predefNodes);
+            
+            //Inverting K matrix
+            Matrix<double> K_tot_inverse = K_tot.Inverse();
+            
+            
 
             /*
              * For Cholesky calculation. Kept for now.
@@ -273,14 +270,14 @@ namespace SolidsVR
         {
             for (int i = 0; i < bcNodes.Count; i++)
             {
-                for (int j = 0; j < K.ColumnCount; j++)
+                /*for (int j = 0; j < K.ColumnCount; j++)
                 {
                     if (bcNodes[i] != j)
                     {
                         K[bcNodes[i], j] = 0;
                     }
 
-                }
+                }*/
 
                 for (int j = 0; j < K.RowCount; j++)
                 {
@@ -304,30 +301,17 @@ namespace SolidsVR
                 {
                     if (bcNodes[i] != j)
                     {
-                        K[j, bcNodes[i]] = 0;
+                        K[bcNodes[i],j] = 0;
                     }
                     else
                     {
-                        K[j, bcNodes[i]] = 1;
+                        K[bcNodes[i],j] = 1;
                     }
 
                 }
             }
             return K;
         }
-
-        /*public void ApplyBCRed(Matrix<double> K, List<int> bcNodes)
-        {
-            Matrix<double> K_red = K;
-
-            for (int i = 0; i < bcNodes.Count; i++)
-            {
-                K_red = K_red.RemoveColumn(i);
-                K_red = K_red.RemoveRow(i);
-
-            }
-            
-        }*/
 
 
         public Vector<double> ApplyPreDef(Matrix<double> K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
@@ -356,6 +340,11 @@ namespace SolidsVR
 
             //Multiply this with K_red
             Vector<double> R_def = K_red.Multiply(d);
+            for (int i = 0; i < predefNodes.Count; i++)
+            {
+                R_def[predefNodes[i]] = 0;
+            }
+            
 
             return R_def;
         }
@@ -407,7 +396,7 @@ namespace SolidsVR
             }
             for (int i = 0; i < predefNodes.Count; i++)
             {
-                loads[predefNodes[i]] = 0;//  predef[i];
+                loads[predefNodes[i]] = predef[i];
             }
 
             return loads;
