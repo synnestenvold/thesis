@@ -444,6 +444,7 @@ namespace SolidsVR
 
         public void SetNodePosition(Node node, Point3d p, Point3d[] cornerPoints, int i, int j, int k, int u, int v, int w)
         {
+            cornerPoints = RoundPoints(cornerPoints);
             if (cornerPoints.Contains(p)) node.SetIsCorner();
             else if (i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0 || i == w && j == 0 || i == 0 && k == u || j == v && k == 0 || i == 0 && j == v || i == w && k == 0 || j == 0 && k == u || i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0 || i == w && j == v || i == w && k == u || j == v && k == u) node.SetIsEdge();
             else node.SetIsMiddle();
@@ -620,8 +621,8 @@ namespace SolidsVR
         {
             for (int i = 0; i < sortedEdges.Length; i++)
             {
-                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 2), Math.Round(sortedEdges[i].PointAtStart.Y, 2), Math.Round(sortedEdges[i].PointAtStart.Z, 2)));
-                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 2), Math.Round(sortedEdges[i].PointAtEnd.Y, 2), Math.Round(sortedEdges[i].PointAtEnd.Z, 2)));
+                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 1), Math.Round(sortedEdges[i].PointAtStart.Y, 1), Math.Round(sortedEdges[i].PointAtStart.Z, 1)));
+                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 1), Math.Round(sortedEdges[i].PointAtEnd.Y, 1), Math.Round(sortedEdges[i].PointAtEnd.Z, 1)));
             }
             return sortedEdges;
         }
@@ -665,7 +666,17 @@ namespace SolidsVR
         {
             for (int i = 0; i < vertices.Count; i++)
             {
-                vertices[i] = new Point3d(Math.Round(vertices[i].X, 3), Math.Round(vertices[i].Y, 3), Math.Round(vertices[i].Z, 3));
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 2), Math.Round(vertices[i].Y, 2), Math.Round(vertices[i].Z, 2));
+            }
+
+            return vertices;
+        }
+
+        public Point3d[] RoundPoints(Point3d[] vertices)
+        {
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 1), Math.Round(vertices[i].Y, 1), Math.Round(vertices[i].Z, 1));
             }
 
             return vertices;
