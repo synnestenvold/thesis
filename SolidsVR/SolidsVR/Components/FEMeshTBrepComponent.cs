@@ -96,14 +96,19 @@ namespace SolidsVR
             List<int> predefNodes = tupleDef.Item1;
             List<double> predef = tupleDef.Item2;
 
-            //Apply boundary condition and predeformations (putting 0 in rows and columns)
-            K_tot = ApplyBC(K_tot, bcNodes);
-            K_tot = ApplyBC(K_tot, predefNodes);
-            //ApplyBCRed(K_tot, bcNodes);
+            //Setter 0 i hver rad med bc og predef, og diagonal til 1.
+            K_tot = ApplyBC_Row(K_tot, bcNodes);
+            K_tot = ApplyBC_Row(K_tot, predefNodes);
 
             //Needs to take the predefs into account
             Vector<double> R_def = Vector<double>.Build.Dense(sizeOfMatrix);
             if (deftxt.Any()) R_def = ApplyPreDef(K_tot, predefNodes, predef, sizeOfMatrix);
+
+            //Apply boundary condition and predeformations (putting 0 in rows and columns of K)
+            K_tot = ApplyBC(K_tot, bcNodes);
+            K_tot = ApplyBC(K_tot, predefNodes);
+            
+            
 
             //Inverting K matrix
             Matrix<double> K_tot_inverse = K_tot.Inverse();
@@ -289,7 +294,29 @@ namespace SolidsVR
             return K;
         }
 
-        public void ApplyBCRed(Matrix<double> K, List<int> bcNodes)
+        public Matrix<double> ApplyBC_Row(Matrix<double> K, List<int> bcNodes)
+        {
+            for (int i = 0; i < bcNodes.Count; i++)
+            {
+                
+
+                for (int j = 0; j < K.RowCount; j++)
+                {
+                    if (bcNodes[i] != j)
+                    {
+                        K[j, bcNodes[i]] = 0;
+                    }
+                    else
+                    {
+                        K[j, bcNodes[i]] = 1;
+                    }
+
+                }
+            }
+            return K;
+        }
+
+        /*public void ApplyBCRed(Matrix<double> K, List<int> bcNodes)
         {
             Matrix<double> K_red = K;
 
@@ -300,9 +327,9 @@ namespace SolidsVR
 
             }
             
-        }
+        }*/
 
-     
+
         public Vector<double> ApplyPreDef(Matrix<double> K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
         {
             if (predefNodes.Count == 0) return Vector<double>.Build.Dense(sizeOfM);
@@ -373,14 +400,14 @@ namespace SolidsVR
                 }
                 index += 3;
             }
-            //Corresponding value in R is set to 0 if it is a BC here. Ref page 309 in FEM book.
+            //Corresponding value in R is set to 0 if it is a BC/predef here. Ref page 309 in FEM book.
             foreach (int bc in bcNodes)
             {
                 loads[bc] = 0;
             }
             for (int i = 0; i < predefNodes.Count; i++)
             {
-                loads[predefNodes[i]] =  predef[i];
+                loads[predefNodes[i]] = 0;//  predef[i];
             }
 
             return loads;
