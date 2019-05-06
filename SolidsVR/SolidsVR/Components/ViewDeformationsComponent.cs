@@ -80,8 +80,6 @@ namespace SolidsVR
             List<Element> elements = mesh.GetElements();
             List<Node> nodes = mesh.GetNodeList();
 
-            //Creating deformation vectors
-            //Vector3d[] defVectors = CreateVectors(treeDef);
             breps = CreateDefBreps(elements, scale, angle, center);
 
             //Finding point with max deformation

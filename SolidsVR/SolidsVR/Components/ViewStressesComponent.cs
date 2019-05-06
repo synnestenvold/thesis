@@ -24,9 +24,7 @@ namespace SolidsVR
         {
 
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Stresses", "Stress", "Stresses in each node", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Stress direction", "Stress dir", "S11, S22, S33, S12, S13, S23, mises as 0, 1, 2, 3, 4, 5, 6", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
         }
 
@@ -48,18 +46,14 @@ namespace SolidsVR
             //---variables---
 
             Mesh_class mesh = new Mesh_class();
-            GH_Structure<GH_Number> treeStress = new GH_Structure<GH_Number>();
             int dir = new int();
-            GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = new double();
 
             //---input---
 
             if (!DA.GetData(0, ref mesh)) return;
-            if (!DA.GetDataTree(1, out treeStress)) return;
-            if (!DA.GetData(2, ref dir)) return;
-            if (!DA.GetDataTree(3, out treeDef)) return;
-            if (!DA.GetData(4, ref scale)) return;
+            if (!DA.GetData(1, ref dir)) return;
+            if (!DA.GetData(2, ref scale)) return;
 
             //---setup---
 
@@ -74,16 +68,14 @@ namespace SolidsVR
             //---solve---
 
             //Creating deformation vectors
-            Vector3d[] defVectors = CreateVectors(treeDef);
 
-            List<List<int>> connectivity = mesh.GetConnectivity();
-            List<List<Point3d>> elementPoints = mesh.GetElementPoints();
+            List<Element> elements = mesh.GetElements();
+            List<Node> nodes = mesh.GetNodeList();
 
-            //Creating new deformed breps
-            List<Brep> breps = CreateDefBreps(elementPoints, connectivity, defVectors, angle, center, scale); //output Breps
+            List<Brep> breps = CreateDefBreps(elements, scale, angle, center);
 
             //Getting colors for each brep
-            var tuple1 = ColorBreps(breps, connectivity, treeStress, dir);
+            var tuple1 = ColorBreps(elements, breps, dir);
             List<Color> brepColors = tuple1.Item1; //output BrepsColors
             List<string> rangeValues = tuple1.Item2; //output text
 
@@ -276,19 +268,19 @@ namespace SolidsVR
             return vectors;
         }
 
-        public List<Brep> CreateDefBreps(List<List<Point3d>> elementPoints, List<List<int>> connectivity, Vector3d[] defVectors, double angle, Point3d center, double scale)
+        public List<Brep> CreateDefBreps(List<Element> elements, double scale, double angle, Point3d center)
         {
             List<Brep> breps = new List<Brep>();
-            for (int j = 0; j < elementPoints.Count; j++)
+            for (int j = 0; j < elements.Count; j++)
             {
                 var mesh = new Mesh();
-                List<Point3d> vertices = elementPoints[j];
-                List<int> connect = connectivity[j];
+                List<Node> vertices = elements[j].GetVertices();
 
                 for (int i = 0; i < vertices.Count; i++)
                 {
-                    Point3d p = vertices[i];
-                    Point3d new_p = Point3d.Add(p, defVectors[connect[i]] * scale);
+                    Point3d p = vertices[i].GetCoord();
+                    Vector3d defVector = new Vector3d(vertices[i].GetDeformation()[0], vertices[i].GetDeformation()[1], vertices[i].GetDeformation()[2]);
+                    Point3d new_p = Point3d.Add(p, defVector * scale);
                     mesh.Vertices.Add(new_p);
                 }
                 mesh.Faces.AddFace(0, 1, 5, 4);
@@ -298,26 +290,22 @@ namespace SolidsVR
                 mesh.Faces.AddFace(4, 5, 6, 7);
                 mesh.Faces.AddFace(0, 1, 2, 3);
 
-
                 Brep new_brep = Brep.CreateFromMesh(mesh, false);
-
                 Vector3d vecAxis = new Vector3d(0, 0, 1);
                 new_brep.Rotate(angle, vecAxis, center);
-
                 breps.Add(new_brep);
-
             }
             return breps;
         }
-    
 
-        public Tuple<List<Color>, List<string>> ColorBreps(List<Brep> breps, List<List<int>> connectivity, GH_Structure<GH_Number> treeStress, int dir)
+
+        public Tuple<List<Color>, List<string>> ColorBreps(List<Element> elements, List<Brep> breps, int dir)
         {
             List<Color> brepColors = new List<Color>();
             Color color = Color.White;
             List<string> rangeValues = new List<String>();
 
-            double[] averageValues = AverageValuesStress(treeStress, connectivity, dir);
+            double[] averageValues = AverageValuesStress(elements, dir);
             double max = averageValues.Max();
             double min = averageValues.Min();
             double range = (max - min) / 13;
@@ -358,20 +346,19 @@ namespace SolidsVR
             return Tuple.Create(brepColors, rangeValues);
         }
 
-        public double[] AverageValuesStress(GH_Structure<GH_Number> treeStress, List<List<int>> connectivity, int dir)
+        public double[] AverageValuesStress(List<Element> elements, int dir)
         {
-            double[] averageList = new double[connectivity.Count];
+            double[] averageList = new double[elements.Count];
 
-            for (int i = 0; i < connectivity.Count; i++)
+            for (int i = 0; i < elements.Count; i++)
             {
                 double average = 0;
-                List<int> connect = connectivity[i];
-                for (int j = 0; j < connect.Count; j++)
+                List<Node> vertices = elements[i].GetVertices();
+                for (int j = 0; j < vertices.Count; j++)
                 {
-                    List<GH_Number> stresses = (List<GH_Number>)treeStress.get_Branch(connect[j]);
-                    average += stresses[dir].Value;
+                    average += vertices[j].GetStress()[dir];
                 }
-                averageList[i] = Math.Round(average / connect.Count, 4);
+                averageList[i] = Math.Round(average / vertices.Count, 4);
             }
             return averageList;
         }
