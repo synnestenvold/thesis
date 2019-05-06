@@ -15,7 +15,7 @@ namespace SolidsVR
         /// Initializes a new instance of the MeshSurfBrep class.
         /// </summary>
         public MeshSurfBrep()
-          : base("Meshing brep", "Mesh crazy geometry",
+          : base("MeshSBrep", "MeshSBrep",
               "Description",
               "Category3", "Mesh")
         {
@@ -31,7 +31,6 @@ namespace SolidsVR
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);
-            pManager.AddCurveParameter("Curves", "C", "Corner points in right order", GH_ParamAccess.list);
 
         }
 
@@ -60,7 +59,7 @@ namespace SolidsVR
                 int u = 1;
                 int v = 1;
                 int w = 1;
-                List<Curve> c = new List<Curve>();
+                //List<Curve> c = new List<Curve>();
 
                 // --- input ---
 
@@ -69,7 +68,7 @@ namespace SolidsVR
                 if (!DA.GetData(2, ref u)) return;
                 if (!DA.GetData(3, ref v)) return;
                 if (!DA.GetData(4, ref w)) return;
-                if (!DA.GetDataList(5, c)) return;
+                //if (!DA.GetDataList(5, c)) return;
 
 
 
@@ -621,8 +620,8 @@ namespace SolidsVR
         {
             for (int i = 0; i < sortedEdges.Length; i++)
             {
-                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 3), Math.Round(sortedEdges[i].PointAtStart.Y, 3), Math.Round(sortedEdges[i].PointAtStart.Z, 3)));
-                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 3), Math.Round(sortedEdges[i].PointAtEnd.Y, 3), Math.Round(sortedEdges[i].PointAtEnd.Z, 3)));
+                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 2), Math.Round(sortedEdges[i].PointAtStart.Y, 2), Math.Round(sortedEdges[i].PointAtStart.Z, 2)));
+                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 2), Math.Round(sortedEdges[i].PointAtEnd.Y, 2), Math.Round(sortedEdges[i].PointAtEnd.Z, 2)));
             }
             return sortedEdges;
         }
