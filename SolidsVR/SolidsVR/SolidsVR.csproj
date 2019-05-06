@@ -94,6 +94,7 @@
     <Compile Include="DeconstructNode.cs" />
     <Compile Include="MeshCBrep.cs" />
     <Compile Include="MeshSurfBrep.cs" />
+    <Compile Include="NodeInfoComponent.cs" />
     <Compile Include="SolidsVRInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classes\StiffnessMatrix.cs" />
