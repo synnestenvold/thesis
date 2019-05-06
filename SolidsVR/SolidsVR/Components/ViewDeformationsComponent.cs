@@ -77,25 +77,26 @@ namespace SolidsVR
 
             //---solve---
 
-            List<List<int>> connectivity = mesh.GetConnectivity();
-            List<List<Point3d>> elementPoints = mesh.GetElementPoints();
             List<Element> elements = mesh.GetElements();
+            List<Node> nodes = mesh.GetNodeList();
 
             //Creating deformation vectors
             Vector3d[] defVectors = CreateVectors(treeDef);
-            breps = CreateDefBreps(elementPoints, connectivity, defVectors, scale, angle, center);
+            breps = CreateDefBreps(elements, scale, angle, center);
 
             //Finding point with max deformation
-            var tuple = GetMaxDeformation(defVectors, elementPoints, connectivity);
+            var tuple = GetMaxDeformation(nodes);
             double defMax = tuple.Item1; 
-            Point3d pointMax = tuple.Item2;
-            int nodeGlobalMax = tuple.Item3;
+            Node nodeMax = tuple.Item2;
 
-            Brep sphere = DrawSphere(pointMax, nodeGlobalMax, defVectors, angle, center, scale, refSize); //output geo
+            Brep sphere = DrawSphere(nodeMax, angle, center, scale, refSize); //output geo
             Color colorSphere = Color.Red;
 
+            VolumeMassProperties vmpt = VolumeMassProperties.Compute(sphere);
+            Point3d centroidt = vmpt.Centroid;
+
             //Creating text for displaying it for max value
-            var tuple2 = CreateText(defMax, pointMax, nodeGlobalMax, defVectors, scale, refSize, angle, center);
+            var tuple2 = CreateText(defMax, nodeMax, scale, refSize, angle, center);
             string textDef = tuple2.Item1;
             double textDefSize = tuple2.Item2;
             Plane textDefPlane = tuple2.Item3;
@@ -192,17 +193,17 @@ namespace SolidsVR
             Color color = Color.White;
             for (int i = 0; i < breps.Count; i++)
             {
-                //if (defVectors[i].Length < limit) color = Color.Green;
-                //else color = Color.Red;
                 colorBreps.Add(color);
             }
 
             return colorBreps;
         }
 
-        public Brep DrawSphere(Point3d pointMax, int nodeGlobalMax, Vector3d[] defVectors, double angle, Point3d center, double scale, double refSize)
+        public Brep DrawSphere(Node nodeMax, double angle, Point3d center, double scale, double refSize)
         {
-            Point3d newPoint = pointMax + defVectors[nodeGlobalMax]*scale;
+            Vector3d def = new Vector3d(nodeMax.GetDeformation()[0], nodeMax.GetDeformation()[1], nodeMax.GetDeformation()[2]);
+
+            Point3d newPoint = nodeMax.GetCoord() + def*scale;
 
             Point3d p0 = newPoint;
             Point3d p1 = Point3d.Add(p0, new Point3d(-1, 0, 0));
@@ -244,54 +245,39 @@ namespace SolidsVR
             return vectors;
         }
 
-        public Tuple<double, Point3d, int> GetMaxDeformation(Vector3d[] defVectors, List<List<Point3d>> elementPoints, List<List<int>> connectivity)
+        public Tuple<double, Node> GetMaxDeformation(List<Node> nodes)
         {
             double defMax = -1;
-            int nodeGlobalMax = new int();
-            int nodeMax = new int();
-            int elemMax = new int();
-            Point3d pointMax = new Point3d();
-            for (int i = 0; i < defVectors.Length; i++)
+            Node maxDefNode = new Node(new Point3d(0,0,0),0);
+
+            for (int i = 0; i < nodes.Count; i++)
             {
-                double def = defVectors[i].Length;
+                Vector3d defVector = new Vector3d(nodes[i].GetDeformation()[0], nodes[i].GetDeformation()[1], nodes[i].GetDeformation()[2]);
+
+                double def = defVector.Length;
                 if (def > defMax)
                 {
                     defMax = Math.Round(def, 6);
-                    nodeGlobalMax = i;
+                    maxDefNode = nodes[i];
                 }
             }
-            for (int j = 0; j < connectivity.Count; j++)
-            {
-                List<int> connect = connectivity[j];
-                for (int k = 0; k < connect.Count; k++)
-                {
-                    if (connect[k] == nodeGlobalMax)
-                    {
-                        nodeMax = k;
-                        elemMax = j;
-                    }
-                }
-                List<Point3d> point = elementPoints[elemMax];
-                pointMax = point[nodeMax];
-            }
 
-
-            return Tuple.Create(defMax, pointMax, nodeGlobalMax);
+            return Tuple.Create(defMax, maxDefNode);
         }
 
-        public List<Brep> CreateDefBreps(List<List<Point3d>> elementPoints, List<List<int>> connectivity, Vector3d[] defVectors, double scale, double angle, Point3d center)
+        public List<Brep> CreateDefBreps(List<Element> elements, double scale, double angle, Point3d center)
         {
             List<Brep> breps = new List<Brep>();
-            for (int j = 0; j < elementPoints.Count; j++)
+            for (int j = 0; j < elements.Count; j++)
             {
                 var mesh = new Mesh();
-                List<Point3d> vertices = elementPoints[j];
-                List<int> connect = connectivity[j];
+                List<Node> vertices = elements[j].GetVertices();
 
                 for (int i = 0; i < vertices.Count; i++)
                 {
-                    Point3d p = vertices[i];
-                    Point3d new_p = Point3d.Add(p, defVectors[connect[i]]*scale);
+                    Point3d p = vertices[i].GetCoord();
+                    Vector3d defVector = new Vector3d(vertices[i].GetDeformation()[0], vertices[i].GetDeformation()[1], vertices[i].GetDeformation()[2]);
+                    Point3d new_p = Point3d.Add(p, defVector*scale);
                     mesh.Vertices.Add(new_p);
                 }
                 mesh.Faces.AddFace(0, 1, 5, 4);
@@ -309,9 +295,11 @@ namespace SolidsVR
             return breps;
         }
 
-        public Tuple<string, double, Plane, Color> CreateText(double defMax, Point3d pointMax, int nodeGlobalMax, Vector3d[] defVectors, double scale, double refSize, double angle, Point3d center)
+        public Tuple<string, double, Plane, Color> CreateText(double defMax, Node nodeMax, double scale, double refSize, double angle, Point3d center)
         {
-            Point3d newPoint = pointMax + defVectors[nodeGlobalMax] * scale;
+            Vector3d def = new Vector3d(nodeMax.GetDeformation()[0], nodeMax.GetDeformation()[1], nodeMax.GetDeformation()[2]);
+
+            Point3d newPoint = nodeMax.GetCoord() + def * scale;
 
             string text = defMax.ToString();
             double textSize = refSize;
