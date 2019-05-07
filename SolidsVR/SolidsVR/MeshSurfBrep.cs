@@ -31,6 +31,7 @@ namespace SolidsVR
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);
+            pManager.AddBrepParameter("Surfaces", "S", "Input geometry as a curved brep", GH_ParamAccess.list);
 
         }
 
