@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
+using Rhino.Geometry.Collections;
 using Rhino.Geometry;
 using System.Linq;
 
@@ -74,23 +75,31 @@ namespace SolidsVR
                 if (!DA.GetData(4, ref w)) return;
                 if (!DA.GetDataList(5, breps)) return;
 
-                Surface[] sortedSurfaces = new Surface[6];
+                Surface[] surfaces = new Surface[6];
 
-                
+                BrepFaceList faces = brp.Faces;
+
+                surfaces[0] = faces[0].DuplicateSurface();
+                surfaces[1] = faces[1].DuplicateSurface();
+                surfaces[2] = faces[2].DuplicateSurface();
+                surfaces[3] = faces[3].DuplicateSurface();
+                surfaces[4] = faces[4].DuplicateSurface();
+                surfaces[5] = faces[5].DuplicateSurface();
+
+                surfaces = FindSurfaces(corners, surfaces);
 
                 Curve[] edges = brp.DuplicateEdgeCurves();
-                //edges = RoundEdgePointsOne(edges);
-                //edges = RoundEdgePointsTwo(edges);
 
-                //Point3d test = edges[5].PointAtStart;
+                Curve[] sortedEdges = SortEdges(corners, edges);
 
-                //Point3d t = new Point3d(Math.Round(test.X, 4), Math.Round(test.Y, 4), Math.Round(test.Z, 4));
+                Surface[] crossSecSurf = CreateSurfaces(sortedEdges);
 
-                //edges[5].SetStartPoint(t);
-                Curve[] sortedEdges = SortEdges(corners, edges); 
+                surfaces[4] = crossSecSurf[0];
+                surfaces[5] = crossSecSurf[1];
 
-                Surface[] sortedSurf = CreateSurfaces(sortedEdges);
+                //Surface[] surf = SortedSurfaces(corners, surfaces);
 
+                /*
                 BrepFace face1 = breps[0].Faces[0];
                 sortedSurfaces[0] = face1.DuplicateSurface();
                 BrepFace face2 = breps[1].Faces[0];
@@ -99,6 +108,7 @@ namespace SolidsVR
                 sortedSurfaces[2] = face3.DuplicateSurface();
                 BrepFace face4 = breps[3].Faces[0];
                 sortedSurfaces[3] = face4.DuplicateSurface();
+                */
 
                 /*
                  List<NurbsCurve> curves5 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[4].ToNurbsCurve(), edges[1].ToNurbsCurve(), edges[5].ToNurbsCurve() };
@@ -113,13 +123,11 @@ namespace SolidsVR
                  sortedSurfaces[5] = face6.DuplicateSurface();
                  */
 
-                sortedSurfaces[4] = sortedSurf[4];
-                sortedSurfaces[5] = sortedSurf[5];
 
 
 
 
-                var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, sortedSurfaces);
+                var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, surfaces);
 
                 List<List<Point3d>> elementPoints = tuple.Item1;
                 List<List<int>> connectivity = tuple.Item2;
@@ -151,9 +159,9 @@ namespace SolidsVR
                 DA.SetData(0, mesh);
                 DA.SetDataList(1, sortedEdges);
                 
-                DA.SetDataList(2, sortedSurf);
+                //DA.SetDataList(2, sortedSurf);
                 DA.SetDataList(3, curves);
-                DA.SetDataList(4, sortedSurfaces);
+                DA.SetDataList(4, surfaces);
 
             }
         }
@@ -215,6 +223,9 @@ namespace SolidsVR
                 List<Point3d> ps2 = new List<Point3d> { p_2, p_3 };
                 List<Point3d> ps3 = new List<Point3d> { p_3, p_4 };
                 List<Point3d> ps4 = new List<Point3d> { p_4, p_1 };
+
+                Brep testBrep = surF1.ToBrep();
+                Point3d[] vert = testBrep.DuplicateVertices();
 
                 NurbsCurve c1 = surF1.InterpolatedCurveOnSurface(ps1, 0);
                 NurbsCurve c2 = surF2.InterpolatedCurveOnSurface(ps2, 0);
@@ -565,9 +576,41 @@ namespace SolidsVR
             return surfaces;
         }
 
-        public Surface[] SortedSurfaces(List<Point3d> corners, List<Surface> surfaces)
+        public Surface[] FindSurfaces(List<Point3d> corners, Surface[] surfaces)
         {
             Surface[] sortedSurfaces = new Surface[6];
+
+            corners = RoundPointsList(corners);
+
+            Point3d[] surf0 = new Point3d[] { corners[0], corners[1], corners[4], corners[5] };
+            Point3d[] surf1 = new Point3d[] { corners[1], corners[2], corners[5], corners[6] };
+            Point3d[] surf2 = new Point3d[] { corners[2], corners[3], corners[6], corners[7] };
+            Point3d[] surf3 = new Point3d[] { corners[0], corners[3], corners[4], corners[7] };
+
+            for (int i = 0; i < surfaces.Length; i++)
+            {
+                Brep surf = surfaces[i].ToBrep();
+                Point3d[] cornerSurf = surf.DuplicateVertices();
+
+                cornerSurf = RoundPoints(cornerSurf);
+
+                if (cornerSurf.All(surf0.Contains)) sortedSurfaces[0] = surfaces[i];
+                if (cornerSurf.All(surf1.Contains)) sortedSurfaces[1] = surfaces[i];
+                if (cornerSurf.All(surf2.Contains)) sortedSurfaces[2] = surfaces[i];
+                if (cornerSurf.All(surf3.Contains)) sortedSurfaces[3] = surfaces[i];
+            }
+
+
+            return sortedSurfaces;
+        }
+
+
+
+        public Surface[] SortedSurfaces(List<Point3d> corners, Surface [] surfaces)
+        {
+            Surface[] sortedSurfaces = new Surface[6];
+
+            corners = RoundPointsList(corners);
 
             Point3d[] surf0 = new Point3d[] { corners[0], corners[1], corners[4], corners[5] };
             Point3d[] surf1 = new Point3d[] { corners[1], corners[2], corners[5], corners[6] };
@@ -576,10 +619,12 @@ namespace SolidsVR
             Point3d[] surf4 = new Point3d[] { corners[0], corners[1], corners[2], corners[3] };
             Point3d[] surf5 = new Point3d[] { corners[4], corners[5], corners[6], corners[7] };
 
-            for (int i = 0; i < surfaces.Count; i++)
+            for (int i = 0; i < surfaces.Length; i++)
             {
                 Brep surf = surfaces[i].ToBrep();
                 Point3d[] cornerSurf = surf.DuplicateVertices();
+
+                cornerSurf = RoundPoints(cornerSurf);
 
                 if (cornerSurf.All(surf0.Contains)) sortedSurfaces[0] = surfaces[i];
                 if (cornerSurf.All(surf1.Contains)) sortedSurfaces[1] = surfaces[i];
@@ -692,20 +737,25 @@ namespace SolidsVR
         {
             Surface[] sortedSurfaces = new Surface[6];
 
+            /*
             List<NurbsCurve> curves1 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[9].ToNurbsCurve(), edges[2].ToNurbsCurve(), edges[8].ToNurbsCurve() };
             List<NurbsCurve> curves2 = new List<NurbsCurve>() { edges[9].ToNurbsCurve(), edges[6].ToNurbsCurve(), edges[10].ToNurbsCurve(), edges[5].ToNurbsCurve() };
             List<NurbsCurve> curves3 = new List<NurbsCurve>() { edges[1].ToNurbsCurve(), edges[11].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[10].ToNurbsCurve() };
             List<NurbsCurve> curves4 = new List<NurbsCurve>() { edges[4].ToNurbsCurve(), edges[8].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[11].ToNurbsCurve() };
+            */
             List<NurbsCurve> curves5 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[5].ToNurbsCurve(), edges[1].ToNurbsCurve(), edges[4].ToNurbsCurve() };
             List<NurbsCurve> curves6 = new List<NurbsCurve>() { edges[2].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[6].ToNurbsCurve() };
 
+            /*
             Brep brebSurf1 = Brep.CreateEdgeSurface(curves1);
             Brep brebSurf2 = Brep.CreateEdgeSurface(curves2);
             Brep brebSurf3 = Brep.CreateEdgeSurface(curves3);
             Brep brebSurf4 = Brep.CreateEdgeSurface(curves4);
+            */
             Brep brebSurf5 = Brep.CreateEdgeSurface(curves5);
             Brep brebSurf6 = Brep.CreateEdgeSurface(curves6);
 
+            /*
             BrepFace face1 = brebSurf1.Faces[0];
             sortedSurfaces[0] = face1.DuplicateSurface();
             BrepFace face2 = brebSurf2.Faces[0];
@@ -714,10 +764,11 @@ namespace SolidsVR
             sortedSurfaces[2] = face3.DuplicateSurface();
             BrepFace face4 = brebSurf4.Faces[0];
             sortedSurfaces[3] = face4.DuplicateSurface();
+            */
             BrepFace face5 = brebSurf5.Faces[0];
-            sortedSurfaces[4] = face5.DuplicateSurface();
+            sortedSurfaces[0] = face5.DuplicateSurface();
             BrepFace face6 = brebSurf6.Faces[0];
-            sortedSurfaces[5] = face6.DuplicateSurface();
+            sortedSurfaces[1] = face6.DuplicateSurface();
 
             return sortedSurfaces;
 
