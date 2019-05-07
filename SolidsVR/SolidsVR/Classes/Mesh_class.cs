@@ -158,6 +158,14 @@ namespace SolidsVR
             return elements;
         }
 
+        public void RemoveElement()
+        {
+            elements.RemoveAt(0);
+            elements.RemoveAt(0);
+            elements.RemoveAt(0);
+            elements.RemoveAt(0);
+        }
+
         public void OrderSurfaces(List<Point3d> orderedPoints)
         {
             Brep[] orderedSurfaces = new Brep[6];

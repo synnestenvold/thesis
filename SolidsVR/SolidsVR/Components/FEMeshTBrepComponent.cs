@@ -79,8 +79,9 @@ namespace SolidsVR
             int sizeOfMatrix = mesh.GetSizeOfMatrix();
             Point3d[] globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
+            mesh.RemoveElement();
             List<Element> elements = mesh.GetElements();
-
+            //elements.RemoveAt(0);
             //Create K_tot
             var tupleK_B = CreateGlobalStiffnessMatrix(connectivity, elementPoints, sizeOfMatrix, material, elements);
             Matrix<double> K_tot = tupleK_B.Item1;
