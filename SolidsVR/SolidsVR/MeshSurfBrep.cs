@@ -134,6 +134,8 @@ namespace SolidsVR
                 
                 //DA.SetDataList(2, sortedSurf);
                 DA.SetDataList(3, curves);
+
+
                 DA.SetDataList(4, surfaces);
 
             }
@@ -613,6 +615,7 @@ namespace SolidsVR
 
         public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
         {
+            corners = RoundPointsList(corners);
             Curve[] sortedEdges = new Curve[12];
             for (int i = 0; i < edges.Length; i++)
             {
@@ -751,7 +754,7 @@ namespace SolidsVR
         {
             for (int i = 0; i < vertices.Count; i++)
             {
-                vertices[i] = new Point3d(Math.Round(vertices[i].X, 2), Math.Round(vertices[i].Y, 2), Math.Round(vertices[i].Z, 2));
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 1), Math.Round(vertices[i].Y, 1), Math.Round(vertices[i].Z, 1));
             }
 
             return vertices;

@@ -160,10 +160,27 @@ namespace SolidsVR
 
         public void RemoveElement()
         {
-            elements.RemoveAt(0);
-            elements.RemoveAt(0);
-            elements.RemoveAt(0);
-            elements.RemoveAt(0);
+            elements.RemoveAt(elements.Count-1);
+            elements.RemoveAt(elements.Count-1);
+            elements.RemoveAt(elements.Count-1);
+            elements.RemoveAt(elements.Count-1);
+            elements.RemoveAt(elements.Count-1);
+            elements.RemoveAt(elements.Count-1);
+            elements.RemoveAt(elements.Count-1);
+            elements.RemoveAt(elements.Count-1);
+            elements.RemoveAt(elements.Count-1);
+            
+            
+            elements.RemoveAt(elements.Count - 1);
+            elements.RemoveAt(elements.Count - 1);
+            elements.RemoveAt(elements.Count - 1);
+            elements.RemoveAt(elements.Count - 1);
+            elements.RemoveAt(elements.Count - 1);
+            elements.RemoveAt(elements.Count - 1);
+            elements.RemoveAt(elements.Count - 1);
+            
+            
+
         }
 
         public void OrderSurfaces(List<Point3d> orderedPoints)

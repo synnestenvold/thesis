@@ -79,7 +79,7 @@ namespace SolidsVR
             int sizeOfMatrix = mesh.GetSizeOfMatrix();
             Point3d[] globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
-            mesh.RemoveElement();
+            //mesh.RemoveElement();
             List<Element> elements = mesh.GetElements();
             //elements.RemoveAt(0);
             //Create K_tot
