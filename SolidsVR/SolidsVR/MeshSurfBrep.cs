@@ -75,7 +75,7 @@ namespace SolidsVR
 
 
                 Curve[] edges = brp.DuplicateEdgeCurves();
-                edges = RoundEdgePointsOne(edges);
+                //edges = RoundEdgePointsOne(edges);
                 //edges = RoundEdgePointsTwo(edges);
 
                 //Point3d test = edges[5].PointAtStart;
@@ -568,69 +568,71 @@ namespace SolidsVR
             Curve[] sortedEdges = new Curve[12];
             for (int i = 0; i < edges.Length; i++)
             {
-                List<Point3d> tempP = new List<Point3d>() { edges[i].PointAtStart, edges[i].PointAtEnd };
+                Point3d start = new Point3d(Math.Round(edges[i].PointAtStart.X, 1), Math.Round(edges[i].PointAtStart.Y, 1), Math.Round(edges[i].PointAtStart.Z, 1));
+                Point3d end = new Point3d(Math.Round(edges[i].PointAtEnd.X, 1), Math.Round(edges[i].PointAtEnd.Y, 1), Math.Round(edges[i].PointAtEnd.Z, 1));
+                List<Point3d> tempP = new List<Point3d>() { start, end };
                 //u-dir
                 if (tempP.Contains(corners[0]) && tempP.Contains(corners[1]))
                 {
                     sortedEdges[0] = edges[i];
-                    if (edges[i].PointAtEnd == corners[0]) { sortedEdges[0].Reverse(); }
+                    if (end == corners[0]) { sortedEdges[0].Reverse(); }
                 }
                 else if (tempP.Contains(corners[3]) && tempP.Contains(corners[2]))
                 {
                     sortedEdges[1] = edges[i];
-                    if (edges[i].PointAtEnd == corners[3]) { sortedEdges[1].Reverse(); }
+                    if (end == corners[3]) { sortedEdges[1].Reverse(); }
                 }
                 else if (tempP.Contains(corners[4]) && tempP.Contains(corners[5]))
                 {
                     sortedEdges[2] = edges[i];
-                    if (edges[i].PointAtEnd == corners[4]) { sortedEdges[2].Reverse(); }
+                    if (end == corners[4]) { sortedEdges[2].Reverse(); }
                 }
                 else if (tempP.Contains(corners[7]) && tempP.Contains(corners[6]))
                 {
                     sortedEdges[3] = edges[i];
-                    if (edges[i].PointAtEnd == corners[7]) { sortedEdges[3].Reverse(); }
+                    if (end == corners[7]) { sortedEdges[3].Reverse(); }
                 }
                 //v-dir
                 else if (tempP.Contains(corners[0]) && tempP.Contains(corners[3]))
                 {
                     sortedEdges[4] = edges[i];
-                    if (edges[i].PointAtEnd == corners[0]) { sortedEdges[4].Reverse(); }
+                    if (end == corners[0]) { sortedEdges[4].Reverse(); }
                 }
                 else if (tempP.Contains(corners[1]) && tempP.Contains(corners[2]))
                 {
                     sortedEdges[5] = edges[i];
-                    if (edges[i].PointAtEnd == corners[1]) { sortedEdges[5].Reverse(); }
+                    if (end == corners[1]) { sortedEdges[5].Reverse(); }
                 }
                 else if (tempP.Contains(corners[5]) && tempP.Contains(corners[6]))
                 {
                     sortedEdges[6] = edges[i];
-                    if (edges[i].PointAtEnd == corners[5]) { sortedEdges[6].Reverse(); }
+                    if (end == corners[5]) { sortedEdges[6].Reverse(); }
                 }
                 else if (tempP.Contains(corners[4]) && tempP.Contains(corners[7]))
                 {
                     sortedEdges[7] = edges[i];
-                    if (edges[i].PointAtEnd == corners[4]) { sortedEdges[7].Reverse(); }
+                    if (end == corners[4]) { sortedEdges[7].Reverse(); }
                 }
                 //w-dir
                 else if (tempP.Contains(corners[0]) && tempP.Contains(corners[4]))
                 {
                     sortedEdges[8] = edges[i];
-                    if (edges[i].PointAtEnd == corners[0]) { sortedEdges[8].Reverse(); }
+                    if (end == corners[0]) { sortedEdges[8].Reverse(); }
                 }
                 else if (tempP.Contains(corners[1]) && tempP.Contains(corners[5]))
                 {
                     sortedEdges[9] = edges[i];
-                    if (edges[i].PointAtEnd == corners[1]) { sortedEdges[9].Reverse(); }
+                    if (end == corners[1]) { sortedEdges[9].Reverse(); }
                 }
                 else if (tempP.Contains(corners[2]) && tempP.Contains(corners[6]))
                 {
                     sortedEdges[10] = edges[i];
-                    if (edges[i].PointAtEnd == corners[2]) { sortedEdges[10].Reverse(); }
+                    if (end == corners[2]) { sortedEdges[10].Reverse(); }
                 }
                 else
                 {
                     sortedEdges[11] = edges[i];
-                    if (edges[i].PointAtEnd == corners[3]) { sortedEdges[11].Reverse(); }
+                    if (end == corners[3]) { sortedEdges[11].Reverse(); }
                 }
             }
             return sortedEdges;
