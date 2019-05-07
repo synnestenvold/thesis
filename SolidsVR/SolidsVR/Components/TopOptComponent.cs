@@ -33,6 +33,7 @@ namespace SolidsVR.Components
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
             pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
             pManager.AddGenericParameter("Material", "M", "Material", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Iterations", "i", "Number of max iterations", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -58,6 +59,7 @@ namespace SolidsVR.Components
             List<string> deftxt = new List<string>();
             Brep origBrep = new Brep();
             Material material = new Material();
+            int maxN = 1;
 
 
             // --- input ---
@@ -68,6 +70,7 @@ namespace SolidsVR.Components
             if (!DA.GetDataList(3, deftxt)) return;
             if (!DA.GetData(4, ref origBrep)) return;
             if (!DA.GetData(5, ref material)) return;
+            if (!DA.GetData(6, ref maxN)) return;
 
             //double E = 210000;
             //double nu = 0.3;
@@ -84,16 +87,19 @@ namespace SolidsVR.Components
             int n = 0;
             double max = 0;
             int removeElem = -1;
-            while (n < 5 && max < 355)
+            while (n < maxN && max < 355)
             {
                 
                 List<Element> elements = mesh.GetElements();
                 if (first != true)
                 {
+                    
                     elements.RemoveAt(removeElem);
+
                 }
                 first = false;
                 //Create K_tot
+                
                 var tupleK_B = CreateGlobalStiffnessMatrix(connectivity, elementPoints, sizeOfMatrix, material, elements);
                 Matrix<double> K_tot = tupleK_B.Item1;
 
