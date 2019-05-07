@@ -44,6 +44,7 @@ namespace SolidsVR
             pManager.AddCurveParameter("Curve", "Curve", "Mesh of Brep", GH_ParamAccess.list);
             pManager.AddBrepParameter("Surface", "Surface", "Mesh of Brep", GH_ParamAccess.list);
             pManager.AddCurveParameter("Curve", "Curve", "Mesh of Brep", GH_ParamAccess.list);
+            pManager.AddBrepParameter("Surfaces", "S", "Input geometry as a curved brep", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -62,6 +63,7 @@ namespace SolidsVR
                 int v = 1;
                 int w = 1;
                 //List<Curve> c = new List<Curve>();
+                List<Brep> breps = new List<Brep>();
 
                 // --- input ---
 
@@ -70,9 +72,11 @@ namespace SolidsVR
                 if (!DA.GetData(2, ref u)) return;
                 if (!DA.GetData(3, ref v)) return;
                 if (!DA.GetData(4, ref w)) return;
-                //if (!DA.GetDataList(5, c)) return;
+                if (!DA.GetDataList(5, breps)) return;
 
+                Surface[] sortedSurfaces = new Surface[6];
 
+                
 
                 Curve[] edges = brp.DuplicateEdgeCurves();
                 //edges = RoundEdgePointsOne(edges);
@@ -87,10 +91,35 @@ namespace SolidsVR
 
                 Surface[] sortedSurf = CreateSurfaces(sortedEdges);
 
+                BrepFace face1 = breps[0].Faces[0];
+                sortedSurfaces[0] = face1.DuplicateSurface();
+                BrepFace face2 = breps[1].Faces[0];
+                sortedSurfaces[1] = face2.DuplicateSurface();
+                BrepFace face3 = breps[2].Faces[0];
+                sortedSurfaces[2] = face3.DuplicateSurface();
+                BrepFace face4 = breps[3].Faces[0];
+                sortedSurfaces[3] = face4.DuplicateSurface();
+
+                /*
+                 List<NurbsCurve> curves5 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[4].ToNurbsCurve(), edges[1].ToNurbsCurve(), edges[5].ToNurbsCurve() };
+                 List<NurbsCurve> curves6 = new List<NurbsCurve>() { edges[2].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[6].ToNurbsCurve() };
+
+                 Brep brebSurf5 = Brep.CreateEdgeSurface(curves5);
+                 Brep brebSurf6 = Brep.CreateEdgeSurface(curves6);
+
+                 BrepFace face5 = brebSurf5.Faces[0];
+                 sortedSurfaces[4] = face5.DuplicateSurface();
+                 BrepFace face6 = brebSurf6.Faces[0];
+                 sortedSurfaces[5] = face6.DuplicateSurface();
+                 */
+
+                sortedSurfaces[4] = sortedSurf[4];
+                sortedSurfaces[5] = sortedSurf[5];
 
 
 
-                var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, sortedSurf);
+
+                var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, sortedSurfaces);
 
                 List<List<Point3d>> elementPoints = tuple.Item1;
                 List<List<int>> connectivity = tuple.Item2;
@@ -124,6 +153,7 @@ namespace SolidsVR
                 
                 DA.SetDataList(2, sortedSurf);
                 DA.SetDataList(3, curves);
+                DA.SetDataList(4, sortedSurfaces);
 
             }
         }
