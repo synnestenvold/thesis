@@ -227,7 +227,7 @@ namespace SolidsVR
         {
             for (int i = 0; i < vertices.Length; i++)
             {
-                vertices[i] = new Point3d(Math.Round(vertices[i].X, 2), Math.Round(vertices[i].Y, 2), Math.Round(vertices[i].Z, 2));
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 1), Math.Round(vertices[i].Y, 1), Math.Round(vertices[i].Z, 1));
             }
 
             return vertices;

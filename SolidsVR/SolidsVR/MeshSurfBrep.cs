@@ -42,6 +42,7 @@ namespace SolidsVR
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.list);
             pManager.AddCurveParameter("Curve", "Curve", "Mesh of Brep", GH_ParamAccess.list);
             pManager.AddBrepParameter("Surface", "Surface", "Mesh of Brep", GH_ParamAccess.list);
+            pManager.AddCurveParameter("Curve", "Curve", "Mesh of Brep", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -73,12 +74,21 @@ namespace SolidsVR
 
 
                 Curve[] edges = brp.DuplicateEdgeCurves();
-                edges = RoundEdgePoints(edges);
+                edges = RoundEdgePointsOne(edges);
+                //edges = RoundEdgePointsTwo(edges);
+
+                //Point3d test = edges[5].PointAtStart;
+
+                //Point3d t = new Point3d(Math.Round(test.X, 4), Math.Round(test.Y, 4), Math.Round(test.Z, 4));
+
+                //edges[5].SetStartPoint(t);
                 Curve[] sortedEdges = SortEdges(corners, edges); 
 
                 Surface[] sortedSurf = CreateSurfaces(sortedEdges);
 
-                
+
+
+
                 var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, sortedSurf);
 
                 List<List<Point3d>> elementPoints = tuple.Item1;
@@ -87,6 +97,7 @@ namespace SolidsVR
                 List<List<Brep>> surfacesMesh = tuple.Item4;
                 List<Node> nodes = tuple.Item5;
                 List<Element> elements = tuple.Item6;
+                List<NurbsCurve> curves = tuple.Item7;
                 int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
                 Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
@@ -111,11 +122,12 @@ namespace SolidsVR
                 DA.SetDataList(1, sortedEdges);
                 
                 DA.SetDataList(2, sortedSurf);
+                DA.SetDataList(3, curves);
 
             }
         }
 
-        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>> CreateNewBreps(Brep brep, int u, int v, int w, Curve[] edges, Surface [] oSurfaces)
+        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>, List<NurbsCurve>> CreateNewBreps(Brep brep, int u, int v, int w, Curve[] edges, Surface [] oSurfaces)
         {
             List<Point3d> points = new List<Point3d>();
             List<List<int>> global_numbering = new List<List<int>>();
@@ -155,7 +167,7 @@ namespace SolidsVR
 
 
             List<NurbsCurve> curve = new List<NurbsCurve>();
-
+            List<NurbsCurve> curves = new List<NurbsCurve>();
 
             Interval dW = surF1.Domain(0);
 
@@ -185,7 +197,13 @@ namespace SolidsVR
 
 
                 curve = new List<NurbsCurve>() { c1, c2, c3, c4 };
-                Brep brepSurf = Brep.CreateEdgeSurface(curve); 
+                Brep brepSurf = Brep.CreateEdgeSurface(curve);
+
+                curves.Add(c1);
+                curves.Add(c2);
+                curves.Add(c3);
+                curves.Add(c4);
+
 
                 //Point3d[] vert = brepSurf.DuplicateVertices();
 
@@ -317,7 +335,7 @@ namespace SolidsVR
                 index++;
             }
             
-            return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh, nodes, elements);
+            return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh, nodes, elements, curves);
             //return points;
         }
 
@@ -617,12 +635,22 @@ namespace SolidsVR
             return sortedEdges;
         }
 
-        public Curve[] RoundEdgePoints(Curve[] sortedEdges)
+        public Curve[] RoundEdgePointsOne(Curve[] sortedEdges)
         {
             for (int i = 0; i < sortedEdges.Length; i++)
             {
                 sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 1), Math.Round(sortedEdges[i].PointAtStart.Y, 1), Math.Round(sortedEdges[i].PointAtStart.Z, 1)));
                 sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 1), Math.Round(sortedEdges[i].PointAtEnd.Y, 1), Math.Round(sortedEdges[i].PointAtEnd.Z, 1)));
+            }
+            return sortedEdges;
+        }
+
+        public Curve[] RoundEdgePointsTwo(Curve[] sortedEdges)
+        {
+            for (int i = 0; i < sortedEdges.Length; i++)
+            {
+                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 4), Math.Round(sortedEdges[i].PointAtStart.Y, 4), Math.Round(sortedEdges[i].PointAtStart.Z, 4)));
+                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 4), Math.Round(sortedEdges[i].PointAtEnd.Y, 4), Math.Round(sortedEdges[i].PointAtEnd.Z, 4)));
             }
             return sortedEdges;
         }
