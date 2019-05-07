@@ -158,29 +158,29 @@ namespace SolidsVR
             return elements;
         }
 
-        public void RemoveElement()
+        public Tuple<double, int> RemoveOneElement()
         {
-            elements.RemoveAt(elements.Count-1);
-            elements.RemoveAt(elements.Count-1);
-            elements.RemoveAt(elements.Count-1);
-            elements.RemoveAt(elements.Count-1);
-            elements.RemoveAt(elements.Count-1);
-            elements.RemoveAt(elements.Count-1);
-            elements.RemoveAt(elements.Count-1);
-            elements.RemoveAt(elements.Count-1);
-            elements.RemoveAt(elements.Count-1);
-            
-            
-            elements.RemoveAt(elements.Count - 1);
-            elements.RemoveAt(elements.Count - 1);
-            elements.RemoveAt(elements.Count - 1);
-            elements.RemoveAt(elements.Count - 1);
-            elements.RemoveAt(elements.Count - 1);
-            elements.RemoveAt(elements.Count - 1);
-            elements.RemoveAt(elements.Count - 1);
-            
-            
-
+            double max = double.NegativeInfinity;
+            double min = double.PositiveInfinity;
+            int minElem = -1;
+            for (int i=0; i<elements.Count; i++)
+            {
+                double mises = elements[i].GetAverageStressDir(6);
+                if (mises < min)
+                {
+                    min = mises;
+                    minElem = i;
+                }
+                if (mises >= max)
+                {
+                    max = mises;
+                }
+            }
+            //if (minElem != -1 || max < 355)
+            //{
+            //    elements.RemoveAt(minElem);
+            //}
+            return Tuple.Create(max, minElem);
         }
 
         public void OrderSurfaces(List<Point3d> orderedPoints)

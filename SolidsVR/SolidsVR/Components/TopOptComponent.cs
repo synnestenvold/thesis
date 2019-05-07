@@ -11,16 +11,16 @@ using Grasshopper.Kernel.Types;
 using System.Linq;
 using System.Drawing;
 
-
-namespace SolidsVR
+namespace SolidsVR.Components
 {
-    public class FEMeshTBrepComponent : GH_Component
+    public class TopOptComponent : GH_Component
     {
-
-
-        public FEMeshTBrepComponent()
-          : base("Finite Element of meshed TBrep", "FEMeshTBrep",
-              "Description",
+        /// <summary>
+        /// Initializes a new instance of the TopOpt class.
+        /// </summary>
+        public TopOptComponent()
+          : base("TopOpt", "TopOpt",
+              "Topology Optimization",
               "Category3", "Subcategory3")
         {
         }
@@ -73,87 +73,85 @@ namespace SolidsVR
             //double nu = 0.3;
 
             // --- solve ---
-            //Boolean first = true;
+            Boolean first = true;
             List<List<int>> connectivity = mesh.GetConnectivity();
             List<List<Point3d>> elementPoints = mesh.GetElementPoints();
             int sizeOfMatrix = mesh.GetSizeOfMatrix();
             Point3d[] globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
-            
-                
-            List<Element> elements = mesh.GetElements();
-            //Create K_tot
-            var tupleK_B = CreateGlobalStiffnessMatrix(connectivity, elementPoints, sizeOfMatrix, material, elements);
-            Matrix<double> K_tot = tupleK_B.Item1;
-
-            //B_all
-            List<List<Matrix<double>>> B_all = tupleK_B.Item2;
-
-            //Create boundary condition list AND predeformations
-            var tupleBC = CreateBCList(bctxt, globalPoints);
-            List<int> bcNodes = tupleBC.Item1;
-
-            var tupleDef = CreateBCList(deftxt, globalPoints);
-            List<int> predefNodes = tupleDef.Item1;
-            List<double> predef = tupleDef.Item2;
-
-            //Setter 0 i hver rad med bc og predef, og diagonal til 1.
-            K_tot = ApplyBC_Row(K_tot, bcNodes);
-            K_tot = ApplyBC_Row(K_tot, predefNodes);
-
-            //Needs to take the predefs into account
-            Vector<double> R_def = Vector<double>.Build.Dense(sizeOfMatrix);
-            if (deftxt.Any()) R_def = ApplyPreDef(K_tot, predefNodes, predef, sizeOfMatrix);
-
-            //double[] R_array = SetLoads(sizeOfM, loadtxt);
-            double[] R_array = AssignLoadsDefAndBC(loadtxt, predefNodes, predef, bcNodes, globalPoints);
-
-            //Adding R-matrix for pre-deformations.
-            var V = Vector<double>.Build;
-            Vector<double> R = (V.DenseOfArray(R_array)).Subtract(R_def);
-
-            //Apply boundary condition and predeformations (Puts 0 in columns of K)
-            K_tot = ApplyBC_Col(K_tot, bcNodes);
-            K_tot = ApplyBC_Col(K_tot, predefNodes);
-            
-            //Inverting K matrix
-            Matrix<double> K_tot_inverse = K_tot.Inverse();
-            
-            
-
-            /*
-                * For Cholesky calculation. Kept for now.
-            double[] R_array_def = R.ToArray();
-
-            double[] R_array_def = new double[sizeOfM];
-            for (int j = 0; j < sizeOfM; j++)
+            DataTree<double> defTree = new DataTree<double>();
+            //topologitest
+            int n = 0;
+            double max = 0;
+            int removeElem = -1;
+            while (n < 5 && max < 355)
             {
-                R_array_def[j] = R[j];
+                
+                List<Element> elements = mesh.GetElements();
+                if (first != true)
+                {
+                    elements.RemoveAt(removeElem);
+                }
+                first = false;
+                //Create K_tot
+                var tupleK_B = CreateGlobalStiffnessMatrix(connectivity, elementPoints, sizeOfMatrix, material, elements);
+                Matrix<double> K_tot = tupleK_B.Item1;
+
+                //B_all
+                List<List<Matrix<double>>> B_all = tupleK_B.Item2;
+
+                //Create boundary condition list AND predeformations
+                var tupleBC = CreateBCList(bctxt, globalPoints);
+                List<int> bcNodes = tupleBC.Item1;
+
+                var tupleDef = CreateBCList(deftxt, globalPoints);
+                List<int> predefNodes = tupleDef.Item1;
+                List<double> predef = tupleDef.Item2;
+
+                //Setter 0 i hver rad med bc og predef, og diagonal til 1.
+                K_tot = ApplyBC_Row(K_tot, bcNodes);
+                K_tot = ApplyBC_Row(K_tot, predefNodes);
+
+                //Needs to take the predefs into account
+                Vector<double> R_def = Vector<double>.Build.Dense(sizeOfMatrix);
+                if (deftxt.Any()) R_def = ApplyPreDef(K_tot, predefNodes, predef, sizeOfMatrix);
+
+                //double[] R_array = SetLoads(sizeOfM, loadtxt);
+                double[] R_array = AssignLoadsDefAndBC(loadtxt, predefNodes, predef, bcNodes, globalPoints);
+
+                //Adding R-matrix for pre-deformations.
+                var V = Vector<double>.Build;
+                Vector<double> R = (V.DenseOfArray(R_array)).Subtract(R_def);
+
+                //Apply boundary condition and predeformations (Puts 0 in columns of K)
+                K_tot = ApplyBC_Col(K_tot, bcNodes);
+                K_tot = ApplyBC_Col(K_tot, predefNodes);
+
+                //Inverting K matrix. Singular when all elements belonging to a node is removed
+                Matrix<double> K_tot_inverse = K_tot.Inverse();
+                
+                //Caluculation of the displacement vector u
+                Vector<double> u = K_tot_inverse.Multiply(R);
+
+                //Creating tree for output of deformation. Structured in x,y,z for each node. As well as asigning deformation to each node class
+                defTree = DefToTree(u, nodes);
+
+                //Calculatin strains for each node in elements
+                CalcStrain(elements);
+
+                //Calculate global stresses from strain
+
+                CalcStress(nodes, material);
+                SetAverageStresses(elements);
+
+                var tuple = mesh.RemoveOneElement();
+                max = tuple.Item1;
+                removeElem = tuple.Item2;
+                n++;
             }
-
-            //Cholesky calc. Kept for now,
-            Deformations def = new Deformations(K_tot, R_array_def);
-            List<double> u = def.Cholesky_Banachiewicz();
-            */
-
-            //Caluculation of the displacement vector u
-            Vector<double> u = K_tot_inverse.Multiply(R);
-
-            //Creating tree for output of deformation. Structured in x,y,z for each node. As well as asigning deformation to each node class
-            DataTree<double> defTree = DefToTree(u, nodes);
-            
-            //Calculatin strains for each node in elements
-            CalcStrain(elements);
-
-            //Calculate global stresses from strain
-
-            CalcStress(nodes, material);
-            SetAverageStresses(elements);
-
-             
             DataTree<double> strainTree = new DataTree<double>();
             DataTree<double> stressTree = new DataTree<double>();
-            
+
             for (int i = 0; i < nodes.Count; i++)
             {
                 strainTree.AddRange(nodes[i].GetGlobalStrain(), new GH_Path(new int[] { 0, i }));
@@ -298,17 +296,17 @@ namespace SolidsVR
         {
             for (int i = 0; i < bcNodes.Count; i++)
             {
-                
+
 
                 for (int j = 0; j < K.RowCount; j++)
                 {
                     if (bcNodes[i] != j)
                     {
-                        K[bcNodes[i],j] = 0;
+                        K[bcNodes[i], j] = 0;
                     }
                     else
                     {
-                        K[bcNodes[i],j] = 1;
+                        K[bcNodes[i], j] = 1;
                     }
 
                 }
@@ -347,7 +345,7 @@ namespace SolidsVR
             {
                 R_def[predefNodes[i]] = 0;
             }
-            
+
 
             return R_def;
         }
@@ -443,7 +441,7 @@ namespace SolidsVR
 
         }
 
-      
+
 
         public void CalcStress(List<Node> nodes, Material material)
         {
@@ -455,7 +453,7 @@ namespace SolidsVR
             for (int i = 0; i < nodes.Count; i++)
             {
                 Vector<double> globalStress = C_matrix.Multiply(nodes[i].GetGlobalStrain());
-                
+
                 //Adding Mises
                 var tempStressVec = Vector<double>.Build.Dense(globalStress.Count + 1);
                 globalStress.Storage.CopySubVectorTo(tempStressVec.Storage, 0, 0, 6);
@@ -465,18 +463,18 @@ namespace SolidsVR
                 double Sxy = globalStress[3];
                 double Sxz = globalStress[4];
                 double Syz = globalStress[5];
-                double mises = Math.Sqrt(0.5*(Math.Pow(Sxx-Syy, 2)+Math.Pow(Syy-Szz,2)+Math.Pow(Szz-Sxx, 2))+3*(Math.Pow(Sxy,2)+ Math.Pow(Sxz, 2)+ Math.Pow(Syz, 2)));
+                double mises = Math.Sqrt(0.5 * (Math.Pow(Sxx - Syy, 2) + Math.Pow(Syy - Szz, 2) + Math.Pow(Szz - Sxx, 2)) + 3 * (Math.Pow(Sxy, 2) + Math.Pow(Sxz, 2) + Math.Pow(Syz, 2)));
                 tempStressVec.At(6, mises);
 
                 nodes[i].SetStress(tempStressVec);
 
             }
-            
+
         }
 
         public void SetAverageStresses(List<Element> elements)
         {
-            for (int i=0; i< elements.Count;i++)
+            for (int i = 0; i < elements.Count; i++)
             {
                 elements[i].SetAverageValuesStress();
             }
@@ -541,9 +539,9 @@ namespace SolidsVR
             return K;
         }
 
-        
 
-        
+
+
 
 
 
@@ -560,30 +558,22 @@ namespace SolidsVR
 
             return calcedStress;
         }
-
-
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
+                //You can add image files to your project resources and access them like this:
+                // return Resources.IconForThisComponent;
                 return null;
             }
         }
 
+        /// <summary>
+        /// Gets the unique ID for this component. Do not change this ID after release.
+        /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("cec65985-58a5-4ff1-a238-e4761e0abbeb"); }
+            get { return new Guid("f0cb3c4f-cdc0-4e69-b554-84d9e3e112f4"); }
         }
-        
-        static void Main(string[] args)
-        {
-            //Control.UseManaged();
-            Control.UseNativeMKL();
-        }
-        
     }
 }
-
-    
