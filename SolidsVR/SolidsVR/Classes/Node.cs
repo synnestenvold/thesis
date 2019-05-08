@@ -24,6 +24,7 @@ namespace SolidsVR
         List<Vector<double>> strain = new List<Vector<double>>();
         Vector<double> stress;
         Dictionary<int, int> elementNode = new Dictionary<int, int>();
+        Boolean removable = true;
 
         List<double> deformation = new List<double>();
 
@@ -150,6 +151,14 @@ namespace SolidsVR
             }
 
             return globalStrain;
+        }
+        public Boolean isRemovable()
+        {
+            return removable;
+        }
+        public void setRemovable(Boolean _removable)
+        {
+            removable = _removable;
         }
     }
 }

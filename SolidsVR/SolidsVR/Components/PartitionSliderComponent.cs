@@ -149,7 +149,7 @@ namespace SolidsVR
         }
 
         public override Guid ComponentGuid
-        {
+        { 
             get { return new Guid("f55bdd6e-1c71-44eb-b1d5-40d997763b3e"); }
         }
 
