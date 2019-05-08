@@ -71,32 +71,11 @@ namespace SolidsVR
                 if (!DA.GetData(3, ref v)) return;
                 if (!DA.GetData(4, ref w)) return;
 
-                Surface[] surfaces = new Surface[6];
-
-                BrepFaceList faces = brp.Faces;
-
-                surfaces[0] = faces[0].DuplicateSurface();
-                surfaces[1] = faces[1].DuplicateSurface();
-                surfaces[2] = faces[2].DuplicateSurface();
-                surfaces[3] = faces[3].DuplicateSurface();
-                surfaces[4] = faces[4].DuplicateSurface();
-                surfaces[5] = faces[5].DuplicateSurface();
-
-                surfaces = FindSurfaces(corners, surfaces);
-
                 Curve[] edges = brp.DuplicateEdgeCurves();
 
                 Curve[] sortedEdges = SortEdges(corners, edges);
 
-                Surface[] crossSecSurf = CreateSurfaces(sortedEdges);
-
-                surfaces[4] = crossSecSurf[0];
-                surfaces[5] = crossSecSurf[1];
-
-
-
-
-
+                Surface[] surfaces = CreateSortedSurfaces(brp, edges, corners);
 
                 var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, surfaces);
 
@@ -141,6 +120,154 @@ namespace SolidsVR
             }
         }
 
+        public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
+        {
+            corners = RoundPointsList(corners);
+            Curve[] sortedEdges = new Curve[12];
+            for (int i = 0; i < edges.Length; i++)
+            {
+                Point3d start = new Point3d(Math.Round(edges[i].PointAtStart.X, 1), Math.Round(edges[i].PointAtStart.Y, 1), Math.Round(edges[i].PointAtStart.Z, 1));
+                Point3d end = new Point3d(Math.Round(edges[i].PointAtEnd.X, 1), Math.Round(edges[i].PointAtEnd.Y, 1), Math.Round(edges[i].PointAtEnd.Z, 1));
+                List<Point3d> tempP = new List<Point3d>() { start, end };
+                //u-dir
+                if (tempP.Contains(corners[0]) && tempP.Contains(corners[1]))
+                {
+                    sortedEdges[0] = edges[i];
+                    if (end == corners[0]) { sortedEdges[0].Reverse(); }
+                }
+                else if (tempP.Contains(corners[3]) && tempP.Contains(corners[2]))
+                {
+                    sortedEdges[1] = edges[i];
+                    if (end == corners[3]) { sortedEdges[1].Reverse(); }
+                }
+                else if (tempP.Contains(corners[4]) && tempP.Contains(corners[5]))
+                {
+                    sortedEdges[2] = edges[i];
+                    if (end == corners[4]) { sortedEdges[2].Reverse(); }
+                }
+                else if (tempP.Contains(corners[7]) && tempP.Contains(corners[6]))
+                {
+                    sortedEdges[3] = edges[i];
+                    if (end == corners[7]) { sortedEdges[3].Reverse(); }
+                }
+                //v-dir
+                else if (tempP.Contains(corners[0]) && tempP.Contains(corners[3]))
+                {
+                    sortedEdges[4] = edges[i];
+                    if (end == corners[0]) { sortedEdges[4].Reverse(); }
+                }
+                else if (tempP.Contains(corners[1]) && tempP.Contains(corners[2]))
+                {
+                    sortedEdges[5] = edges[i];
+                    if (end == corners[1]) { sortedEdges[5].Reverse(); }
+                }
+                else if (tempP.Contains(corners[5]) && tempP.Contains(corners[6]))
+                {
+                    sortedEdges[6] = edges[i];
+                    if (end == corners[5]) { sortedEdges[6].Reverse(); }
+                }
+                else if (tempP.Contains(corners[4]) && tempP.Contains(corners[7]))
+                {
+                    sortedEdges[7] = edges[i];
+                    if (end == corners[4]) { sortedEdges[7].Reverse(); }
+                }
+                //w-dir
+                else if (tempP.Contains(corners[0]) && tempP.Contains(corners[4]))
+                {
+                    sortedEdges[8] = edges[i];
+                    if (end == corners[0]) { sortedEdges[8].Reverse(); }
+                }
+                else if (tempP.Contains(corners[1]) && tempP.Contains(corners[5]))
+                {
+                    sortedEdges[9] = edges[i];
+                    if (end == corners[1]) { sortedEdges[9].Reverse(); }
+                }
+                else if (tempP.Contains(corners[2]) && tempP.Contains(corners[6]))
+                {
+                    sortedEdges[10] = edges[i];
+                    if (end == corners[2]) { sortedEdges[10].Reverse(); }
+                }
+                else
+                {
+                    sortedEdges[11] = edges[i];
+                    if (end == corners[3]) { sortedEdges[11].Reverse(); }
+                }
+            }
+            return sortedEdges;
+        }
+
+        public Surface[] CreateSortedSurfaces (Brep brp, Curve[] sortedEdges, List<Point3d> corners)
+        {
+            Surface[] surfaces = new Surface[6];
+
+            BrepFaceList faces = brp.Faces;
+
+            surfaces[0] = faces[0].DuplicateSurface();
+            surfaces[1] = faces[1].DuplicateSurface();
+            surfaces[2] = faces[2].DuplicateSurface();
+            surfaces[3] = faces[3].DuplicateSurface();
+            surfaces[4] = faces[4].DuplicateSurface();
+            surfaces[5] = faces[5].DuplicateSurface();
+
+            surfaces = FindSurfaces(corners, surfaces);
+
+            Surface[] crossSecSurf = CreateCrossSection(sortedEdges);
+
+            surfaces[4] = crossSecSurf[0];
+            surfaces[5] = crossSecSurf[1];
+
+            return surfaces;
+        }
+
+        public Surface[] FindSurfaces(List<Point3d> corners, Surface[] surfaces)
+        {
+            Surface[] sortedSurfaces = new Surface[6];
+
+            corners = RoundPointsList(corners);
+
+            Point3d[] surf0 = new Point3d[] { corners[0], corners[1], corners[4], corners[5] };
+            Point3d[] surf1 = new Point3d[] { corners[1], corners[2], corners[5], corners[6] };
+            Point3d[] surf2 = new Point3d[] { corners[2], corners[3], corners[6], corners[7] };
+            Point3d[] surf3 = new Point3d[] { corners[0], corners[3], corners[4], corners[7] };
+
+            for (int i = 0; i < surfaces.Length; i++)
+            {
+                Brep surf = surfaces[i].ToBrep();
+                Point3d[] cornerSurf = surf.DuplicateVertices();
+
+                cornerSurf = RoundPoints(cornerSurf);
+
+                if (cornerSurf.All(surf0.Contains)) sortedSurfaces[0] = surfaces[i];
+                if (cornerSurf.All(surf1.Contains)) sortedSurfaces[1] = surfaces[i];
+                if (cornerSurf.All(surf2.Contains)) sortedSurfaces[2] = surfaces[i];
+                if (cornerSurf.All(surf3.Contains)) sortedSurfaces[3] = surfaces[i];
+
+                
+            }
+
+
+            return sortedSurfaces;
+        }
+
+        public Surface[] CreateCrossSection(Curve[] edges)
+        {
+            Surface[] crossSecSurfaces = new Surface[6];
+
+            List<NurbsCurve> curves5 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[5].ToNurbsCurve(), edges[1].ToNurbsCurve(), edges[4].ToNurbsCurve() };
+            List<NurbsCurve> curves6 = new List<NurbsCurve>() { edges[2].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[6].ToNurbsCurve() };
+
+            Brep brebSurf5 = Brep.CreateEdgeSurface(curves5);
+            Brep brebSurf6 = Brep.CreateEdgeSurface(curves6);
+
+            BrepFace face5 = brebSurf5.Faces[0];
+            crossSecSurfaces[0] = face5.DuplicateSurface();
+            BrepFace face6 = brebSurf6.Faces[0];
+            crossSecSurfaces[1] = face6.DuplicateSurface();
+
+            return crossSecSurfaces;
+
+        }
+
         public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>, List<NurbsCurve>> CreateNewBreps(Brep brep, int u, int v, int w, Curve[] edges, Surface [] oSurfaces)
         {
             List<Point3d> points = new List<Point3d>();
@@ -159,15 +286,6 @@ namespace SolidsVR
             Curve edge3 = edges[10];
             Curve edge4 = edges[11];
 
-           /*
-            edge1.Reverse();
-            edge2.Reverse();
-            edge3.Reverse();
-            edge4.Reverse();
-            */
-            
-
-
             edge1.DivideByCount(w, true, out Point3d[] p1s);
             edge2.DivideByCount(w, true, out Point3d[] p2s);
             edge3.DivideByCount(w, true, out Point3d[] p3s);
@@ -177,7 +295,6 @@ namespace SolidsVR
             Surface surF2 = oSurfaces[1];
             Surface surF3 = oSurfaces[2];
             Surface surF4 = oSurfaces[3];
-            
 
 
             List<NurbsCurve> curve = new List<NurbsCurve>();
@@ -207,12 +324,6 @@ namespace SolidsVR
                 NurbsCurve c3 = surF3.InterpolatedCurveOnSurface(ps3, 0);
                 NurbsCurve c4 = surF4.InterpolatedCurveOnSurface(ps4, 0);
 
-                //c1.Reverse();
-                //c2.Reverse();
-                //c4.Reverse();
-
-
-
                 curve = new List<NurbsCurve>() { c1, c2, c3, c4 };
                 Brep brepSurf = Brep.CreateEdgeSurface(curve);
 
@@ -221,19 +332,13 @@ namespace SolidsVR
                 curves.Add(c3);
                 curves.Add(c4);
 
-
-                //Point3d[] vert = brepSurf.DuplicateVertices();
-
                 Surface surface = null;
-
 
                 foreach (BrepFace surf in brepSurf.Faces)
                 {
                     surface = surf.DuplicateSurface();
                 }
-
-
-
+               
                 List<Point3d> pointList = new List<Point3d>() { p_1, p_2, p_3, p_4 };
 
                 Brep b = surface.ToBrep();
@@ -489,7 +594,6 @@ namespace SolidsVR
         {
             Point3d[] pointList = new Point3d[sizeOfM / 3];
 
-
             for (int i = 0; i < treeConnectivity.Count; i++)
             {
                 List<int> connectedNodes = treeConnectivity[i];
@@ -526,7 +630,6 @@ namespace SolidsVR
             return edges;
         }
 
-
         public List<Brep> CreateSurfaceMesh(List<Point3d> elementPoints)
         {
 
@@ -536,7 +639,6 @@ namespace SolidsVR
             Brep b4 = Brep.CreateFromCornerPoints(elementPoints[0], elementPoints[3], elementPoints[7], elementPoints[4], 0);
             Brep b5 = Brep.CreateFromCornerPoints(elementPoints[0], elementPoints[1], elementPoints[2], elementPoints[3], 0);
             Brep b6 = Brep.CreateFromCornerPoints(elementPoints[4], elementPoints[5], elementPoints[6], elementPoints[7], 0);
-
 
             List<Brep> surfaces = new List<Brep>()
             {
@@ -551,145 +653,7 @@ namespace SolidsVR
             return surfaces;
         }
 
-        public Surface[] FindSurfaces(List<Point3d> corners, Surface[] surfaces)
-        {
-            Surface[] sortedSurfaces = new Surface[6];
-
-            corners = RoundPointsList(corners);
-
-            Point3d[] surf0 = new Point3d[] { corners[0], corners[1], corners[4], corners[5] };
-            Point3d[] surf1 = new Point3d[] { corners[1], corners[2], corners[5], corners[6] };
-            Point3d[] surf2 = new Point3d[] { corners[2], corners[3], corners[6], corners[7] };
-            Point3d[] surf3 = new Point3d[] { corners[0], corners[3], corners[4], corners[7] };
-
-            for (int i = 0; i < surfaces.Length; i++)
-            {
-                Brep surf = surfaces[i].ToBrep();
-                Point3d[] cornerSurf = surf.DuplicateVertices();
-
-                cornerSurf = RoundPoints(cornerSurf);
-
-                if (cornerSurf.All(surf0.Contains)) sortedSurfaces[0] = surfaces[i];
-                if (cornerSurf.All(surf1.Contains)) sortedSurfaces[1] = surfaces[i];
-                if (cornerSurf.All(surf2.Contains)) sortedSurfaces[2] = surfaces[i];
-                if (cornerSurf.All(surf3.Contains)) sortedSurfaces[3] = surfaces[i];
-            }
-
-
-            return sortedSurfaces;
-        }
-
-
-
-        public Surface[] SortedSurfaces(List<Point3d> corners, Surface [] surfaces)
-        {
-            Surface[] sortedSurfaces = new Surface[6];
-
-            corners = RoundPointsList(corners);
-
-            Point3d[] surf0 = new Point3d[] { corners[0], corners[1], corners[4], corners[5] };
-            Point3d[] surf1 = new Point3d[] { corners[1], corners[2], corners[5], corners[6] };
-            Point3d[] surf2 = new Point3d[] { corners[2], corners[3], corners[6], corners[7] };
-            Point3d[] surf3 = new Point3d[] { corners[0], corners[3], corners[4], corners[7] };
-            Point3d[] surf4 = new Point3d[] { corners[0], corners[1], corners[2], corners[3] };
-            Point3d[] surf5 = new Point3d[] { corners[4], corners[5], corners[6], corners[7] };
-
-            for (int i = 0; i < surfaces.Length; i++)
-            {
-                Brep surf = surfaces[i].ToBrep();
-                Point3d[] cornerSurf = surf.DuplicateVertices();
-
-                cornerSurf = RoundPoints(cornerSurf);
-
-                if (cornerSurf.All(surf0.Contains)) sortedSurfaces[0] = surfaces[i];
-                if (cornerSurf.All(surf1.Contains)) sortedSurfaces[1] = surfaces[i];
-                if (cornerSurf.All(surf2.Contains)) sortedSurfaces[2] = surfaces[i];
-                if (cornerSurf.All(surf3.Contains)) sortedSurfaces[3] = surfaces[i];
-                if (cornerSurf.All(surf4.Contains)) sortedSurfaces[4] = surfaces[i];
-                if (cornerSurf.All(surf5.Contains)) sortedSurfaces[5] = surfaces[i];
-            }
-
-
-            return sortedSurfaces;
-        }
-
-        public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
-        {
-            corners = RoundPointsList(corners);
-            Curve[] sortedEdges = new Curve[12];
-            for (int i = 0; i < edges.Length; i++)
-            {
-                Point3d start = new Point3d(Math.Round(edges[i].PointAtStart.X, 1), Math.Round(edges[i].PointAtStart.Y, 1), Math.Round(edges[i].PointAtStart.Z, 1));
-                Point3d end = new Point3d(Math.Round(edges[i].PointAtEnd.X, 1), Math.Round(edges[i].PointAtEnd.Y, 1), Math.Round(edges[i].PointAtEnd.Z, 1));
-                List<Point3d> tempP = new List<Point3d>() { start, end };
-                //u-dir
-                if (tempP.Contains(corners[0]) && tempP.Contains(corners[1]))
-                {
-                    sortedEdges[0] = edges[i];
-                    if (end == corners[0]) { sortedEdges[0].Reverse(); }
-                }
-                else if (tempP.Contains(corners[3]) && tempP.Contains(corners[2]))
-                {
-                    sortedEdges[1] = edges[i];
-                    if (end == corners[3]) { sortedEdges[1].Reverse(); }
-                }
-                else if (tempP.Contains(corners[4]) && tempP.Contains(corners[5]))
-                {
-                    sortedEdges[2] = edges[i];
-                    if (end == corners[4]) { sortedEdges[2].Reverse(); }
-                }
-                else if (tempP.Contains(corners[7]) && tempP.Contains(corners[6]))
-                {
-                    sortedEdges[3] = edges[i];
-                    if (end == corners[7]) { sortedEdges[3].Reverse(); }
-                }
-                //v-dir
-                else if (tempP.Contains(corners[0]) && tempP.Contains(corners[3]))
-                {
-                    sortedEdges[4] = edges[i];
-                    if (end == corners[0]) { sortedEdges[4].Reverse(); }
-                }
-                else if (tempP.Contains(corners[1]) && tempP.Contains(corners[2]))
-                {
-                    sortedEdges[5] = edges[i];
-                    if (end == corners[1]) { sortedEdges[5].Reverse(); }
-                }
-                else if (tempP.Contains(corners[5]) && tempP.Contains(corners[6]))
-                {
-                    sortedEdges[6] = edges[i];
-                    if (end == corners[5]) { sortedEdges[6].Reverse(); }
-                }
-                else if (tempP.Contains(corners[4]) && tempP.Contains(corners[7]))
-                {
-                    sortedEdges[7] = edges[i];
-                    if (end == corners[4]) { sortedEdges[7].Reverse(); }
-                }
-                //w-dir
-                else if (tempP.Contains(corners[0]) && tempP.Contains(corners[4]))
-                {
-                    sortedEdges[8] = edges[i];
-                    if (end == corners[0]) { sortedEdges[8].Reverse(); }
-                }
-                else if (tempP.Contains(corners[1]) && tempP.Contains(corners[5]))
-                {
-                    sortedEdges[9] = edges[i];
-                    if (end == corners[1]) { sortedEdges[9].Reverse(); }
-                }
-                else if (tempP.Contains(corners[2]) && tempP.Contains(corners[6]))
-                {
-                    sortedEdges[10] = edges[i];
-                    if (end == corners[2]) { sortedEdges[10].Reverse(); }
-                }
-                else
-                {
-                    sortedEdges[11] = edges[i];
-                    if (end == corners[3]) { sortedEdges[11].Reverse(); }
-                }
-            }
-            return sortedEdges;
-        }
-
-        public Curve[] RoundEdgePointsOne(Curve[] sortedEdges)
+        public Curve[] RoundEdgePoints(Curve[] sortedEdges)
         {
             for (int i = 0; i < sortedEdges.Length; i++)
             {
@@ -699,57 +663,7 @@ namespace SolidsVR
             return sortedEdges;
         }
 
-        public Curve[] RoundEdgePointsTwo(Curve[] sortedEdges)
-        {
-            for (int i = 0; i < sortedEdges.Length; i++)
-            {
-                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 4), Math.Round(sortedEdges[i].PointAtStart.Y, 4), Math.Round(sortedEdges[i].PointAtStart.Z, 4)));
-                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 4), Math.Round(sortedEdges[i].PointAtEnd.Y, 4), Math.Round(sortedEdges[i].PointAtEnd.Z, 4)));
-            }
-            return sortedEdges;
-        }
-
-        public Surface[] CreateSurfaces(Curve[] edges)
-        {
-            Surface[] sortedSurfaces = new Surface[6];
-
-            /*
-            List<NurbsCurve> curves1 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[9].ToNurbsCurve(), edges[2].ToNurbsCurve(), edges[8].ToNurbsCurve() };
-            List<NurbsCurve> curves2 = new List<NurbsCurve>() { edges[9].ToNurbsCurve(), edges[6].ToNurbsCurve(), edges[10].ToNurbsCurve(), edges[5].ToNurbsCurve() };
-            List<NurbsCurve> curves3 = new List<NurbsCurve>() { edges[1].ToNurbsCurve(), edges[11].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[10].ToNurbsCurve() };
-            List<NurbsCurve> curves4 = new List<NurbsCurve>() { edges[4].ToNurbsCurve(), edges[8].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[11].ToNurbsCurve() };
-            */
-            List<NurbsCurve> curves5 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[5].ToNurbsCurve(), edges[1].ToNurbsCurve(), edges[4].ToNurbsCurve() };
-            List<NurbsCurve> curves6 = new List<NurbsCurve>() { edges[2].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[6].ToNurbsCurve() };
-
-            /*
-            Brep brebSurf1 = Brep.CreateEdgeSurface(curves1);
-            Brep brebSurf2 = Brep.CreateEdgeSurface(curves2);
-            Brep brebSurf3 = Brep.CreateEdgeSurface(curves3);
-            Brep brebSurf4 = Brep.CreateEdgeSurface(curves4);
-            */
-            Brep brebSurf5 = Brep.CreateEdgeSurface(curves5);
-            Brep brebSurf6 = Brep.CreateEdgeSurface(curves6);
-
-            /*
-            BrepFace face1 = brebSurf1.Faces[0];
-            sortedSurfaces[0] = face1.DuplicateSurface();
-            BrepFace face2 = brebSurf2.Faces[0];
-            sortedSurfaces[1] = face2.DuplicateSurface();
-            BrepFace face3 = brebSurf3.Faces[0];
-            sortedSurfaces[2] = face3.DuplicateSurface();
-            BrepFace face4 = brebSurf4.Faces[0];
-            sortedSurfaces[3] = face4.DuplicateSurface();
-            */
-            BrepFace face5 = brebSurf5.Faces[0];
-            sortedSurfaces[0] = face5.DuplicateSurface();
-            BrepFace face6 = brebSurf6.Faces[0];
-            sortedSurfaces[1] = face6.DuplicateSurface();
-
-            return sortedSurfaces;
-
-
-        }
+        
         public List<Point3d> RoundPointsList(List<Point3d> vertices)
         {
             for (int i = 0; i < vertices.Count; i++)

@@ -352,13 +352,8 @@ namespace SolidsVR
 
             for (int i = 0; i < elements.Count; i++)
             {
-                double average = 0;
-                List<Node> vertices = elements[i].GetVertices();
-                for (int j = 0; j < vertices.Count; j++)
-                {
-                    average += vertices[j].GetStress()[dir];
-                }
-                averageList[i] = Math.Round(average / vertices.Count, 4);
+                averageList[i] = elements[i].GetAverageStressDir(dir);
+
             }
             return averageList;
         }
