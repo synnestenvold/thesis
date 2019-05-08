@@ -87,7 +87,7 @@ namespace SolidsVR
             text.Add("Adjust for load in N/mm^2");
             text.Add("(" + Math.Round((load.X), 3).ToString() + ", " + Math.Round((load.Y), 3).ToString() + ", " + Math.Round((load.Z), 3).ToString() + ")");
 
-            double refSize = (double)(refLength / 10);
+            double refSize = (double)(refLength / 7);
 
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
