@@ -12,7 +12,7 @@ namespace SolidsVR
 
     public class PartitionSliderComponent : GH_Component
     {
-        readonly int max = 10;
+        readonly int max = 20;
 
         public PartitionSliderComponent()
           : base("DivisionSlider", "DivSlider",
@@ -56,7 +56,7 @@ namespace SolidsVR
 
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
-            double adjustment = 10 / refLength; //the length should give 10
+            double adjustment = 8 / refLength; //the length should give 6
 
             //---solve---
 
@@ -109,7 +109,7 @@ namespace SolidsVR
                 direction = "W";
             }
             text.Add("Mesh division "+ direction+": "+div.ToString());
-            double refSize = (double)(refLength / 10);
+            double refSize = (double)(refLength / 7);
             List<double> size = new List<double>() { refSize };
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;

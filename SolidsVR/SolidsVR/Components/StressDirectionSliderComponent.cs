@@ -54,8 +54,8 @@ namespace SolidsVR
             //---setup---
 
             double refLength = Math.Pow(brep.GetVolume(), (double)1 / 3);
-            double refSize = (double)(refLength / 10);
-            double adjustment = 6 / refLength; //the length should give 6
+            double refSize = (double)(refLength / 7);
+            double adjustment = 4 / refLength; //the length should give 6
 
             //---solve---
 

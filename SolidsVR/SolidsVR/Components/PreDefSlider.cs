@@ -83,7 +83,7 @@ namespace SolidsVR.Components
             text.Add("Adjust for deformations in mm");
             text.Add("(" + Math.Round((load.X), 3).ToString() + ", " + Math.Round((load.Y), 3).ToString() + ", " + Math.Round((load.Z), 3).ToString() + ")");
 
-            double refSize = (double)(refLength / 10);
+            double refSize = (double)(refLength / 7);
 
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
