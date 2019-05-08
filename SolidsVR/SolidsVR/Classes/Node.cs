@@ -115,6 +115,11 @@ namespace SolidsVR
             return partOfElement;
         }
 
+        public int GetNodeNr()
+        {
+            return nodeNr;
+        }
+
         public void SetDeformation(List<double> _deformation)
         {
             deformation = _deformation;

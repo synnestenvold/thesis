@@ -87,22 +87,34 @@ namespace SolidsVR.Components
             int n = 0;
             double max = 0;
             int removeElem = -1;
+            List<int> removeNodeNr = new List<int>();
             while (n < maxN && max < 355)
             {
                 
                 List<Element> elements = mesh.GetElements();
+                
                 if (first != true)
                 {
-                    
+                    List<Node> nodeElem = elements[removeElem].GetVertices();
+                    int removeElemNr = elements[removeElem].GetElementNr();
+                    for (int i = 0; i<nodeElem.Count; i++)
+                    {
+                        nodeElem[i].GetElementNr().RemoveAll(item => item == removeElemNr);
+                        if (nodeElem[i].GetElementNr().Count == 0)
+                        {
+                            removeNodeNr.Add(nodeElem[i].GetNodeNr());
+                        }
+                    }
                     elements.RemoveAt(removeElem);
 
                 }
                 first = false;
                 //Create K_tot
                 
-                var tupleK_B = CreateGlobalStiffnessMatrix(connectivity, elementPoints, sizeOfMatrix, material, elements);
+                var tupleK_B = CreateGlobalStiffnessMatrix(sizeOfMatrix, material, elements);
                 Matrix<double> K_tot = tupleK_B.Item1;
 
+                
                 //B_all
                 List<List<Matrix<double>>> B_all = tupleK_B.Item2;
 
@@ -133,6 +145,23 @@ namespace SolidsVR.Components
                 K_tot = ApplyBC_Col(K_tot, bcNodes);
                 K_tot = ApplyBC_Col(K_tot, predefNodes);
 
+                //Removing row and column for nodes in removeNodeNr
+                removeNodeNr.Sort();
+                removeNodeNr.Reverse();
+                for (int i = 0; i < removeNodeNr.Count; i++)
+                {
+                    K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
+                    K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
+                    K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
+                    K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
+                    K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
+                    K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
+                    List<double> R_removed = R.ToList();
+                    R_removed.RemoveAt(3 * removeNodeNr[i]);
+                    R_removed.RemoveAt(3 * removeNodeNr[i]);
+                    R_removed.RemoveAt(3 * removeNodeNr[i]);
+                    R = (V.DenseOfArray(R_removed.ToArray()));
+                }
                 //Inverting K matrix. Singular when all elements belonging to a node is removed
                 Matrix<double> K_tot_inverse = K_tot.Inverse();
                 
@@ -196,7 +225,7 @@ namespace SolidsVR.Components
         }
 
 
-        public Tuple<Matrix<double>, List<List<Matrix<double>>>> CreateGlobalStiffnessMatrix(List<List<int>> connectivity, List<List<Point3d>> elementPoints, int sizeOfMatrix, Material material, List<Element> elements)
+        public Tuple<Matrix<double>, List<List<Matrix<double>>>> CreateGlobalStiffnessMatrix(int sizeOfMatrix, Material material, List<Element> elements)
         {
             Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
             Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
@@ -419,7 +448,7 @@ namespace SolidsVR.Components
                 u_node.Add(u[i]);
                 u_node.Add(u[i + 1]);
                 u_node.Add(u[i + 2]);
-
+                //sett til riktig node, ta hensyn til de vi har fjernet.
                 nodes[i / 3].SetDeformation(u_node);
 
                 defTree.AddRange(u_node, new GH_Path(new int[] { 0, n }));
@@ -499,7 +528,7 @@ namespace SolidsVR.Components
 
         public Tuple<string, double, Plane, Color> CreateHeadline(Point3d centroid, double refLength)
         {
-            string headText = "MODEL";
+            string headText = "Model";
 
             double headSize = (double)refLength / 2;
 
