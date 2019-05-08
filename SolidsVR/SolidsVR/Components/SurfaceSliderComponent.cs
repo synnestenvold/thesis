@@ -83,7 +83,7 @@ namespace SolidsVR
             List<string> text = new List<string>();
             text.Add("Adjust to pick surface (1-6): "+ surface.ToString());
             text.AddRange(new List<string>() { "1", "2", "3", "4", "5", "6" });
-            double refSize = (double)(refLength / 10);
+            double refSize = (double)(refLength / 7);
             List<double> size = new List<double>() { refSize, (double)(refSize / 2) };
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
