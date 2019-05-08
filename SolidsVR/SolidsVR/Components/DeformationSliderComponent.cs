@@ -74,7 +74,7 @@ namespace SolidsVR
         public Tuple<string, double, Plane, Color> CreateText(Curve curve, double scale, double refLength)
         {
             string text = "Scale: " + Math.Round(scale).ToString();
-            double refSize = (double)(refLength / 10); //text size and sphere size
+            double refSize = (double)(refLength / 7); //text size and sphere size
             Point3d end = curve.PointAtEnd;
             Point3d p0 = Point3d.Add(end, new Point3d(0, 0, 2*refSize));
             Point3d p1 = Point3d.Add(end, new Point3d(0, 1, 2*refSize));

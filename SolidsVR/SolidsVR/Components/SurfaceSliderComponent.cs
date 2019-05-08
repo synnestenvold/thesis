@@ -52,15 +52,14 @@ namespace SolidsVR
 
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
-            double adjustment = 5 / refLength; //the length should give 5
+            double adjustment = 3 / refLength; //the length should give 3
 
             //---solve---
 
             int surface = Convert.ToInt32(curve.GetLength() * adjustment);
             surface = surface > max ? max : surface;
-            //Surface surf = brep.Surfaces[surface];
 
-            var tuple = CreateText(curve, refLength);
+            var tuple = CreateText(curve, refLength, surface);
             List<string> text = tuple.Item1;
             List<double> size = tuple.Item2;
             List<Plane> textPlane = tuple.Item3;
@@ -79,10 +78,10 @@ namespace SolidsVR
             
         }
 
-        public Tuple<List<string>, List<double>, List<Plane>, Color> CreateText(Curve curve, double refLength)
+        public Tuple<List<string>, List<double>, List<Plane>, Color> CreateText(Curve curve, double refLength, int surface)
         {
             List<string> text = new List<string>();
-            text.Add("Adjust to pick surface (1-6)");
+            text.Add("Adjust to pick surface (1-6): "+ surface.ToString());
             text.AddRange(new List<string>() { "1", "2", "3", "4", "5", "6" });
             double refSize = (double)(refLength / 10);
             List<double> size = new List<double>() { refSize, (double)(refSize / 2) };
