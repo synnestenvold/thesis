@@ -211,11 +211,6 @@ namespace SolidsVR
 
             surfaces = FindSurfaces(corners, surfaces);
 
-            Surface[] crossSecSurf = CreateCrossSection(sortedEdges);
-
-            surfaces[4] = crossSecSurf[0];
-            surfaces[5] = crossSecSurf[1];
-
             return surfaces;
         }
 
@@ -253,16 +248,31 @@ namespace SolidsVR
         {
             Surface[] crossSecSurfaces = new Surface[6];
 
+            Curve[] edges2 = edges;
+
+            //edges2 = RoundEdgePoints(edges2); 
+
             List<NurbsCurve> curves5 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[5].ToNurbsCurve(), edges[1].ToNurbsCurve(), edges[4].ToNurbsCurve() };
             List<NurbsCurve> curves6 = new List<NurbsCurve>() { edges[2].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[6].ToNurbsCurve() };
 
-            Brep brebSurf5 = Brep.CreateEdgeSurface(curves5);
-            Brep brebSurf6 = Brep.CreateEdgeSurface(curves6);
+            Brep brepSurf5 = Brep.CreateEdgeSurface(curves5);
+            Brep brepSurf6 = Brep.CreateEdgeSurface(curves6);
 
+            foreach (BrepFace surf in brepSurf5.Faces)
+            {
+                crossSecSurfaces[0] = surf.DuplicateSurface();
+            }
+
+            foreach (BrepFace surf in brepSurf6.Faces)
+            {
+                crossSecSurfaces[1] = surf.DuplicateSurface();
+            }
+            /*
             BrepFace face5 = brebSurf5.Faces[0];
             crossSecSurfaces[0] = face5.DuplicateSurface();
             BrepFace face6 = brebSurf6.Faces[0];
             crossSecSurfaces[1] = face6.DuplicateSurface();
+            */
 
             return crossSecSurfaces;
 
