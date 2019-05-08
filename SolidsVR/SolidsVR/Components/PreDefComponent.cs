@@ -108,7 +108,7 @@ namespace SolidsVR
 
         public Plane FindSpherePlane(Point3d centroid, double refLength)
         {
-            Point3d p0 = new Point3d(centroid.X, centroid.Y, centroid.Z + refLength/10);
+            Point3d p0 = new Point3d(centroid.X, centroid.Y, centroid.Z + refLength/5);
             Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
             Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 

@@ -48,10 +48,12 @@ namespace SolidsVR
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             //pManager.AddPointParameter("Point", "P", "Closest point to sphere", GH_ParamAccess.item);
-            pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
+            pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "Color", "Colors for text", GH_ParamAccess.item);
             pManager.AddTextParameter("Text Sphere", "Text", "Text for sphere", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane Sphere", "Plane", "Placement for text", GH_ParamAccess.item);
         }
 
@@ -101,40 +103,58 @@ namespace SolidsVR
 
             Node chosenNode = FindNode(nodeList, point);
 
-            String text = "";
+            List<string> text = new List<string>();
 
             if (chosenNode == null)
             {
-                text = "No node is chosen";
+                text.Add("No node is chosen");
             }
             else
             {
                 text = CreateText(chosenNode);
             }
 
-            Plane textPlane = CreateTextPlane(centroid, refLength);
+            List<Plane> textPlane = CreateTextPlane(centroid, refLength, text);
 
-            Color color = Color.Green;
+            Color color = Color.Orange;
+
+            double size = (double)refLength / 7;
 
             //---output---
 
-            DA.SetData(0, text);
-            DA.SetData(1, textPlane);
-            DA.SetData(2, color);
-            DA.SetData(3, textSphere);
-            DA.SetData(4, textPlaneSphere);
+            DA.SetDataList(0, text);
+            
+            DA.SetData(1, size);
+            DA.SetDataList(2, textPlane);
+            DA.SetData(3, color);
+            DA.SetData(4, textSphere);
+            DA.SetData(5, size);
+            DA.SetData(6, textPlaneSphere);
 
         }
 
-        public Plane CreateTextPlane(Point3d centroid, double refLength)
+        public List<Plane> CreateTextPlane(Point3d centroid, double refLength, List<string> text)
         {
-            Point3d p0 = new Point3d(centroid.X - refLength*2.5, centroid.Y, centroid.Z + refLength * 2);
-            Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
-            Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
+            List<Plane> planes = new List<Plane>();
 
-            Plane p = new Plane(p0, p1, p2);
+            for (int i = 0; i < text.Count; i++)
+            {
+                double zValue = centroid.Z + refLength * 2;
 
-            return p;
+                double z = (double)(zValue - i * refLength / 7);
+
+                if (i == 1) z = (double)(z + refLength / 12);
+
+                Point3d p0 = new Point3d(centroid.X - refLength * 2.5, centroid.Y, z);
+                Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
+                Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
+
+                Plane p = new Plane(p0, p1, p2);
+
+                planes.Add(p);
+            }
+
+            return planes;
         }
 
         public Node FindNode(List<Node> nodeList, Point3d point)
@@ -151,18 +171,24 @@ namespace SolidsVR
             return null;
         }
 
-        public string CreateText(Node node)
+        public List<string> CreateText(Node node)
         {
+            List<string> text = new List<string>();
+
             string header = "NODE INFORMATION:";
             string underScore = "________________________";
             string nodeCoord = "Coord: (" + Math.Round(node.GetCoord().X,2) + ","+Math.Round(node.GetCoord().Y, 2) +"," + Math.Round(node.GetCoord().Z, 2) +")";
             string def = "Def: " + Math.Round(node.GetDeformation()[0], 5).ToString() + "," + Math.Round(node.GetDeformation()[1], 5) + "," + Math.Round(node.GetDeformation()[2], 5);
 
-            double l = def.Length;
-
             string stress = "von Mises: " + Math.Round(node.GetStress()[6],5);
 
-            string text = header + "\n"+ underScore+ "\n" + nodeCoord + "\n" + def + "\n" + stress;
+            //string text = header + "\n"+ underScore+ "\n" + nodeCoord + "\n" + def + "\n" + stress;
+
+            text.Add(header);
+            text.Add(underScore);
+            text.Add(nodeCoord);
+            text.Add(def);
+            text.Add(stress);
 
             return text;
         }
@@ -192,7 +218,7 @@ namespace SolidsVR
 
         public Plane FindSpherePlane(Point3d centroid, double refLength)
         {
-            Point3d p0 = new Point3d(centroid.X,  centroid.Y, centroid.Z + refLength/10);
+            Point3d p0 = new Point3d(centroid.X,  centroid.Y, centroid.Z + refLength/5);
             Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
             Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 
