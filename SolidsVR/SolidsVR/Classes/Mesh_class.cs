@@ -158,6 +158,20 @@ namespace SolidsVR
             return elements;
         }
 
+        public void RemoveElements()
+        {
+            elements.RemoveAt(40);
+            elements.RemoveAt(40);
+            elements.RemoveAt(40);
+            elements.RemoveAt(40);
+            elements.RemoveAt(40);
+            elements.RemoveAt(40);
+            elements.RemoveAt(40);
+            elements.RemoveAt(40);
+            elements.RemoveAt(40);
+            elements.RemoveAt(40);
+        }
+
         public Tuple<double, int> RemoveOneElement()
         {
             double max = double.NegativeInfinity;

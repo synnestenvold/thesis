@@ -31,7 +31,6 @@ namespace SolidsVR
             pManager.AddTextParameter("Boundary conditions", "BC", "Nodes that are constrained", GH_ParamAccess.list);
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
-            pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
             pManager.AddGenericParameter("Material", "M", "Material", GH_ParamAccess.item);
         }
 
@@ -56,7 +55,6 @@ namespace SolidsVR
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
             List<string> deftxt = new List<string>();
-            Brep origBrep = new Brep();
             Material material = new Material();
 
 
@@ -66,8 +64,7 @@ namespace SolidsVR
             if (!DA.GetDataList(1, bctxt)) return;
             if (!DA.GetDataList(2, loadtxt)) return;
             if (!DA.GetDataList(3, deftxt)) return;
-            if (!DA.GetData(4, ref origBrep)) return;
-            if (!DA.GetData(5, ref material)) return;
+            if (!DA.GetData(4, ref material)) return;
 
             //double E = 210000;
             //double nu = 0.3;
@@ -79,7 +76,10 @@ namespace SolidsVR
             int sizeOfMatrix = mesh.GetSizeOfMatrix();
             Point3d[] globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
-            
+            Brep_class brp = mesh.GetBrep();
+            Brep origBrep = brp.GetBrep();
+
+            //mesh.RemoveElements();
                 
             List<Element> elements = mesh.GetElements();
             //Create K_tot
@@ -111,6 +111,8 @@ namespace SolidsVR
             //Adding R-matrix for pre-deformations.
             var V = Vector<double>.Build;
             Vector<double> R = (V.DenseOfArray(R_array)).Subtract(R_def);
+
+            
 
             //Apply boundary condition and predeformations (Puts 0 in columns of K)
             K_tot = ApplyBC_Col(K_tot, bcNodes);
