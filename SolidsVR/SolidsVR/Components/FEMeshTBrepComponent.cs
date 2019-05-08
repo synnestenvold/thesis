@@ -83,7 +83,7 @@ namespace SolidsVR
                 
             List<Element> elements = mesh.GetElements();
             //Create K_tot
-            var tupleK_B = CreateGlobalStiffnessMatrix(connectivity, elementPoints, sizeOfMatrix, material, elements);
+            var tupleK_B = CreateGlobalStiffnessMatrix(sizeOfMatrix, material, elements);
             Matrix<double> K_tot = tupleK_B.Item1;
 
             //B_all
@@ -194,7 +194,7 @@ namespace SolidsVR
         }
 
 
-        public Tuple<Matrix<double>, List<List<Matrix<double>>>> CreateGlobalStiffnessMatrix(List<List<int>> connectivity, List<List<Point3d>> elementPoints, int sizeOfMatrix, Material material, List<Element> elements)
+        public Tuple<Matrix<double>, List<List<Matrix<double>>>> CreateGlobalStiffnessMatrix(int sizeOfMatrix, Material material, List<Element> elements)
         {
             Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
             Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
@@ -497,7 +497,7 @@ namespace SolidsVR
 
         public Tuple<string, double, Plane, Color> CreateHeadline(Point3d centroid, double refLength)
         {
-            string headText = "MODEL";
+            string headText = "Model";
 
             double headSize = (double)refLength / 2;
 
