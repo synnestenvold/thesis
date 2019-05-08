@@ -54,7 +54,7 @@ namespace SolidsVR.Components
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
 
-            double adjustment = 20 / refLength; //the length should give 20 kn/m^2
+            double adjustment = 2 / refLength; //the length should give 2
             Vector3d vectorRef = curve.PointAtEnd - curve.PointAtStart;
             Vector3d def = Vector3d.Multiply(adjustment, vectorRef);
 

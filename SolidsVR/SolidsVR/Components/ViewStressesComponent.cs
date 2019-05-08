@@ -147,7 +147,7 @@ namespace SolidsVR
             Plane headPlane = new Plane(p0, p1, p2);
 
             headPlane.Rotate(angle, new Vector3d(0, 0, 1), center);
-            headPlane.Translate(new Vector3d(0, 0, refLength));
+            headPlane.Translate(new Vector3d(0, -headSize, refLength));
 
             Color headColor = Color.Pink;
 

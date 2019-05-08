@@ -12,7 +12,7 @@ namespace SolidsVR
 
     public class PartitionSliderComponent : GH_Component
     {
-        readonly int max = 20;
+        readonly int max = 15;
 
         public PartitionSliderComponent()
           : base("DivisionSlider", "DivSlider",
@@ -56,7 +56,7 @@ namespace SolidsVR
 
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(brep.GetVolume(), sqrt3);
-            double adjustment = 8 / refLength; //the length should give 6
+            double adjustment = 8 / refLength; //the length should give 8
 
             //---solve---
 
@@ -119,7 +119,7 @@ namespace SolidsVR
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1 + 2 * refSize)));
             textPlane.Add(new Plane(p0, p1, p2));
             double range = (double)(refLength / 10);
-            for (int i = 1; i < 11; i++)
+            for (int i = 1; i < 16; i++)
             {
                 size.Add((double)(refSize / 2));
                 string divRange = i.ToString();
