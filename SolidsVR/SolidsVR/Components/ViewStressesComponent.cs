@@ -24,6 +24,7 @@ namespace SolidsVR
         {
 
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Stress", "Stress", "Stress in each dof", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Stress direction", "Stress dir", "S11, S22, S33, S12, S13, S23, mises as 0, 1, 2, 3, 4, 5, 6", GH_ParamAccess.item);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
         }
@@ -46,14 +47,17 @@ namespace SolidsVR
             //---variables---
 
             Mesh_class mesh = new Mesh_class();
+            GH_Structure<GH_Number> treeStress = new GH_Structure<GH_Number>();
             int dir = new int();
             double scale = new double();
+            
 
             //---input---
 
             if (!DA.GetData(0, ref mesh)) return;
-            if (!DA.GetData(1, ref dir)) return;
-            if (!DA.GetData(2, ref scale)) return;
+            if (!DA.GetDataTree(1, out treeStress)) return;
+            if (!DA.GetData(2, ref dir)) return;
+            if (!DA.GetData(3, ref scale)) return;
 
             //---setup---
 

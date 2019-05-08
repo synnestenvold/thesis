@@ -25,7 +25,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
-            //pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
         }
 
@@ -53,14 +53,14 @@ namespace SolidsVR
             //---variables---
 
             Mesh_class mesh = new Mesh_class();
-            //GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
+            GH_Structure<GH_Number> treeDef = new GH_Structure<GH_Number>();
             double scale = 1;
 
             //---input---
 
             if (!DA.GetData(0, ref mesh)) return;
-            //if (!DA.GetDataTree(1, out treeDef)) return;
-            if (!DA.GetData(1, ref scale)) return;
+            if (!DA.GetDataTree(1, out treeDef)) return;
+            if (!DA.GetData(2, ref scale)) return;
 
             //---setup---
 
