@@ -170,13 +170,13 @@ namespace SolidsVR
             double headSize = (double)refLength / 2;
 
             Point3d p0 = centroid;
-            Point3d p1 = Point3d.Add(p0, new Point3d(-1, -headSize, 0));
-            Point3d p2 = Point3d.Add(p0, new Point3d(0, -headSize, 1));
+            Point3d p1 = Point3d.Add(p0, new Point3d(-1, 0, 0));
+            Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 
             Plane headPlane = new Plane(p0, p1, p2);
 
             headPlane.Rotate(angle, new Vector3d(0, 0, 1), center);
-            headPlane.Translate(new Vector3d(0, 0, refLength));
+            headPlane.Translate(new Vector3d(0, -headSize, refLength));
 
             Color headColor = Color.Pink;
 
