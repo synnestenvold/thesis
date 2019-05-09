@@ -80,7 +80,7 @@ namespace SolidsVR
 
                 Surface[] surfaces = CreateSortedSurfaces(brp, edges, corners);
 
-                var tuple = CreateNewBreps(brp, u, v, w, sortedEdges, surfaces);
+                var tuple = CreateMesh(brp, u, v, w, sortedEdges, surfaces);
 
                 List<List<Point3d>> elementPoints = tuple.Item1;
                 List<List<int>> connectivity = tuple.Item2;
@@ -282,7 +282,7 @@ namespace SolidsVR
 
         }
 
-        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>, List<NurbsCurve>> CreateNewBreps(Brep brep, int u, int v, int w, Curve[] edges, Surface [] oSurfaces)
+        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>, List<NurbsCurve>> CreateMesh(Brep brep, int u, int v, int w, Curve[] edges, Surface [] oSurfaces)
         {
             List<Point3d> points = new List<Point3d>();
             List<List<int>> global_numbering = new List<List<int>>();
@@ -300,10 +300,10 @@ namespace SolidsVR
             Curve edge3 = edges[10];
             Curve edge4 = edges[11];
 
-            edge1.DivideByCount(w, true, out Point3d[] p1s);
-            edge2.DivideByCount(w, true, out Point3d[] p2s);
-            edge3.DivideByCount(w, true, out Point3d[] p3s);
-            edge4.DivideByCount(w, true, out Point3d[] p4s);
+            edge1.DivideByCount(w, true, out Point3d[] p1w);
+            edge2.DivideByCount(w, true, out Point3d[] p2w);
+            edge3.DivideByCount(w, true, out Point3d[] p3w);
+            edge4.DivideByCount(w, true, out Point3d[] p4w);
             
             Surface surF1 = oSurfaces[0];
             Surface surF2 = oSurfaces[1];
@@ -314,24 +314,18 @@ namespace SolidsVR
             List<NurbsCurve> curve = new List<NurbsCurve>();
             List<NurbsCurve> curves = new List<NurbsCurve>();
 
-            Interval dW = surF1.Domain(0);
 
             for (int i = 0; i <= w; i++)
             {
-                double tw = dW.ParameterAt(i / (double)w);
-
-                Point3d p_1 = p1s[i];
-                Point3d p_2 = p2s[i];
-                Point3d p_3 = p3s[i];
-                Point3d p_4 = p4s[i];
+                Point3d p_1 = p1w[i];
+                Point3d p_2 = p2w[i];
+                Point3d p_3 = p3w[i];
+                Point3d p_4 = p4w[i];
 
                 List<Point3d> ps1 = new List<Point3d> { p_1, p_2 };
                 List<Point3d> ps2 = new List<Point3d> { p_2, p_3 };
                 List<Point3d> ps3 = new List<Point3d> { p_3, p_4 };
                 List<Point3d> ps4 = new List<Point3d> { p_4, p_1 };
-
-                Brep testBrep = surF1.ToBrep();
-                Point3d[] vert = testBrep.DuplicateVertices();
 
                 NurbsCurve c1 = surF1.InterpolatedCurveOnSurface(ps1, 0);
                 NurbsCurve c2 = surF2.InterpolatedCurveOnSurface(ps2, 0);
@@ -339,29 +333,31 @@ namespace SolidsVR
                 NurbsCurve c4 = surF4.InterpolatedCurveOnSurface(ps4, 0);
 
                 curve = new List<NurbsCurve>() { c1, c2, c3, c4 };
+
                 Brep brepSurf = Brep.CreateEdgeSurface(curve);
 
-                curves.Add(c1);
-                curves.Add(c2);
-                curves.Add(c3);
-                curves.Add(c4);
+                Surface surface = brepSurf.Faces[0].DuplicateSurface();
+                //Surface surface = surf.DuplicateSurface();
 
-                Surface surface = null;
-
-                foreach (BrepFace surf in brepSurf.Faces)
-                {
-                    surface = surf.DuplicateSurface();
-                }
-               
                 List<Point3d> pointList = new List<Point3d>() { p_1, p_2, p_3, p_4 };
-
-                Brep b = surface.ToBrep();
-                Point3d[] vertices = b.DuplicateVertices();
 
                 var tuple = CreatePoints(surface, u, v, w, i, cornerPoints, pointList, points, nodes);
 
                 points = tuple.Item1;
                 nodes = tuple.Item2;
+
+                /*
+                Surface surface = null;
+
+                foreach (BrepFace surf in brepSurf.Faces)
+                {
+                    surface = surf.DuplicateSurface();
+                }*/
+
+                curves.Add(c1);
+                curves.Add(c2);
+                curves.Add(c3);
+                curves.Add(c4);
                 
             }
 
@@ -534,14 +530,14 @@ namespace SolidsVR
                 }
             }
 
-            double p11 = point1.ParameterAt(0);
-            double p12 = point1.ParameterAt(1);
+            double d11 = point1.ParameterAt(0);
+            double d12 = point1.ParameterAt(1);
 
-            double p21 = point2.ParameterAt(0);
-            double p22 = point2.ParameterAt(1);
+            double d21 = point2.ParameterAt(0);
+            double d22 = point2.ParameterAt(1);
 
-            double p31 = point3.ParameterAt(0);
-            double p32 = point3.ParameterAt(1);
+            double d31 = point3.ParameterAt(0);
+            double d32 = point3.ParameterAt(1);
 
 
             //List<Point3d> points = new List<Point3d>();
@@ -552,27 +548,15 @@ namespace SolidsVR
 
             for (int j = 0; j <= v; j++)
             {
-                if ((p31 - p11) != 0)
-                {
-                    tu = (double) (p11 - j * (p11 - p31) / v);
-                }
-                else
-                {
-                    tv = (double) (p12 - j * (p12 - p32) / v);
-                }
+                if ((d31 - d11) != 0) tu = (double)(d11 - j * (d11 - d31) / v);
+                else tv = (double)(d12 - j * (d12 - d32) / v);
+
                 for (int k = 0; k <= u; k++)
                 {
-                    if ((p21 - p11) != 0)
-                    {
-                        tu = (double) (p11 - k * (p11 - p21) / u);
-                    }
-                    else
-                    {
-                        tv = (double) (p12 - k * (p12 - p22) / u);
-                    }
+                    if ((d21 - d11) != 0) tu = (double)(d11 - k * (d11 - d21) / u);
+                    else tv = (double)(d12 - k * (d12 - d22) / u);
 
                     Point3d p1 = surface.PointAt(tu, tv);
-
                     points.Add(p1);
 
                     Node node = new Node(p1, points.IndexOf(p1));
