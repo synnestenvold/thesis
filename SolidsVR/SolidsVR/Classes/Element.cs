@@ -18,6 +18,7 @@ namespace SolidsVR
         Matrix<double> K_e = Matrix<double>.Build.Dense(24, 24);
         List<Matrix<Double>> B_e = new List<Matrix<Double>>();
         List<double> averageStress = new List<double>();
+        Boolean removable = true;
 
         public Element (List<Node> _vertices, int _elementNr, List<int> _connectivity)
         {
@@ -78,6 +79,14 @@ namespace SolidsVR
         public double GetAverageStressDir(int dir)
         {
             return averageStress[dir];
+        }
+        public Boolean isRemovable()
+        {
+            return removable;
+        }
+        public void setRemovable(Boolean _removable)
+        {
+            removable = _removable;
         }
 
     }

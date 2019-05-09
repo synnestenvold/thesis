@@ -179,21 +179,20 @@ namespace SolidsVR
             int minElem = -1;
             for (int i=0; i<elements.Count; i++)
             {
-                double mises = elements[i].GetAverageStressDir(6);
-                if (mises < min)
-                {
-                    min = mises;
-                    minElem = i;
-                }
-                if (mises >= max)
-                {
-                    max = mises;
+                if (elements[i].isRemovable()) { 
+                    double mises = elements[i].GetAverageStressDir(6);
+                    if (mises < min)
+                    {
+                        min = mises;
+                        minElem = i;
+                    }
+                    if (mises >= max)
+                    {
+                        max = mises;
+                    }
                 }
             }
-            //if (minElem != -1 || max < 355)
-            //{
-            //    elements.RemoveAt(minElem);
-            //}
+            
             return Tuple.Create(max, minElem);
         }
 

@@ -33,7 +33,8 @@ namespace SolidsVR.Components
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
             pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
             pManager.AddGenericParameter("Material", "M", "Material", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Iterations", "i", "Number of max iterations", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("Run TopOpt", "TO", "Run topology opt", GH_ParamAccess.item);
+            //pManager.AddIntegerParameter("Iterations", "i", "Number of max iterations", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -59,7 +60,7 @@ namespace SolidsVR.Components
             List<string> deftxt = new List<string>();
             Brep origBrep = new Brep();
             Material material = new Material();
-            int maxN = 1;
+            Boolean opt = false;
 
 
             // --- input ---
@@ -70,30 +71,30 @@ namespace SolidsVR.Components
             if (!DA.GetDataList(3, deftxt)) return;
             if (!DA.GetData(4, ref origBrep)) return;
             if (!DA.GetData(5, ref material)) return;
-            if (!DA.GetData(6, ref maxN)) return;
-
-            //double E = 210000;
-            //double nu = 0.3;
-
+            if (!DA.GetData(6, ref opt)) return;
+            
             // --- solve ---
-            Boolean first = true;
+            
             List<List<int>> connectivity = mesh.GetConnectivity();
             List<List<Point3d>> elementPoints = mesh.GetElementPoints();
             int sizeOfMatrix = mesh.GetSizeOfMatrix();
             Point3d[] globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
             DataTree<double> defTree = new DataTree<double>();
+
             //topologitest
+            //Finding removable elements based on if their nodes have BC or load
+            int removableElements = FindRemovableElements(nodes, mesh.GetElements());
             int n = 0;
             double max = 0;
             int removeElem = -1;
             List<int> removeNodeNr = new List<int>();
-            while (n < maxN && max < 355)
+            while (n < removableElements && max < 400)
             {
                 
                 List<Element> elements = mesh.GetElements();
                 
-                if (first != true)
+                if (opt == true && removeElem != -1)
                 {
                     List<Node> nodeElem = elements[removeElem].GetVertices();
                     int removeElemNr = elements[removeElem].GetElementNr();
@@ -108,7 +109,7 @@ namespace SolidsVR.Components
                     elements.RemoveAt(removeElem);
 
                 }
-                first = false;
+                //first = false;
                 //Create K_tot
                 
                 var tupleK_B = CreateGlobalStiffnessMatrix(sizeOfMatrix, material, elements);
@@ -140,28 +141,21 @@ namespace SolidsVR.Components
                 //Adding R-matrix for pre-deformations.
                 var V = Vector<double>.Build;
                 Vector<double> R = (V.DenseOfArray(R_array)).Subtract(R_def);
-
+                
                 //Apply boundary condition and predeformations (Puts 0 in columns of K)
                 K_tot = ApplyBC_Col(K_tot, bcNodes);
                 K_tot = ApplyBC_Col(K_tot, predefNodes);
 
-                //Removing row and column for nodes in removeNodeNr
-                removeNodeNr.Sort();
-                removeNodeNr.Reverse();
-                for (int i = 0; i < removeNodeNr.Count; i++)
+                //Removing row and column in K and R, and nodes with removeNodeNr
+                if (opt == true)
                 {
-                    K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
-                    K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
-                    K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
-                    K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
-                    K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
-                    K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
-                    List<double> R_removed = R.ToList();
-                    R_removed.RemoveAt(3 * removeNodeNr[i]);
-                    R_removed.RemoveAt(3 * removeNodeNr[i]);
-                    R_removed.RemoveAt(3 * removeNodeNr[i]);
-                    R = (V.DenseOfArray(R_removed.ToArray()));
+                    List<Node> nodes_removed = mesh.GetNodeList().ConvertAll(x => x);
+                    var tuple = RemoveNodes(removeNodeNr, K_tot, R, nodes_removed);
+                    K_tot = tuple.Item1;
+                    R = tuple.Item2;
+                    nodes = tuple.Item3;
                 }
+                
                 //Inverting K matrix. Singular when all elements belonging to a node is removed
                 Matrix<double> K_tot_inverse = K_tot.Inverse();
                 
@@ -179,9 +173,12 @@ namespace SolidsVR.Components
                 CalcStress(nodes, material);
                 SetAverageStresses(elements);
 
-                var tuple = mesh.RemoveOneElement();
-                max = tuple.Item1;
-                removeElem = tuple.Item2;
+                if (opt == true)
+                {
+                    var tupleRemoved = mesh.RemoveOneElement();
+                    max = tupleRemoved.Item1;
+                    removeElem = tupleRemoved.Item2;
+                }
                 n++;
             }
             DataTree<double> strainTree = new DataTree<double>();
@@ -593,6 +590,51 @@ namespace SolidsVR.Components
 
             return calcedStress;
         }
+        
+
+        public Tuple<Matrix<double>, Vector<double>, List<Node>> RemoveNodes(List<int> removeNodeNr, Matrix<double> K_tot, Vector<double> R, List<Node> nodes_removed)
+        {
+            removeNodeNr.Sort();
+            removeNodeNr.Reverse();
+            
+            for (int i = 0; i < removeNodeNr.Count; i++)
+            {
+                K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
+                List<double> R_removed = R.ToList();
+                R_removed.RemoveAt(3 * removeNodeNr[i]);
+                R_removed.RemoveAt(3 * removeNodeNr[i]);
+                R_removed.RemoveAt(3 * removeNodeNr[i]);
+                var V = Vector<double>.Build;
+                R = (V.DenseOfArray(R_removed.ToArray()));
+
+                nodes_removed.RemoveAt(removeNodeNr[i]);
+            }
+            return Tuple.Create(K_tot, R, nodes_removed);
+        }
+
+        public int FindRemovableElements(List<Node> nodes, List<Element> elements)
+        {
+            int count = 0;
+            for (int i = 0; i < elements.Count; i++)
+            {
+                List<Node> checkNodes = elements[i].GetVertices();
+                for (int j = 0; j < checkNodes.Count; j++)
+                {
+                    if (!(checkNodes[j].isRemovable()))
+                    {
+                        elements[i].setRemovable(false);
+                    }
+                }
+                if (elements[i].isRemovable()) { count++; }
+            }
+            return count;
+        }
+
         protected override System.Drawing.Bitmap Icon
         {
             get
