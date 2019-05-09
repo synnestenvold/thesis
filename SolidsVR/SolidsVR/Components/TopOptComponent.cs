@@ -94,28 +94,14 @@ namespace SolidsVR.Components
                 
                 List<Element> elements = mesh.GetElements();
                 
+                //Remove selected element from last iterations, and update afftected nodes
                 if (opt == true && removeElem != -1)
                 {
-                    List<Node> nodeElem = elements[removeElem].GetVertices();
-                    int removeElemNr = elements[removeElem].GetElementNr();
-                    for (int i = 0; i<nodeElem.Count; i++)
-                    {
-                        nodeElem[i].GetElementNr().RemoveAll(item => item == removeElemNr);
-                        if (nodeElem[i].GetElementNr().Count == 0)
-                        {
-                            int test_remove = nodeElem[i].GetNodeNr();
-                            removeNodeNr.Add(nodeElem[i].GetNodeNr());
-                        }
-                    }
-                    elements.RemoveAt(removeElem);
-
+                    RemoveElementAndUpdateNodes(elements, removeElem, removeNodeNr);
                 }
-                //first = false;
                 //Create K_tot
-                
                 var tupleK_B = CreateGlobalStiffnessMatrix(sizeOfMatrix, material, elements);
                 Matrix<double> K_tot = tupleK_B.Item1;
-
                 
                 //B_all
                 List<List<Matrix<double>>> B_all = tupleK_B.Item2;
@@ -151,7 +137,7 @@ namespace SolidsVR.Components
                 if (opt == true)
                 {
                     List<Node> nodes_removed = mesh.GetNodeList().ConvertAll(x => x);
-                    var tuple = RemoveNodes(removeNodeNr, K_tot, R, nodes_removed);
+                    var tuple = UpdateK(removeNodeNr, K_tot, R, nodes_removed);
                     K_tot = tuple.Item1;
                     R = tuple.Item2;
                     nodes = tuple.Item3;
@@ -170,10 +156,10 @@ namespace SolidsVR.Components
                 CalcStrain(elements);
 
                 //Calculate global stresses from strain
-
                 CalcStress(nodes, material);
                 SetAverageStresses(elements);
 
+                //Find element to be removed next
                 if (opt == true)
                 {
                     var tupleRemoved = mesh.RemoveOneElement();
@@ -593,7 +579,7 @@ namespace SolidsVR.Components
         }
         
 
-        public Tuple<Matrix<double>, Vector<double>, List<Node>> RemoveNodes(List<int> removeNodeNr, Matrix<double> K_tot, Vector<double> R, List<Node> nodes_removed)
+        public Tuple<Matrix<double>, Vector<double>, List<Node>> UpdateK(List<int> removeNodeNr, Matrix<double> K_tot, Vector<double> R, List<Node> nodes_removed)
         {
             removeNodeNr.Sort();
             removeNodeNr.Reverse();
@@ -635,6 +621,23 @@ namespace SolidsVR.Components
             }
             return count;
         }
+
+        public void RemoveElementAndUpdateNodes(List<Element> elements, int removeElem, List<int> removeNodeNr)
+        {
+            List<Node> nodeElem = elements[removeElem].GetVertices();
+            int removeElemNr = elements[removeElem].GetElementNr();
+            for (int i = 0; i < nodeElem.Count; i++)
+            {
+                nodeElem[i].GetElementNr().RemoveAll(item => item == removeElemNr);
+                if (nodeElem[i].GetElementNr().Count == 0)
+                {
+                    removeNodeNr.Add(nodeElem[i].GetNodeNr());
+                }
+            }
+            elements.RemoveAt(removeElem);
+
+        }
+        
 
         protected override System.Drawing.Bitmap Icon
         {
