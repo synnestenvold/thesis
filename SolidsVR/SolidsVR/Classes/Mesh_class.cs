@@ -23,6 +23,7 @@ namespace SolidsVR
         Brep origBrep = new Brep();
         List<Brep> surfaces = new List<Brep>();
         List<Element> elements = new List<Element>();
+        Boolean opt = false;
 
         Point3d[] globalPoints = null;
         int sizeOfMatrix = 0;
@@ -158,20 +159,17 @@ namespace SolidsVR
             return elements;
         }
 
-        public void RemoveElements()
+        public void SetOpt(Boolean _opt)
         {
-            elements.RemoveAt(40);
-            elements.RemoveAt(40);
-            elements.RemoveAt(40);
-            elements.RemoveAt(40);
-            elements.RemoveAt(40);
-            elements.RemoveAt(40);
-            elements.RemoveAt(40);
-            elements.RemoveAt(40);
-            elements.RemoveAt(40);
-            elements.RemoveAt(40);
+            opt = _opt;
         }
 
+        public Boolean GetOpt()
+        {
+            return opt;
+        }
+
+     
         public Tuple<double, int> RemoveOneElement()
         {
             double max = double.NegativeInfinity;
@@ -199,7 +197,6 @@ namespace SolidsVR
         public void OrderSurfaces(List<Point3d> orderedPoints)
         {
             Brep[] orderedSurfaces = new Brep[6];
-            //List<Brep> surfaces = new List<Brep>();
             List<int> surfaceNumber = new List<int>();
 
             foreach (BrepFace surf in origBrep.Faces)

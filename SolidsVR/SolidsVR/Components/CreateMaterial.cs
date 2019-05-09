@@ -22,6 +22,7 @@ namespace SolidsVR
         {
             pManager.AddNumberParameter("E-modulus", "E", "Young's modulus", GH_ParamAccess.item);
             pManager.AddNumberParameter("P-ratio", "nu", "Poisson's ratio", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Yield stress", "Y", "Yield stress", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -35,13 +36,15 @@ namespace SolidsVR
             // --- variables ---
             double E = 210000;
             double nu = 0.3;
+            double Y = 355;
 
             // --- inputs ---
             if (!DA.GetData(0, ref E)) return;
             if (!DA.GetData(1, ref nu)) return;
+            if (!DA.GetData(2, ref Y)) return;
 
             // --- solve ---
-            Material material = new Material(E, nu);
+            Material material = new Material(E, nu, Y);
 
             // --- output ---
             DA.SetData(0, material);

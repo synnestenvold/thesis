@@ -10,11 +10,13 @@ namespace SolidsVR
     {
         private double E;
         private double nu;
+        private double Y;
 
-        public Material(double _E, double _nu)
+        public Material(double _E, double _nu, double _Y)
         {
             E = _E;
             nu = _nu;
+            Y = _Y;
         }
         public Material() { }
 
@@ -36,6 +38,16 @@ namespace SolidsVR
         public void SetNu(double _nu)
         {
             nu = _nu;
+        }
+
+        public void SetY(double _Y)
+        {
+            Y = _Y;
+        }
+
+        public double GetY()
+        {
+            return Y;
         }
     }
 

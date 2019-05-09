@@ -33,8 +33,7 @@ namespace SolidsVR.Components
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
             pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
             pManager.AddGenericParameter("Material", "M", "Material", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("Run TopOpt", "TO", "Run topology opt", GH_ParamAccess.item);
-            //pManager.AddIntegerParameter("Iterations", "i", "Number of max iterations", GH_ParamAccess.item);
+            //pManager.AddBooleanParameter("Run TopOpt", "TO", "Run topology opt", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -60,7 +59,7 @@ namespace SolidsVR.Components
             List<string> deftxt = new List<string>();
             Brep origBrep = new Brep();
             Material material = new Material();
-            Boolean opt = false;
+            //Boolean opt = false;
 
 
             // --- input ---
@@ -71,7 +70,7 @@ namespace SolidsVR.Components
             if (!DA.GetDataList(3, deftxt)) return;
             if (!DA.GetData(4, ref origBrep)) return;
             if (!DA.GetData(5, ref material)) return;
-            if (!DA.GetData(6, ref opt)) return;
+            //if (!DA.GetData(6, ref opt)) return;
             
             // --- solve ---
             
@@ -80,6 +79,7 @@ namespace SolidsVR.Components
             int sizeOfMatrix = mesh.GetSizeOfMatrix();
             Point3d[] globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
+            Boolean opt = mesh.GetOpt();
             DataTree<double> defTree = new DataTree<double>();
 
             //topologitest
@@ -89,7 +89,7 @@ namespace SolidsVR.Components
             double max = 0;
             int removeElem = -1;
             List<int> removeNodeNr = new List<int>();
-            while (n < 4 && max < 355)
+            while (n < 4 && max < material.GetY())
             {
                 
                 List<Element> elements = mesh.GetElements();
