@@ -354,13 +354,14 @@ namespace SolidsVR
                 Brep b = surface.ToBrep();
                 Point3d[] vertices = b.DuplicateVertices();
 
-                var tuple = CreatePoints(surface, u, v, w, i, cornerPoints, pointList);
+                var tuple = CreatePoints(surface, u, v, w, i, cornerPoints, pointList, points, nodes);
 
-                points.AddRange(tuple.Item1);
-                nodes.AddRange(tuple.Item2);
+                points = tuple.Item1;
+                nodes = tuple.Item2;
+                
             }
 
-            
+
 
 
             // Putting together the breps:
@@ -471,12 +472,12 @@ namespace SolidsVR
             //return points;
         }
 
-        public Tuple<List<Point3d>, List<Node>> CreatePoints(Surface surface, int u, int v, int w, int i, Point3d[] cornerNodes, List<Point3d> pointList)
+        public Tuple<List<Point3d>, List<Node>> CreatePoints(Surface surface, int u, int v, int w, int i, Point3d[] cornerNodes, List<Point3d> pointList, List<Point3d> points, List<Node> nodes)
         {
             Interval domainU = surface.Domain(0);
             Interval domainV = surface.Domain(1);
 
-            List<Node> nodes = new List<Node>();
+            //List<Node> nodes = new List<Node>();
 
             double tu0 = domainU.ParameterAt(0);
             double tu1 = domainU.ParameterAt(1);
@@ -539,7 +540,7 @@ namespace SolidsVR
             double p32 = point3.ParameterAt(1);
 
 
-            List<Point3d> points = new List<Point3d>();
+            //List<Point3d> points = new List<Point3d>();
             List<Vector3d> vectors = new List<Vector3d>();
 
             double tu = 0;
