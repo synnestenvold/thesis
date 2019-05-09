@@ -89,7 +89,7 @@ namespace SolidsVR.Components
             double max = 0;
             int removeElem = -1;
             List<int> removeNodeNr = new List<int>();
-            while (n < removableElements && max < 400)
+            while (n < 4 && max < 355)
             {
                 
                 List<Element> elements = mesh.GetElements();
@@ -103,6 +103,7 @@ namespace SolidsVR.Components
                         nodeElem[i].GetElementNr().RemoveAll(item => item == removeElemNr);
                         if (nodeElem[i].GetElementNr().Count == 0)
                         {
+                            int test_remove = nodeElem[i].GetNodeNr();
                             removeNodeNr.Add(nodeElem[i].GetNodeNr());
                         }
                     }
