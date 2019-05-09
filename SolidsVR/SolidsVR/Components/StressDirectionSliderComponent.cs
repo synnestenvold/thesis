@@ -55,7 +55,7 @@ namespace SolidsVR
 
             double refLength = Math.Pow(brep.GetVolume(), (double)1 / 3);
             double refSize = (double)(refLength / 7);
-            double adjustment = 4 / refLength; //the length should give 6
+            double adjustment = 4 / refLength; //the length should give 4
 
             //---solve---
 
@@ -94,7 +94,7 @@ namespace SolidsVR
             else direction = "Mises";
             text.Add("Stress direction: "+direction);
             text.AddRange(new List<string>() { "S,xx", "S,yy", "S,zz", "S,xy", "S,xz", "S,yz", "Mises" });
-            double refSize = (double)(refLength / 10);
+            double refSize = (double)(refLength / 7);
             List<double> size = new List<double>() { refSize, (double)(refSize / 2) };
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
@@ -103,7 +103,7 @@ namespace SolidsVR
             Point3d p1 = Point3d.Add(end, new Point3d(0, -1, 2 * refSize));
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1 + 2 * refSize)));
             textPlane.Add(new Plane(p0, p1, p2));
-            double range = (double)(refLength / 6);
+            double range = (double)(refLength / 4);
             for (int i = 0; i < 7; i++)
             {
                 Point3d p3 = Point3d.Add(start, new Point3d(0, range * i, -2 * refSize));
