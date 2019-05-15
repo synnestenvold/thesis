@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Drawing;
 using Grasshopper.Kernel;
+using Rhino.Display;
 using Rhino.Geometry;
 
 namespace SolidsVR.Components
 {
     public class VolumePercentage : GH_Component
     {
-        /// <summary>
-        /// Initializes a new instance of the VolumePercentage class.
-        /// </summary>
+        int max = 30;
+        int zero = 10;
         public VolumePercentage()
           : base("VolumePercentage", "Nickname",
               "Description",
@@ -29,8 +29,8 @@ namespace SolidsVR.Components
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Volume percentage", "V", "Volume (0%-20%)", GH_ParamAccess.item);
-            pManager.AddTextParameter("Text", "Text", "Direction text", GH_ParamAccess.list);
+            pManager.AddIntegerParameter("Volume percentage", "V", "Volume (0%-30%)", GH_ParamAccess.item);
+            pManager.AddTextParameter("Text", "Text", "Volume text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
             pManager.AddColourParameter("Color", "Color", "Color for text and geometry", GH_ParamAccess.item);
@@ -53,14 +53,15 @@ namespace SolidsVR.Components
 
             double refLength = Math.Pow(brep.GetVolume(), (double)1 / 3);
             double refSize = (double)(refLength / 7);
-            double adjustment = 4 / refLength; //the length should give 4
+            double adjustment = 20 / refLength; //the length should give 20%
 
             //---solve---
 
-            int dir = Convert.ToInt32(curve.GetLength() * adjustment);
-            dir = dir > max ? max : dir;
+            int volume = Convert.ToInt32(curve.GetLength() * adjustment)-10;
+            volume = volume <= 0 ? 0 : volume; //from -10-0% the value is 0
+            volume = volume > max ? max : volume; // from 10-40% the value is 0-30%
 
-            var tuple = CreateText(curve, dir, refLength);
+            var tuple = CreateText(curve, volume, refLength);
             List<string> text = tuple.Item1;
             List<double> size = tuple.Item2;
             List<Plane> textPlane = tuple.Item3;
@@ -70,7 +71,7 @@ namespace SolidsVR.Components
 
             //---output---
 
-            DA.SetData(0, dir);
+            DA.SetData(0, volume);
             DA.SetDataList(1, text);
             DA.SetDataList(2, size);
             DA.SetDataList(3, textPlane);
@@ -79,19 +80,14 @@ namespace SolidsVR.Components
 
         }
 
-        public Tuple<List<string>, List<double>, List<Plane>, Color> CreateText(Curve curve, double dir, double refLength)
+        public Tuple<List<string>, List<double>, List<Plane>, Color> CreateText(Curve curve, double volume, double refLength)
         {
             List<string> text = new List<string>();
-            string direction = "";
-            if (dir < 1) direction = "S,xx";
-            else if (dir < 2) direction = "S,yy";
-            else if (dir < 3) direction = "S,zz";
-            else if (dir < 4) direction = "S,xy";
-            else if (dir < 5) direction = "S,xz";
-            else if (dir < 6) direction = "S,yz";
-            else direction = "Mises";
-            text.Add("Stress direction: " + direction);
-            text.AddRange(new List<string>() { "S,xx", "S,yy", "S,zz", "S,xy", "S,xz", "S,yz", "Mises" });
+            string volumeText = "";
+            if (volume == 0) volumeText = "No reduction";
+            else volumeText = volume.ToString()+" %";
+            text.Add("Volume reduction: " + volumeText);
+            text.AddRange(new List<string>() { "No reduction", "0%", "10%", "20%", "30%"});
             double refSize = (double)(refLength / 7);
             List<double> size = new List<double>() { refSize, (double)(refSize / 2) };
             List<Plane> textPlane = new List<Plane>();
@@ -101,8 +97,8 @@ namespace SolidsVR.Components
             Point3d p1 = Point3d.Add(end, new Point3d(0, -1, 2 * refSize));
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1 + 2 * refSize)));
             textPlane.Add(new Plane(p0, p1, p2));
-            double range = (double)(refLength / 4);
-            for (int i = 0; i < 7; i++)
+            double range = (double)(refLength / 20);
+            for (int i = 0; i < 5; i++)
             {
                 Point3d p3 = Point3d.Add(start, new Point3d(0, range * i, -2 * refSize));
                 Point3d p4 = Point3d.Add(start, new Point3d(0, -1 + range * i, -2 * refSize));
