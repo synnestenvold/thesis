@@ -33,7 +33,6 @@ namespace SolidsVR.Components
             pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
             pManager.AddBrepParameter("Brep", "B", "Original brep for preview", GH_ParamAccess.item);
             pManager.AddGenericParameter("Material", "M", "Material", GH_ParamAccess.item);
-            //pManager.AddNumberParameter("Volume percentage", "V", "Volume percentage to be removed", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -70,7 +69,6 @@ namespace SolidsVR.Components
             if (!DA.GetDataList(3, deftxt)) return;
             if (!DA.GetData(4, ref origBrep)) return;
             if (!DA.GetData(5, ref material)) return;
-            //if (!DA.GetData(6, ref removableVolume)) return;
             
             // --- solve ---
             
@@ -79,30 +77,27 @@ namespace SolidsVR.Components
             int sizeOfMatrix = mesh.GetSizeOfMatrix();
             Point3d[] globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
-            //Boolean opt = mesh.GetOpt();
             double removableVolume = mesh.GetOptVolume();
+            int removableElements = FindRemovableElements(nodes, mesh.GetElements());
+            int totalElements = mesh.GetElements().Count;
+            double minElements = totalElements - Math.Floor(totalElements * removableVolume / 100);
+            int numberElements = mesh.GetElements().Count;
             if (removableVolume != 0)
             {
                 opt = true;
             }
             DataTree<double> defTree = new DataTree<double>();
-
-            //Finding removable elements based on if their nodes have BC or load
-            int totalElements = mesh.GetElements().Count;
-            double minElements = totalElements-Math.Floor(totalElements * removableVolume/100);
-            int numberElements = mesh.GetElements().Count;
-            int removableElements = FindRemovableElements(nodes, mesh.GetElements());
             Boolean first = true;
             double max = 0;
             int removeElem = -1;
             List<int> removeNodeNr = new List<int>();
             while (numberElements > minElements && max < material.GetY() || first) //Requirements for removal
+                //problem: when only > and || it will loop through the solution when 
             {
                 List<Element> elements = mesh.GetElements();
-                //if (opt == false)
-                //{
-                    first = false;
-                //}
+                //if (opt == false) 
+                first = false;
+                
                 //Remove selected element from last iterations, and update afftected nodes
                 if (removeElem != -1 && opt == true)
                 {
@@ -176,7 +171,6 @@ namespace SolidsVR.Components
                     removeElem = tupleRemoved.Item2;
                     numberElements = mesh.GetElements().Count;
                 }
-                //n++;
             }
             DataTree<double> strainTree = new DataTree<double>();
             DataTree<double> stressTree = new DataTree<double>();

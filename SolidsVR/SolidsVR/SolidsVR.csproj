@@ -90,6 +90,7 @@
     <Compile Include="Components\SetUniLoadComponent.cs" />
     <Compile Include="Classes\Mesh_class.cs" />
     <Compile Include="Components\TopOptComponent.cs" />
+    <Compile Include="Components\VolumePercentageSlider.cs" />
     <Compile Include="DeconstructElement.cs" />
     <Compile Include="DeconstructMesh.cs" />
     <Compile Include="DeconstructNode.cs" />

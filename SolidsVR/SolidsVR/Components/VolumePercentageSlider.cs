@@ -7,14 +7,14 @@ using Rhino.Geometry;
 
 namespace SolidsVR.Components
 {
-    public class VolumePercentage : GH_Component
+    public class VolumePercentageSlider : GH_Component
     {
         int max = 30;
         int zero = 10;
-        public VolumePercentage()
-          : base("VolumePercentage", "Nickname",
-              "Description",
-              "Category", "Subcategory")
+        public VolumePercentageSlider()
+          : base("VolumePercentageSlider", "VolumeSlider",
+              "Volume reduction in percentage",
+              "Category3", "SliderVR")
         {
         }
 
