@@ -180,7 +180,7 @@ namespace SolidsVR
             string nodeCoord = "Coord: (" + Math.Round(node.GetCoord().X,2) + ","+Math.Round(node.GetCoord().Y, 2) +"," + Math.Round(node.GetCoord().Z, 2) +")";
             string def = "Def: " + Math.Round(node.GetDeformation()[0], 5).ToString() + "," + Math.Round(node.GetDeformation()[1], 5) + "," + Math.Round(node.GetDeformation()[2], 5);
 
-            string stress = "von Mises: " + Math.Round(node.GetStress()[6],5);
+            string stress = "von Mises: " + Math.Round(node.GetGlobalStress()[6],5);
 
             //string text = header + "\n"+ underScore+ "\n" + nodeCoord + "\n" + def + "\n" + stress;
 

@@ -194,6 +194,7 @@ namespace SolidsVR
             return Tuple.Create(max, minElem);
         }
 
+       
         public void OrderSurfaces(List<Point3d> orderedPoints)
         {
             Brep[] orderedSurfaces = new Brep[6];

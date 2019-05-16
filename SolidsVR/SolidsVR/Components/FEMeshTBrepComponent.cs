@@ -79,7 +79,7 @@ namespace SolidsVR
             Brep_class brp = mesh.GetBrep();
             Brep origBrep = brp.GetBrep();
 
-            //mesh.RemoveElements();
+           // mesh.RemoveElement();
                 
             List<Element> elements = mesh.GetElements();
             //Create K_tot
@@ -112,8 +112,6 @@ namespace SolidsVR
             var V = Vector<double>.Build;
             Vector<double> R = (V.DenseOfArray(R_array)).Subtract(R_def);
 
-            
-
             //Apply boundary condition and predeformations (Puts 0 in columns of K)
             K_tot = ApplyBC_Col(K_tot, bcNodes);
             K_tot = ApplyBC_Col(K_tot, predefNodes);
@@ -145,11 +143,12 @@ namespace SolidsVR
             DataTree<double> defTree = DefToTree(u, nodes);
             
             //Calculatin strains for each node in elements
-            CalcStrain(elements);
+
+            CalcStrainAndStress(elements, material);
 
             //Calculate global stresses from strain
 
-            CalcStress(nodes, material);
+            CalcStrainAndStressGlobal(nodes, material);
             SetAverageStresses(elements);
 
              
@@ -159,7 +158,7 @@ namespace SolidsVR
             for (int i = 0; i < nodes.Count; i++)
             {
                 strainTree.AddRange(nodes[i].GetGlobalStrain(), new GH_Path(new int[] { 0, i }));
-                stressTree.AddRange(nodes[i].GetStress(), new GH_Path(new int[] { 0, i }));
+                stressTree.AddRange(nodes[i].GetGlobalStress(), new GH_Path(new int[] { 0, i }));
             }
 
             //FOR PREVIEW OF HEADLINE
@@ -427,8 +426,14 @@ namespace SolidsVR
             return defTree;
         }
 
-        public void CalcStrain(List<Element> elements)
+        public void CalcStrainAndStress(List<Element> elements, Material material)
         {
+
+            double E = material.GetE();
+            double nu = material.GetNu();
+            Cmatrix C = new Cmatrix(E, nu);
+            Matrix<double> C_matrix = C.CreateMatrix();
+
             List<Matrix<double>> B_e = new List<Matrix<double>>();
             List<int> c_e = new List<int>();
             List<Node> nodes_e = new List<Node>();
@@ -440,14 +445,14 @@ namespace SolidsVR
                 B_e = elements[i].GetBMatrixes();
                 nodes_e = elements[i].GetVertices();
 
-                sC.StrainCalculations(B_e, nodes_e);
+                sC.StrainCalculations(B_e, nodes_e, C_matrix);
             }
 
         }
 
       
 
-        public void CalcStress(List<Node> nodes, Material material)
+        public void CalcStrainAndStressGlobal(List<Node> nodes, Material material)
         {
             double E = material.GetE();
             double nu = material.GetNu();
@@ -456,8 +461,28 @@ namespace SolidsVR
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                Vector<double> globalStress = C_matrix.Multiply(nodes[i].GetGlobalStrain());
-                
+
+                List<Vector<double>> stress= nodes[i].GetStress();
+
+                double amount = stress.Count;
+                Vector<double> globalStress = Vector<double>.Build.Dense(6);
+                for (int k = 0; k < stress.Count; k++)
+                {
+                    globalStress[0] += stress[k][0];
+                    globalStress[1] += stress[k][1];
+                    globalStress[2] += stress[k][2];
+                    globalStress[3] += stress[k][3];
+                    globalStress[4] += stress[k][4];
+                    globalStress[5] += stress[k][5];
+                }
+
+                for (int j = 0; j < globalStress.Count; j++)
+                {
+                    globalStress[j] = (double)globalStress[j] / amount;
+                }
+
+                nodes[i].SetGlobalStrain(C_matrix.Inverse().Multiply(globalStress));
+
                 //Adding Mises
                 var tempStressVec = Vector<double>.Build.Dense(globalStress.Count + 1);
                 globalStress.Storage.CopySubVectorTo(tempStressVec.Storage, 0, 0, 6);
@@ -470,7 +495,7 @@ namespace SolidsVR
                 double mises = Math.Sqrt(0.5*(Math.Pow(Sxx-Syy, 2)+Math.Pow(Syy-Szz,2)+Math.Pow(Szz-Sxx, 2))+3*(Math.Pow(Sxy,2)+ Math.Pow(Sxz, 2)+ Math.Pow(Syz, 2)));
                 tempStressVec.At(6, mises);
 
-                nodes[i].SetStress(tempStressVec);
+                nodes[i].SetGlobalStress(tempStressVec);
 
             }
             

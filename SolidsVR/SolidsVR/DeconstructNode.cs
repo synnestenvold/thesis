@@ -87,7 +87,7 @@ namespace SolidsVR
             }
 
             Vector<double> globalStrain = node.GetGlobalStrain();
-            Vector<double> globalStress = node.GetStress();
+            Vector<double> globalStress = node.GetGlobalStress();
 
             DA.SetData(0, point);
             DA.SetDataList(1, elementNr);

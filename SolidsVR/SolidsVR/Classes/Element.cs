@@ -70,7 +70,7 @@ namespace SolidsVR
                 double average = 0;
                 for (int j = 0; j < vertices.Count; j++)
                 {
-                    average += vertices[j].GetStress()[dir];
+                    average += vertices[j].GetGlobalStress()[dir];
                 }
                 averageStress.Add(Math.Round(average / vertices.Count, 4));
             }

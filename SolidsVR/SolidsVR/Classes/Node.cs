@@ -22,8 +22,9 @@ namespace SolidsVR
         Boolean isMiddle = false;
         Boolean isEdge = false;
         List<Vector<double>> strain = new List<Vector<double>>();
-        Vector<double> stress;
-        Dictionary<int, int> elementNode = new Dictionary<int, int>();
+        List<Vector<double>> stress = new List<Vector<double>>();
+        Vector<double> globalStrain = Vector<double>.Build.Dense(6);
+        Vector<double> globalStress = Vector<double>.Build.Dense(6);
         Boolean removable = true;
 
         List<double> deformation = new List<double>();
@@ -98,12 +99,23 @@ namespace SolidsVR
 
         public void SetStress(Vector<double> _stress)
         {
-            stress = _stress;
+            stress.Add(_stress);
         }
 
-        public Vector<double> GetStress()
+        public List<Vector<double>> GetStress()
         {
             return stress;
+        }
+
+
+        public void SetGlobalStress(Vector<double> _globalStress)
+        {
+            globalStress = _globalStress;
+        }
+
+        public Vector<double> GetGlobalStress()
+        {
+            return globalStress;
         }
 
         public void AddElementNr(int nr)
@@ -131,25 +143,13 @@ namespace SolidsVR
             return deformation;
         }
 
+        public void SetGlobalStrain(Vector<double> _globalStrain)
+        {
+            globalStrain = _globalStrain;
+        }
+
         public Vector<double> GetGlobalStrain()
         {
-            double amount = strain.Count;
-            Vector<double> globalStrain =  Vector<double>.Build.Dense(6);
-            for (int i = 0; i < strain.Count; i++)
-            {
-                globalStrain[0] += strain[i][0];
-                globalStrain[1] += strain[i][1];
-                globalStrain[2] += strain[i][2];
-                globalStrain[3] += strain[i][3];
-                globalStrain[4] += strain[i][4];
-                globalStrain[5] += strain[i][5];
-            }
-
-            for(int j = 0; j < globalStrain.Count; j++)
-            {
-                globalStrain[j] = (double)globalStrain[j] / amount;
-            }
-
             return globalStrain;
         }
         public Boolean isRemovable()
