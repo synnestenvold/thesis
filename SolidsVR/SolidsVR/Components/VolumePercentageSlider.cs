@@ -97,7 +97,7 @@ namespace SolidsVR.Components
             Point3d p1 = Point3d.Add(end, new Point3d(0, -1, 2 * refSize));
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1 + 2 * refSize)));
             textPlane.Add(new Plane(p0, p1, p2));
-            double range = (double)(refLength / 20);
+            double range = (double)(refLength / 2);
             for (int i = 0; i < 5; i++)
             {
                 Point3d p3 = Point3d.Add(start, new Point3d(0, range * i, -2 * refSize));
