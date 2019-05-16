@@ -32,7 +32,7 @@ namespace SolidsVR
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);
-            pManager.AddBooleanParameter("Run TopOpt", "TO", "Run topology opt", GH_ParamAccess.item, false);
+            pManager.AddNumberParameter("Volume to remove", "V", "Volume percentage to remove", GH_ParamAccess.item, 0);
 
         }
 
@@ -63,7 +63,7 @@ namespace SolidsVR
                 int u = 1;
                 int v = 1;
                 int w = 1;
-                Boolean opt = false;
+                double removeVolume = 0;
                 //List<Curve> c = new List<Curve>();
                 // --- input ---
 
@@ -72,7 +72,7 @@ namespace SolidsVR
                 if (!DA.GetData(2, ref u)) return;
                 if (!DA.GetData(3, ref v)) return;
                 if (!DA.GetData(4, ref w)) return;
-                if (!DA.GetData(5, ref opt)) return;
+                if (!DA.GetData(5, ref removeVolume)) return;
 
                 Curve[] edges = brp.DuplicateEdgeCurves();
 
@@ -107,8 +107,8 @@ namespace SolidsVR
                 mesh.SetOrigBrep(brp);
                 mesh.SetBrep(new Brep_class(brp));
                 mesh.OrderSurfaces(corners);
-                mesh.SetOpt(opt);
-
+                mesh.SetOptVolume(removeVolume);
+                
 
                 //---output---
 

@@ -23,7 +23,7 @@ namespace SolidsVR
         Brep origBrep = new Brep();
         List<Brep> surfaces = new List<Brep>();
         List<Element> elements = new List<Element>();
-        Boolean opt = false;
+        double removeVolume = 0;
 
         Point3d[] globalPoints = null;
         int sizeOfMatrix = 0;
@@ -159,14 +159,14 @@ namespace SolidsVR
             return elements;
         }
 
-        public void SetOpt(Boolean _opt)
+        public void SetOptVolume(double _removeVolume)
         {
-            opt = _opt;
+            removeVolume = _removeVolume;
         }
 
-        public Boolean GetOpt()
+        public double GetOptVolume()
         {
-            return opt;
+            return removeVolume;
         }
 
      
@@ -177,21 +177,21 @@ namespace SolidsVR
             int minElem = -1;
             for (int i=0; i<elements.Count; i++)
             {
-                if (elements[i].isRemovable()) { 
-                    double mises = elements[i].GetAverageStressDir(6);
-                    if (mises < min)
+                double mises = elements[i].GetAverageStressDir(6);
+                if (mises < min)
+                { 
+                    if (elements[i].isRemovable())
                     {
                         min = mises;
                         minElem = i;
                     }
-                    if (mises >= max)
-                    {
-                        max = mises;
-                    }
+                }
+                if (mises >= max)
+                {
+                    max = mises;
                 }
             }
-            
-            return Tuple.Create(max, minElem);
+        return Tuple.Create(max, minElem);
         }
 
        
