@@ -10,7 +10,7 @@ namespace SolidsVR
 {
     public class SurfaceSliderComponent : GH_Component
     {
-        int max = 5;
+        int max = 6;
        
         public SurfaceSliderComponent()
           : base("SurfaceSlider", "SurfSlider",
@@ -56,7 +56,7 @@ namespace SolidsVR
 
             //---solve---
 
-            int surface = Convert.ToInt32(curve.GetLength() * adjustment);
+            int surface = Convert.ToInt32(curve.GetLength() * adjustment)+1;
             surface = surface > max ? max : surface;
 
             var tuple = CreateText(curve, refLength, surface);
