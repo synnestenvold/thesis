@@ -79,8 +79,8 @@ namespace SolidsVR
             Brep_class brp = mesh.GetBrep();
             Brep origBrep = brp.GetBrep();
 
-           // mesh.RemoveElement();
-                
+            // mesh.RemoveElement();
+
             List<Element> elements = mesh.GetElements();
             //Create K_tot
             var tupleK_B = CreateGlobalStiffnessMatrix(sizeOfMatrix, material, elements);
@@ -531,7 +531,7 @@ namespace SolidsVR
             Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 
             Plane headPlane = new Plane(p0, p1, p2);
-            headPlane.Translate(new Vector3d(0, -headSize, refLength));
+            headPlane.Translate(new Vector3d(0, -headSize, 3 * refLength));
 
             Color headColor = Color.Pink;
 

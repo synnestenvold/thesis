@@ -92,6 +92,12 @@ namespace SolidsVR
             strain.Add(_strain);
         }
 
+        public void CleanStressAndStrain()
+        {
+            strain.Clear();
+            stress.Clear();
+        }
+
         public List<Vector<double>> GetStrain()
         {
             return strain;
