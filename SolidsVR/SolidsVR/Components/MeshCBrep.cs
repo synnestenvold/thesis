@@ -117,7 +117,7 @@ namespace SolidsVR
         {
             for(int i = 0; i < vertices.Length; i++)
             {
-                vertices[i] = new Point3d(Math.Round(vertices[i].X, 3), Math.Round(vertices[i].Y, 3), Math.Round(vertices[i].Z, 3));
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 1), Math.Round(vertices[i].Y, 1), Math.Round(vertices[i].Z, 1));
             }
 
             return vertices;
@@ -127,7 +127,7 @@ namespace SolidsVR
         {
             for (int i = 0; i < vertices.Count; i++)
             {
-                vertices[i] = new Point3d(Math.Round(vertices[i].X, 3), Math.Round(vertices[i].Y, 3), Math.Round(vertices[i].Z, 3));
+                vertices[i] = new Point3d(Math.Round(vertices[i].X, 1), Math.Round(vertices[i].Y, 1), Math.Round(vertices[i].Z, 1));
             }
 
             return vertices;
@@ -137,8 +137,8 @@ namespace SolidsVR
         {
             for (int i = 0; i < sortedEdges.Length; i++)
             {
-                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 3), Math.Round(sortedEdges[i].PointAtStart.Y, 3), Math.Round(sortedEdges[i].PointAtStart.Z, 3)));
-                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 3), Math.Round(sortedEdges[i].PointAtEnd.Y, 3), Math.Round(sortedEdges[i].PointAtEnd.Z, 3)));
+                sortedEdges[i].SetStartPoint(new Point3d(Math.Round(sortedEdges[i].PointAtStart.X, 1), Math.Round(sortedEdges[i].PointAtStart.Y, 1), Math.Round(sortedEdges[i].PointAtStart.Z, 1)));
+                sortedEdges[i].SetEndPoint(new Point3d(Math.Round(sortedEdges[i].PointAtEnd.X, 1), Math.Round(sortedEdges[i].PointAtEnd.Y, 1), Math.Round(sortedEdges[i].PointAtEnd.Z, 1)));
             }
             return sortedEdges;
         }
@@ -346,6 +346,8 @@ namespace SolidsVR
 
         public void SetNodePosition(Node node, Point3d p, Point3d[] cornerPoints, int i, int j, int k, int u, int v, int w)
         {
+
+            p = new Point3d(Math.Round(p.X, 1), Math.Round(p.Y, 1), Math.Round(p.Z, 1));
             if (cornerPoints.Contains(p)) node.SetIsCorner();
             else if (i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k ==0 ||  i == w && j == 0 || i == 0 && k == u ||  j == v && k == 0 || i == 0 && j == v || i == w && k == 0 || j == 0 && k == u || i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0 || i == w && j == v || i == w && k == u || j == v && k == u) node.SetIsEdge();
             else node.SetIsMiddle();
@@ -421,7 +423,7 @@ namespace SolidsVR
         public Curve[] SortEdges(List<Point3d> corners, Curve[] edges)
         {
             // TODO
-            edges[0].SetStartPoint(new Point3d(Math.Round(edges[0].PointAtStart.X, 3), Math.Round(edges[0].PointAtStart.Y, 3), Math.Round(edges[0].PointAtStart.Z, 3))); ;
+            edges[0].SetStartPoint(new Point3d(Math.Round(edges[0].PointAtStart.X, 1), Math.Round(edges[0].PointAtStart.Y, 1), Math.Round(edges[0].PointAtStart.Z, 1))); ;
             Curve[] sortedEdges = new Curve[12];
             for (int i = 0; i < edges.Length; i++)
             {

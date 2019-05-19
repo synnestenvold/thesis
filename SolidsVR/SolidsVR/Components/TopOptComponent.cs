@@ -90,10 +90,61 @@ namespace SolidsVR.Components
             double max = 0;
             int removeElem = -1;
             List<int> removeNodeNr = new List<int>();
-            while (numberElements > minElements && max < material.GetY() || first) //Requirements for removal
-                //problem: when only > and || it will loop through the solution when 
+
+            List<int> rn1 = new List<int>();
+
+            for (int i = 0; i < 10; i++)
             {
+                rn1.Add(40);
+            }
+
+            List<int> rn2 = new List<int>();
+
+            for (int i = 280; i < 320; i++)
+            {
+                rn2.Add(280);
+            }
+
+            for (int i = 360; i < 400; i++)
+            {
+                rn2.Add(360);
+            }
+
+            List<int> rn3 = new List<int>();
+
+            for (int i = 900; i < 990; i++)
+            {
+                rn3.Add(900);
+            }
+
+            for (int i = 1080; i < 1170; i++)
+            {
+                rn3.Add(1080);
+            }
+
+            for (int i = 1260; i < 1350; i++)
+            {
+                rn3.Add(1260);
+            }
+
+            int n = 0;
+
+
+            while (n <270 && max < material.GetY() * 100)
+            {
+
+                //Remove results from last iteration
+                for(int i = 0; i < nodes.Count; i++)
+                {
+                    nodes[i].CleanStressAndStrain();
+                }
+
                 List<Element> elements = mesh.GetElements();
+                removeElem = rn3[n];
+
+                //mesh.RemoveElements();
+                //removeNodeNr = mesh.RemoveNodes();
+              
                 //if (opt == false) 
                 first = false;
                 
@@ -166,11 +217,12 @@ namespace SolidsVR.Components
                 //Find element to be removed next
                 if (opt == true)
                 {
-                    var tupleRemoved = mesh.RemoveOneElement();
-                    max = tupleRemoved.Item1;
-                    removeElem = tupleRemoved.Item2;
-                    numberElements = mesh.GetElements().Count;
+                    //var tupleRemoved = mesh.RemoveOneElement();
+                    //max = tupleRemoved.Item1;
+                    //removeElem = tupleRemoved.Item2;
+                    //numberElements = mesh.GetElements().Count;
                 }
+                n++;
             }
             DataTree<double> strainTree = new DataTree<double>();
             DataTree<double> stressTree = new DataTree<double>();
@@ -551,7 +603,7 @@ namespace SolidsVR.Components
             Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 
             Plane headPlane = new Plane(p0, p1, p2);
-            headPlane.Translate(new Vector3d(0, 0, refLength));
+            headPlane.Translate(new Vector3d(0, -headSize, 3*refLength));
 
             Color headColor = Color.Pink;
 

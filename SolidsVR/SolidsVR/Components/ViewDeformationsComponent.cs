@@ -175,7 +175,7 @@ namespace SolidsVR
 
             Plane headPlane = new Plane(p0, p1, p2);
 
-            headPlane.Translate(new Vector3d(0, -headSize, refLength));
+            headPlane.Translate(new Vector3d(0, -headSize, 3*refLength));
             headPlane.Rotate(angle, new Vector3d(0, 0, 1), center);
             
 
@@ -300,7 +300,9 @@ namespace SolidsVR
 
             Point3d newPoint = nodeMax.GetCoord() + def * scale;
 
-            string text = defMax.ToString();
+            defMax = Math.Round(defMax, 3);
+
+            string text = defMax.ToString() + " mm";
             double textSize = refSize;
 
             Point3d p0 = newPoint;

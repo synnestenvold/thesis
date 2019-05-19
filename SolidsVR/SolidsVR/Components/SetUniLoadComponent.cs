@@ -78,7 +78,7 @@ namespace SolidsVR
             List<double> loadCoord = new List<double>();
             List<double> pointValues = new List<double>();
 
-            double loadRef = 0.5;
+            double loadRef = 0.05;
             double arrowRef = 0.8;
 
             foreach (string s in pointLoads)
