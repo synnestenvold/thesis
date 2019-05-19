@@ -557,7 +557,7 @@ namespace SolidsVR.Components
             Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 
             Plane headPlane = new Plane(p0, p1, p2);
-            headPlane.Translate(new Vector3d(0, 0, refLength));
+            headPlane.Translate(new Vector3d( 0, -headSize, 3 * refLength));
 
             Color headColor = Color.Pink;
 

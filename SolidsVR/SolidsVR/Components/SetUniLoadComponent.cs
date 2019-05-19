@@ -55,12 +55,14 @@ namespace SolidsVR
             Brep surface = mesh.GetSurfaceAsBrep(surfNo);
             double area = surface.GetArea();
             List<Node> nodes = mesh.GetNodeList();
-            List<string> pointLoads = FindPointLoads(surfNo, area, forceVec, nodes, brp);
+            var tuple = FindPointLoads(surfNo, area, forceVec, nodes, brp);
+            List<string> pointLoads = tuple.Item1;
+            double maxLoad = tuple.Item2;
 
             ///////FOR PREVIEWING OF LOADS///////
 
             double refLength = brp.GetRefLength();
-            List<Line> arrows = DrawLoads(pointLoads, refLength);
+            List<Line> arrows = DrawLoads(pointLoads, refLength, maxLoad);
             Color color = Color.Blue;
 
             //---output---
@@ -71,7 +73,7 @@ namespace SolidsVR
 
         }
 
-        public List<Line> DrawLoads(List<string> pointLoads, double refLength)
+        public List<Line> DrawLoads(List<string> pointLoads, double refLength, double maxLoad)
         {
             List<Line> arrows = new List<Line>();
 
@@ -80,6 +82,8 @@ namespace SolidsVR
 
             double loadRef = 0.05;
             double arrowRef = 0.8;
+
+            double maxLength = refLength * 2;
 
             foreach (string s in pointLoads)
             {
@@ -104,7 +108,7 @@ namespace SolidsVR
 
                 if (loadX != 0)
                 {
-                    endPoint = new Point3d(loadCoord1 - loadX * loadRef, loadCoord2, loadCoord3);
+                    endPoint = new Point3d(loadCoord1 - loadX * maxLength/maxLoad, loadCoord2, loadCoord3);
 
 
                     if (loadX > 0)
@@ -124,7 +128,7 @@ namespace SolidsVR
 
                 if (loadY != 0)
                 {
-                    endPoint = new Point3d(loadCoord1, loadCoord2 - loadY * loadRef, loadCoord3);
+                    endPoint = new Point3d(loadCoord1, loadCoord2 - loadY *maxLength / maxLoad, loadCoord3);
 
 
                     if (loadY > 0)
@@ -146,7 +150,7 @@ namespace SolidsVR
 
                 if (loadZ != 0)
                 {
-                    endPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3 - loadZ * loadRef);
+                    endPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3 - loadZ * maxLength / maxLoad);
 
 
                     if (loadZ > 0)
@@ -169,9 +173,11 @@ namespace SolidsVR
             return arrows;
         }
 
-        public List<string> FindPointLoads(int surfNo, double area, Vector3d forceVec, List<Node> nodes, Brep_class brp)
+        public Tuple<List<string>, double> FindPointLoads(int surfNo, double area, Vector3d forceVec, List<Node> nodes, Brep_class brp)
         {
             List<string> pointLoads = new List<string>();
+            Vector3d maxLoads = new Vector3d(0, 0, 0);
+            double maxLoad = 0;
             List<string> centerPointsString = new List<string>();
             List<string> cornerPointsString = new List<string>();
             List<string> edgePointsString = new List<string>();
@@ -215,6 +221,19 @@ namespace SolidsVR
             foreach (string s in centerPointsString)
             {
                 centerPointLoads.Add(s + ";" + centerVector);
+
+                string[] centerLoads = (centerVector.Split(','));
+
+                double loadX = Math.Round(double.Parse(centerLoads[0]), 8);
+                double loadY = Math.Round(double.Parse(centerLoads[1]), 8);
+                double loadZ = Math.Round(double.Parse(centerLoads[2]), 8);
+                Vector3d loads = new Vector3d(loadX, loadY, loadZ);
+
+                if (loads.Length > maxLoads.Length)
+                {
+                    maxLoads = loads;
+                    maxLoad = Math.Abs(maxLoads.MaximumCoordinate);
+                }
             }
 
             foreach (string s in cornerPointsString)
@@ -230,7 +249,7 @@ namespace SolidsVR
             pointLoads.AddRange(edgePointLoads);
             pointLoads.AddRange(cornerPointLoads);
 
-            return pointLoads;
+            return Tuple.Create(pointLoads, maxLoad);
         }
        
         protected override System.Drawing.Bitmap Icon
