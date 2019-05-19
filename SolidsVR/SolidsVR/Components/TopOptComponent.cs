@@ -86,16 +86,16 @@ namespace SolidsVR.Components
                 opt = true;
             }
             DataTree<double> defTree = new DataTree<double>();
-            Boolean first = true;
+            Boolean first123456 = true;
             double max = 0;
             int removeElem = -1;
             List<int> removeNodeNr = new List<int>();
-            while (numberElements > minElements && max < material.GetY() || first) //Requirements for removal
+            while (numberElements > minElements && max < material.GetY() || first123456) //Requirements for removal
                 //problem: when only > and || it will loop through the solution when 
             {
                 List<Element> elements = mesh.GetElements();
                 //if (opt == false) 
-                first = false;
+                first123456 = false;
                 
                 //Remove selected element from last iterations, and update afftected nodes
                 if (removeElem != -1 && opt == true)
