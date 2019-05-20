@@ -1,6 +1,6 @@
 clc; clear;
 
-content = fileread( 'Case4_topOpt_disp.txt' ) ;
+content = fileread( 'Case2_disp.txt' ) ;
 data = textscan( content, '%s','HeaderLines',2) ;
 text = data{1};
 
@@ -77,12 +77,12 @@ for i = 1: length(text)
 end
 
 
-xq2 = 1:0.1:xaxis(length(xaxis))
+xq2 = xaxis(1):0.1:xaxis(length(xaxis));
 
 
 
 %figure(1)
-figure('Renderer', 'painters', 'Position', [10 10 900 600])
+figure('Renderer', 'painters', 'Position', [10 10 1000 400])
 hold on
 
 set(gca, 'FontName', 'Times New Roman')
@@ -102,10 +102,16 @@ if it == 1
 end
 
 if it == 2
-    vq1 = interp1(xaxis,yaxis(:,1),xq2)
-    vq2 = interp1(xaxis,yaxis(:,2),xq2)
+    vq1 = interp1(xaxis,yaxis(:,1),xq2,'pchip');
+    vq2 = interp1(xaxis,yaxis(:,2),xq2,'pchip');
+    %smooth(vq1);
+    %smooth(vq2);
     p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
-    p2 = plot(xaxis,yaxis(:,2),'o',xq2,vq2,cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
+    p2 = plot(xaxis,yaxis(:,2),'*',xq2,vq2,cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
+    
+    h = [p1(1);p2(1)];
+ % Now call the legend function passing the handle h and specify the text
+    legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)));
 end
 
 if it == 3
@@ -128,6 +134,11 @@ disp(xaxisPlot)
 ax = gca;
 ax.XMinorTick = 'on';
 ax.XAxis.TickValues = xaxisPlot;
+
+
+ax.YGrid = 'on';
+ax.BoxStyle = 'full';
+
 
 xlabel(xLabel)
 ylabel(yLabel)

@@ -367,7 +367,7 @@ namespace SolidsVR
         {
             get
             {
-                return null;
+                return SolidsVR.Properties.Resource1.stress;
             }
         }
 

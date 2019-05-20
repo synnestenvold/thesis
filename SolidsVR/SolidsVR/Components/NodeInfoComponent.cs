@@ -139,13 +139,13 @@ namespace SolidsVR
 
             for (int i = 0; i < text.Count; i++)
             {
-                double zValue = centroid.Z + refLength * 2;
+                double zValue = centroid.Z + refLength * 1.5;
 
                 double z = (double)(zValue - i * refLength / 7);
 
                 if (i == 1) z = (double)(z + refLength / 12);
 
-                Point3d p0 = new Point3d(centroid.X - refLength * 3.5, centroid.Y, z);
+                Point3d p0 = new Point3d(centroid.X - refLength * 3, centroid.Y, z);
                 Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
                 Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 

@@ -91,12 +91,19 @@
     <Compile Include="Classes\Mesh_class.cs" />
     <Compile Include="Components\TopOptComponent.cs" />
     <Compile Include="Components\VolumePercentageSlider.cs" />
+    <Compile Include="CrossSectionComponent.cs" />
     <Compile Include="DeconstructElement.cs" />
     <Compile Include="DeconstructMesh.cs" />
     <Compile Include="DeconstructNode.cs" />
     <Compile Include="Components\MeshCBrep.cs" />
     <Compile Include="Components\MeshSurfBrep.cs" />
     <Compile Include="Components\NodeInfoComponent.cs" />
+    <Compile Include="headLineComponent.cs" />
+    <Compile Include="Properties\Resource1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource1.resx</DependentUpon>
+    </Compile>
     <Compile Include="SolidsVRInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classes\StiffnessMatrix.cs" />
@@ -112,6 +119,51 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\del.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resource1.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\loads.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\analyze.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mesh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\meshC.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\meshS.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\surfSlider.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\loadSlider.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\scaleSlider.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stress.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stressSlider.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\disp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\divSlider.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

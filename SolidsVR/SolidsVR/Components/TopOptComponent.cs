@@ -39,12 +39,10 @@ namespace SolidsVR.Components
             pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Strain", "Strain", "Strain vector", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Stress", "Stress", "Stress vector", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.list); //For testing only
             pManager.AddTextParameter("Text", "Text", "Text for headline", GH_ParamAccess.item);
             pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.item);
             pManager.AddColourParameter("Colors", "Color T", "Colors for text", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Nodes", "Nodes", "All nodes", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -207,14 +205,11 @@ namespace SolidsVR.Components
             DA.SetDataTree(0, defTree);
             DA.SetDataTree(1, strainTree);
             DA.SetDataTree(2, stressTree);
-            DA.SetDataList(3, globalPoints);
 
-            DA.SetData(4, headText);
-            DA.SetData(5, headSize);
-            DA.SetData(6, headPlane);
-            DA.SetData(7, headColor);
-
-            DA.SetDataList(8, nodes);
+            DA.SetData(3, headText);
+            DA.SetData(4, headSize);
+            DA.SetData(5, headPlane);
+            DA.SetData(6, headColor);
 
         }
 

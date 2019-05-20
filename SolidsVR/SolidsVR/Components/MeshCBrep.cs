@@ -494,7 +494,15 @@ namespace SolidsVR
             return sortedEdges;
         }
 
-   
+        protected override System.Drawing.Bitmap Icon
+        {
+            get
+            {
+                // You can add image files to your project resources and access them like this:
+                //return Resources.IconForThisComponent;
+                return SolidsVR.Properties.Resource1.meshC;
+            }
+        }
         public override Guid ComponentGuid
         {
             get { return new Guid("0f4702ea-a195-4b83-b3ae-5e067f56a73f"); }

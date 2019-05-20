@@ -42,10 +42,6 @@ namespace SolidsVR
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.list);
-            pManager.AddCurveParameter("Curve", "Curve", "Mesh of Brep", GH_ParamAccess.list);
-            pManager.AddBrepParameter("Surface", "Surface", "Mesh of Brep", GH_ParamAccess.list);
-            pManager.AddCurveParameter("Curve", "Curve", "Mesh of Brep", GH_ParamAccess.list);
-            pManager.AddBrepParameter("Surfaces", "S", "Input geometry as a curved brep", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -113,13 +109,6 @@ namespace SolidsVR
                 //---output---
 
                 DA.SetData(0, mesh);
-                DA.SetDataList(1, sortedEdges);
-                
-                //DA.SetDataList(2, sortedSurf);
-                DA.SetDataList(3, curves);
-
-
-                DA.SetDataList(4, surfaces);
 
             }
         }
@@ -694,7 +683,7 @@ namespace SolidsVR
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return SolidsVR.Properties.Resource1.meshS;
             }
         }
 

@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Plotfil</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-05-13"><meta name="DC.source" content="Plotfil.m"><style type="text/css">
+      --><title>Plotfil</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-05-19"><meta name="DC.source" content="Plotfil.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -68,7 +68,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
   </style></head><body><div class="content"><pre class="codeinput">clc; clear;
 
-content = fileread( <span class="string">'plotFilTest.txt'</span> ) ;
+content = fileread( <span class="string">'DispCube.txt'</span> ) ;
 data = textscan( content, <span class="string">'%s'</span>,<span class="string">'HeaderLines'</span>,2) ;
 text = data{1};
 
@@ -147,11 +147,13 @@ r = 1;
 
 xq2 = 1:0.1:xaxis(length(xaxis));
 
+
+
 <span class="comment">%figure(1)</span>
-figure(<span class="string">'Renderer'</span>, <span class="string">'painters'</span>, <span class="string">'Position'</span>, [10 10 900 600])
+figure(<span class="string">'Renderer'</span>, <span class="string">'painters'</span>, <span class="string">'Position'</span>, [10 10 1000 700])
 hold <span class="string">on</span>
 
-set(gca, <span class="string">'FontName'</span>, <span class="string">'Bookman Old Style'</span>)
+set(gca, <span class="string">'FontName'</span>, <span class="string">'Times New Roman'</span>)
 set(gca,<span class="string">'fontsize'</span>,10)
 <span class="comment">%legend([plot1,plot2],'t_{i}','t_{ri}','Location','southeast');</span>
 <span class="comment">%axis tight</span>
@@ -168,8 +170,8 @@ set(gca,<span class="string">'fontsize'</span>,10)
 <span class="keyword">end</span>
 
 <span class="keyword">if</span> it == 2
-    vq1 = interp1(xaxis,yaxis(:,1),xq2,<span class="string">'pchip'</span>);
-    vq2 = interp1(xaxis,yaxis(:,2),xq2,<span class="string">'pchip'</span>);
+    vq1 = interp1(xaxis,yaxis(:,1),xq2)
+    vq2 = interp1(xaxis,yaxis(:,2),xq2)
     p1 = plot(xaxis,yaxis(:,1),<span class="string">'o'</span>,xq2,vq1,cell2mat(colors(1)),<span class="string">'LineWidth'</span>,1,<span class="string">'MarkerSize'</span>,4);
     p2 = plot(xaxis,yaxis(:,2),<span class="string">'o'</span>,xq2,vq2,cell2mat(colors(2)),<span class="string">'LineWidth'</span>,1,<span class="string">'MarkerSize'</span>,4);
 <span class="keyword">end</span>
@@ -179,8 +181,8 @@ set(gca,<span class="string">'fontsize'</span>,10)
     vq2 = interp1(xaxis,yaxis(:,2),xq2,<span class="string">'pchip'</span>);
     vq3 = interp1(xaxis,yaxis(:,3),xq2,<span class="string">'pchip'</span>);
     p1 = plot(xaxis,yaxis(:,1),<span class="string">'o'</span>,xq2,vq1,cell2mat(colors(1)),<span class="string">'LineWidth'</span>,1,<span class="string">'MarkerSize'</span>,4);
-    p2 = plot(xaxis,yaxis(:,2),<span class="string">'o'</span>,xq2,vq2,cell2mat(colors(2)),<span class="string">'LineWidth'</span>,1,<span class="string">'MarkerSize'</span>,4);
-    p3 = plot(xaxis,yaxis(:,3),<span class="string">'o'</span>,xq2,vq3,cell2mat(colors(3)),<span class="string">'LineWidth'</span>,1,<span class="string">'MarkerSize'</span>,4);
+    p2 = plot(xaxis,yaxis(:,2),<span class="string">'*'</span>,xq2,vq2,cell2mat(colors(2)),<span class="string">'LineWidth'</span>,1,<span class="string">'MarkerSize'</span>,4);
+    p3 = plot(xaxis,yaxis(:,3),<span class="string">'x'</span>,xq2,vq3,cell2mat(colors(3)),<span class="string">'LineWidth'</span>,1,<span class="string">'MarkerSize'</span>,4);
 
     <span class="comment">%legend([p1,p2],'t','t','Location','southeast');</span>
 
@@ -190,18 +192,26 @@ set(gca,<span class="string">'fontsize'</span>,10)
 
 <span class="keyword">end</span>
 
+disp(xaxisPlot)
 ax = gca;
 ax.XMinorTick = <span class="string">'on'</span>;
 ax.XAxis.TickValues = xaxisPlot;
 
+
+ax.YGrid = <span class="string">'on'</span>;
+ax.BoxStyle = <span class="string">'full'</span>;
+
+
 xlabel(xLabel)
 ylabel(yLabel)
 title(Title)
+</pre><pre class="codeoutput">     1     8    27    64   125   216   343   512   729
+
 </pre><img vspace="5" hspace="5" src="Plotfil_01.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 clc; clear;
 
-content = fileread( 'plotFilTest.txt' ) ;
+content = fileread( 'DispCube.txt' ) ;
 data = textscan( content, '%s','HeaderLines',2) ;
 text = data{1};
 
@@ -280,11 +290,13 @@ end
 
 xq2 = 1:0.1:xaxis(length(xaxis));
 
+
+
 %figure(1)
-figure('Renderer', 'painters', 'Position', [10 10 900 600])
+figure('Renderer', 'painters', 'Position', [10 10 1000 700])
 hold on
 
-set(gca, 'FontName', 'Bookman Old Style')
+set(gca, 'FontName', 'Times New Roman')
 set(gca,'fontsize',10)
 %legend([plot1,plot2],'t_{i}','t_{ri}','Location','southeast');
 %axis tight
@@ -301,8 +313,8 @@ if it == 1
 end
 
 if it == 2
-    vq1 = interp1(xaxis,yaxis(:,1),xq2,'pchip');
-    vq2 = interp1(xaxis,yaxis(:,2),xq2,'pchip');
+    vq1 = interp1(xaxis,yaxis(:,1),xq2)
+    vq2 = interp1(xaxis,yaxis(:,2),xq2)
     p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
     p2 = plot(xaxis,yaxis(:,2),'o',xq2,vq2,cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
 end
@@ -312,8 +324,8 @@ if it == 3
     vq2 = interp1(xaxis,yaxis(:,2),xq2,'pchip');
     vq3 = interp1(xaxis,yaxis(:,3),xq2,'pchip');
     p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
-    p2 = plot(xaxis,yaxis(:,2),'o',xq2,vq2,cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
-    p3 = plot(xaxis,yaxis(:,3),'o',xq2,vq3,cell2mat(colors(3)),'LineWidth',1,'MarkerSize',4);
+    p2 = plot(xaxis,yaxis(:,2),'*',xq2,vq2,cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
+    p3 = plot(xaxis,yaxis(:,3),'x',xq2,vq3,cell2mat(colors(3)),'LineWidth',1,'MarkerSize',4);
     
     %legend([p1,p2],'t','t','Location','southeast');
     
@@ -323,9 +335,15 @@ if it == 3
     
 end
 
+disp(xaxisPlot)
 ax = gca;
 ax.XMinorTick = 'on';
 ax.XAxis.TickValues = xaxisPlot;
+
+
+ax.YGrid = 'on';
+ax.BoxStyle = 'full';
+
 
 xlabel(xLabel)
 ylabel(yLabel)
