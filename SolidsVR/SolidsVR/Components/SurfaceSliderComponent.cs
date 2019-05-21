@@ -88,11 +88,11 @@ namespace SolidsVR
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
             Point3d end = curve.PointAtEnd;
-            Point3d p0 = Point3d.Add(start, new Point3d(0, 0, 2 * refSize));
-            Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 2 * refSize));
-            Point3d p2 = Point3d.Add(start, new Point3d(0, 0, (1 + 2 * refSize)));
+            Point3d p0 = Point3d.Add(start, new Point3d(refLength, 0, 2 * refSize));
+            Point3d p1 = Point3d.Add(start, new Point3d(1+refLength, 0, 2 * refSize));
+            Point3d p2 = Point3d.Add(start, new Point3d(refLength, 0, (1 + 2 * refSize)));
             textPlane.Add(new Plane(p0, p1, p2));
-            double range = (double)(refLength / 3);
+            double range = (double)(refLength / 3); 
             for (int i = 1; i < 7; i++)
             {
                 string surfRange = i.ToString();
