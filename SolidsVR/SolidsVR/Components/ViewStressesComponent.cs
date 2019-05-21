@@ -138,7 +138,7 @@ namespace SolidsVR
         {
             string headText = "Stress analysis";
 
-            double headSize = (double)refLength / 2;
+            double headSize = (double)refLength / 1.5;
 
             Point3d p0 = centroid;
             Point3d p1 = Point3d.Add(p0, new Point3d(-1, 0, 0));
@@ -147,10 +147,10 @@ namespace SolidsVR
             Plane headPlane = new Plane(p0, p1, p2);
 
             
-            headPlane.Translate(new Vector3d(0, -headSize, 3*refLength));
+            headPlane.Translate(new Vector3d(0, -headSize, 3.5*refLength));
             headPlane.Rotate(angle, new Vector3d(0, 0, 1), center);
 
-            Color headColor = Color.Pink;
+            Color headColor = Color.FromArgb(0, 100, 255);
 
             return Tuple.Create(headText, headSize, headPlane, headColor);
         }
