@@ -29,6 +29,7 @@ namespace SolidsVR
         {
             pManager.AddTextParameter("Prescribed deformations", "PreDef", "Def in point, (x,y,z);(Tx,Ty,Tz)", GH_ParamAccess.list);
             pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Size", "Size", "Size", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
             pManager.AddColourParameter("Colors", "Color", "Colors for text", GH_ParamAccess.item);
         }
@@ -96,14 +97,17 @@ namespace SolidsVR
                 pointDef.Add(s + ";" + def.ToString());
             }
 
-            Color color = Color.Red;
+            double size = (double)refLength / 7;
+
+            Color color = Color.Orange;
 
             //---output---
 
             DA.SetDataList(0, pointDef);
             DA.SetData(1, text);
-            DA.SetDataList(2, planeSphere);
-            DA.SetData(3, color);
+            DA.SetData(2, size);
+            DA.SetDataList(3, planeSphere);
+            DA.SetData(4, color);
         }
 
         public Plane FindSpherePlane(Point3d centroid, double refLength)

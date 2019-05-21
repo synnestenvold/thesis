@@ -88,7 +88,7 @@ namespace SolidsVR
             Node nodeMax = tuple.Item2;
 
             Brep sphere = DrawSphere(nodeMax, angle, center, scale, refSize); //output geo
-            Color colorSphere = Color.Red;
+            Color colorSphere = Color.Orange;
 
             VolumeMassProperties vmpt = VolumeMassProperties.Compute(sphere);
             Point3d centroidt = vmpt.Centroid;
@@ -313,7 +313,7 @@ namespace SolidsVR
             textplane.Rotate(angle, new Vector3d(0,0,1), center);
             textplane.Translate(new Vector3d(0, 0, 2 * refSize));
 
-            Color textColor = Color.Red;
+            Color textColor = Color.Orange;
      
             return Tuple.Create(text, textSize, textplane, textColor);
         }

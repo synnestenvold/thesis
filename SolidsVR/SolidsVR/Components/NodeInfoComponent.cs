@@ -51,7 +51,7 @@ namespace SolidsVR
             pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
-            pManager.AddColourParameter("Colors", "Color", "Colors for text", GH_ParamAccess.item);
+            pManager.AddColourParameter("Colors", "Color", "Colors for text", GH_ParamAccess.list);
             pManager.AddTextParameter("Text Sphere", "Text", "Text for sphere", GH_ParamAccess.item);
             pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane Sphere", "Plane", "Placement for text", GH_ParamAccess.item);
@@ -116,7 +116,11 @@ namespace SolidsVR
 
             List<Plane> textPlane = CreateTextPlane(centroid, refLength, text);
 
-            Color color = Color.Orange;
+            List<Color> colors = new List<Color>();
+
+            colors.Add(Color.Orange);
+            colors.Add(Color.Orange);
+            colors.Add(Color.White);
 
             double size = (double)refLength / 7;
 
@@ -126,7 +130,7 @@ namespace SolidsVR
             
             DA.SetData(1, size);
             DA.SetDataList(2, textPlane);
-            DA.SetData(3, color);
+            DA.SetDataList(3, colors);
             DA.SetData(4, textSphere);
             DA.SetData(5, size);
             DA.SetData(6, textPlaneSphere);
@@ -139,7 +143,7 @@ namespace SolidsVR
 
             for (int i = 0; i < text.Count; i++)
             {
-                double zValue = centroid.Z + refLength * 1.5;
+                double zValue = centroid.Z + refLength * 2.5;
 
                 double z = (double)(zValue - i * refLength / 7);
 

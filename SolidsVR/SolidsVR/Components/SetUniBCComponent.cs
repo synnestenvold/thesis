@@ -56,7 +56,7 @@ namespace SolidsVR
            
             double refLength = brp.GetRefLength();
             List<Brep> cones = DrawBC(pointsBC, refLength);
-            Color color = Color.Green;
+            Color color = Color.FromArgb(0, 100, 255);
 
             //---output---
 

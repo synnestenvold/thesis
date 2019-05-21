@@ -63,7 +63,7 @@ namespace SolidsVR
 
             double refLength = brp.GetRefLength();
             List<Line> arrows = DrawLoads(pointLoads, refLength, maxLoad);
-            Color color = Color.Blue;
+            Color color = Color.FromArgb(135, 206, 255);
 
             //---output---
 
