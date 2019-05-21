@@ -106,9 +106,9 @@ namespace SolidsVR
             double range = (double)(refLength / 4);
             for (int i = 0; i < 7; i++)
             {
-                Point3d p3 = Point3d.Add(start, new Point3d(0, -range+range * i, -2 * refSize));
-                Point3d p4 = Point3d.Add(start, new Point3d(0, -1-range + range * i, -2 * refSize));
-                Point3d p5 = Point3d.Add(start, new Point3d(0, -range+range * i, (1 - 2 * refSize)));
+                Point3d p3 = Point3d.Add(start, new Point3d(0, range * i, -2 * refSize));
+                Point3d p4 = Point3d.Add(start, new Point3d(0, -1 + range * i, -2 * refSize));
+                Point3d p5 = Point3d.Add(start, new Point3d(0, range * i, (1 - 2 * refSize)));
                 textPlane.Add(new Plane(p3, p4, p5));
             }
             return Tuple.Create(text, size, textPlane, Color.White);

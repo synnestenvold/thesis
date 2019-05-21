@@ -124,9 +124,9 @@ namespace SolidsVR
                 size.Add((double)(refSize / 2));
                 string divRange = i.ToString();
                 text.Add(divRange);
-                Point3d p3 = Point3d.Add(start, new Point3d(0 + range * i, 0, -1 * refSize));
-                Point3d p4 = Point3d.Add(start, new Point3d(1 + range * i, 0, -1 * refSize));
-                Point3d p5 = Point3d.Add(start, new Point3d(0 + range * i, 0, (1 - 1 * refSize)));
+                Point3d p3 = Point3d.Add(start, new Point3d(-range + range * i, 0, -1 * refSize));
+                Point3d p4 = Point3d.Add(start, new Point3d(1-range + range * i, 0, -1 * refSize));
+                Point3d p5 = Point3d.Add(start, new Point3d(-range + range * i, 0, (1 - 1 * refSize)));
                 Plane plane = new Plane(p3, p4, p5);
                 textPlane.Add(plane);
             }
