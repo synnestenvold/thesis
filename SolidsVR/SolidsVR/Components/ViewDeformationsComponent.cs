@@ -73,7 +73,7 @@ namespace SolidsVR
             double refLength = brp.GetRefLength();
             double refSize = (double)(refLength / 10);
             double angle = 270*Math.PI/180;
-            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 5, 0)); //Center for viewpoint
+            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 6.5, 0)); //Center for viewpoint
 
             //---solve---
 

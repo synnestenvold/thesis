@@ -66,7 +66,7 @@ namespace SolidsVR
             Brep brep = brp.GetBrep();
             Point3d centroid = brp.GetCentroid();
             double refLength = brp.GetRefLength();
-            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 5, 0));
+            Point3d center = Point3d.Add(centroid, new Point3d(0, -refLength * 6.5, 0));
             double angle = 90 * Math.PI / 180;
 
             //---solve---
