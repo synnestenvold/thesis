@@ -81,8 +81,8 @@ namespace SolidsVR
         public Tuple<List<string>, List<double>, List<Plane>, Color> CreateText(Curve curve, double refLength, int surface)
         {
             List<string> text = new List<string>();
-            text.Add("Adjust to pick surface (1-6): "+ surface.ToString());
-            text.AddRange(new List<string>() { "1 |", "2 |", "3 |", "4 |", "5 |", "6 |" });
+            text.Add("Adjust to pick surface (1-6): "+ (surface+1).ToString());
+            text.AddRange(new List<string>() { "| 1", "| 2", "| 3", "| 4", "| 5", "| 6" });
             double refSize = (double)(refLength / 7);
             List<double> size = new List<double>() { refSize, (double)(refSize / 2) };
             List<Plane> textPlane = new List<Plane>();
@@ -97,9 +97,9 @@ namespace SolidsVR
             {
                 string surfRange = i.ToString();
                 text.Add(surfRange);
-                Point3d p3 = Point3d.Add(start, new Point3d(-1 + range * i, 0, -1 * refSize));
-                Point3d p4 = Point3d.Add(start, new Point3d(0 + range * i, 0, -1 * refSize));
-                Point3d p5 = Point3d.Add(start, new Point3d(-1 + range * i, 0, (1 - 1 * refSize)));
+                Point3d p3 = Point3d.Add(start, new Point3d(-range + range * i, 0, -1 * refSize));
+                Point3d p4 = Point3d.Add(start, new Point3d(1- range + range * i, 0, -1 * refSize));
+                Point3d p5 = Point3d.Add(start, new Point3d(-range + range * i, 0, (1 - 1 * refSize)));
                 Plane plane = new Plane(p3, p4, p5);
                 textPlane.Add(plane);
                 
