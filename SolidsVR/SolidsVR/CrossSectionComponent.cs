@@ -81,7 +81,7 @@ namespace SolidsVR
 
             Color colorText = Color.Orange;
 
-            double size = (double)refLength / 10;
+            double size = (double)refLength / 7;
 
             List<Plane> planes = tuple.Item2;
 
@@ -120,7 +120,7 @@ namespace SolidsVR
 
             planes.Add(hplane);
 
-            Point3d vplane0 = new Point3d(headPoint.X, headPoint.Y, headPoint.Z + refLength / 3);
+            Point3d vplane0 = new Point3d(headPoint.X, headPoint.Y, headPoint.Z + refLength / 3 + 10);
             Point3d vplane1 = Point3d.Add(vplane0, new Point3d(1, 0, 0));
             Point3d vplane2 = Point3d.Add(vplane1, new Point3d(0, 0, 1));
 
@@ -135,7 +135,7 @@ namespace SolidsVR
 
             Point3d uPoint = Point3d.Add(up1, uVec);
 
-            Point3d uplane0 = new Point3d(uPoint.X+100, uPoint.Y, uPoint.Z);
+            Point3d uplane0 = new Point3d(uPoint.X+120, uPoint.Y, uPoint.Z);
             Point3d uplane1 = Point3d.Add(uplane0, new Point3d(1, 0, 0));
             Point3d uplane2 = Point3d.Add(uplane1, new Point3d(0, 0, 1));
 

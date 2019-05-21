@@ -101,12 +101,12 @@ namespace SolidsVR
         public Tuple<List<string>, List<double>, List<Plane>> CreateText(Curve curve, double div, double refLength, int count)
         {
             List<string> text = new List<string>();
-            string direction = "U";
+            string direction = "u";
             if (count == 1) { 
-                direction = "V";
+                direction = "v";
             }
             if (count == 2) {
-                direction = "W";
+                direction = "w";
             }
             text.Add(direction+"-direction: "+div.ToString());
             double refSize = (double)(refLength / 7);
