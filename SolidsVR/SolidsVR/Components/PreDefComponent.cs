@@ -124,7 +124,7 @@ namespace SolidsVR
 
         public Point3d FindClosestPoint(Point3d[] globalPoints, Point3d centroid, double refLength)
         {
-            Point3d closestPoint = new Point3d(999.999, 999.999, 999.999);
+            Point3d closestPoint = new Point3d(999999, 999999, 999999);
 
             double length = double.PositiveInfinity;
 
