@@ -60,7 +60,7 @@ namespace SolidsVR
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(volume, sqrt3);
 
-            var tuple = CreateTextAndPlane(curves);
+            var tuple = CreateTextAndPlane(curves, refLength);
             List<string> texts = tuple.Item1;
 
             Color colorText = Color.Orange;
@@ -76,7 +76,7 @@ namespace SolidsVR
 
         }
 
-        public Tuple<List<string>, List<Plane>> CreateTextAndPlane(List<Curve> curves)
+        public Tuple<List<string>, List<Plane>> CreateTextAndPlane(List<Curve> curves, double refLength)
         {
             List<string> text = new List<string>();
             List<Plane> planes = new List<Plane>();
@@ -95,7 +95,7 @@ namespace SolidsVR
 
             Point3d bp1 = curves[1].PointAtStart;
 
-            Point3d bplane0 = new Point3d(bp1.X + 70, bp1.Y, bp1.Z + 150);
+            Point3d bplane0 = new Point3d(bp1.X + refLength, bp1.Y, bp1.Z + 150);
             Point3d bplane1 = Point3d.Add(bplane0, new Point3d(1, 0, 0));
             Point3d bplane2 = Point3d.Add(bplane1, new Point3d(0, 0, 1));
 

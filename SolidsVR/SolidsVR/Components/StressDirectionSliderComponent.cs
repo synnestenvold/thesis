@@ -93,7 +93,7 @@ namespace SolidsVR
             else if (dir < 6) direction = "S,yz";
             else direction = "Mises";
             text.Add("Stress direction: "+direction);
-            text.AddRange(new List<string>() { "S,xx", "S,yy", "S,zz", "S,xy", "S,xz", "S,yz", "Mises" });
+            text.AddRange(new List<string>() { "| S,xx", "| S,yy", "| S,zz", "| S,xy", "| S,xz", "| S,yz", "| Mises" });
             double refSize = (double)(refLength / 7);
             List<double> size = new List<double>() { refSize, (double)(refSize / 2) };
             List<Plane> textPlane = new List<Plane>();
