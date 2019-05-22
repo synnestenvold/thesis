@@ -28,7 +28,7 @@ namespace SolidsVR
         public ClosestPointComponent()
           : base("Find the closest point to sphere", "Closest point",
               "Description",
-              "Category3", "Closest point")
+              "SolidsVR", "Closest point")
         {
         }
 

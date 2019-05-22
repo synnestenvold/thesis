@@ -6,9 +6,12 @@ bcLoad = [8	14	23	38	81	91	205];
 invertK = [43	137	307	888	2072	4851	9516];
 uSS = [11	14	22	28	55	55	66];
 
-data = [total; k; bcLoad; invertK; uSS];
+data = [total; k; bcLoad; invertK; uSS]
 
-names = {'Total'; 'Create K'; 'Bc+Load'; 'Invert K'; 'u, stress, strain'};
+A = 'BC+Load';
+k = '\delta, \epsilon and \sigma';
+
+names = {'FEMSolver', 'Create K', 'BC+Load', 'Invert K', 'u, \epsilon and \sigma'};
 
 
 figure('Renderer', 'painters', 'Position', [10 10 900 600])
@@ -24,10 +27,8 @@ end
 set(gca,'xtick',[1:5],'xticklabel',names);
 
 set(gca, 'FontName', 'Times New Roman')
-set(gca,'fontsize',10)
-xlabel('Methods');
+set(gca,'fontsize',14)
 ylabel('Time[ms]');
-title('Comparison of methods');
 
 labels=['1029 dofs';'1536 dofs'; '2187 dofs'; '3000 dofs'; '3993 dofs';'5184 dofs';'6591 dofs'];
 legend(b,labels);

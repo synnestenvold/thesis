@@ -1,6 +1,6 @@
 clc; clear;
 
-content = fileread( 'Case2_disp.txt' ) ;
+content = fileread( 'Case3_disp.txt' ) ;
 data = textscan( content, '%s','HeaderLines',2) ;
 text = data{1};
 
@@ -77,7 +77,7 @@ for i = 1: length(text)
 end
 
 
-xq2 = xaxis(1):0.1:xaxis(length(xaxis));
+xq2 = xaxis(1):1:xaxis(length(xaxis))
 
 
 
@@ -86,7 +86,7 @@ figure('Renderer', 'painters', 'Position', [10 10 1000 400])
 hold on
 
 set(gca, 'FontName', 'Times New Roman')
-set(gca,'fontsize',10)
+set(gca,'fontsize',14)
 %legend([plot1,plot2],'t_{i}','t_{ri}','Location','southeast');
 %axis tight
 %grid minor
@@ -104,29 +104,29 @@ end
 if it == 2
     vq1 = interp1(xaxis,yaxis(:,1),xq2,'pchip');
     vq2 = interp1(xaxis,yaxis(:,2),xq2,'pchip');
-    %smooth(vq1);
-    %smooth(vq2);
-    p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
-    p2 = plot(xaxis,yaxis(:,2),'*',xq2,vq2,cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
+    p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,'color',cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
+    p2 = plot(xaxis,yaxis(:,2),'*',xq2,vq2,'color',cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
     
     h = [p1(1);p2(1)];
  % Now call the legend function passing the handle h and specify the text
     legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)));
+    xlim([xaxis(1),xaxis(length(xaxis))]);
 end
 
 if it == 3
     vq1 = interp1(xaxis,yaxis(:,1),xq2,'pchip');
     vq2 = interp1(xaxis,yaxis(:,2),xq2,'pchip');
     vq3 = interp1(xaxis,yaxis(:,3),xq2,'pchip');
-    p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
-    p2 = plot(xaxis,yaxis(:,2),'*',xq2,vq2,cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
-    p3 = plot(xaxis,yaxis(:,3),'x',xq2,vq3,cell2mat(colors(3)),'LineWidth',1,'MarkerSize',4);
+    p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,'color',cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
+    p2 = plot(xaxis,yaxis(:,2),'*',xq2,vq2,'color',cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
+    p3 = plot(xaxis,yaxis(:,3),'x',xq2,vq3,'color',cell2mat(colors(3)),'LineWidth',1,'MarkerSize',4);
     
     %legend([p1,p2],'t','t','Location','southeast');
     
     h = [p1(1);p2(1);p3(1)];
  % Now call the legend function passing the handle h and specify the text
     legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)),cell2mat(Legend(3)));
+    xlim([xaxis(1),xaxis(length(xaxis))]);
     
 end
 
@@ -142,4 +142,4 @@ ax.BoxStyle = 'full';
 
 xlabel(xLabel)
 ylabel(yLabel)
-title(Title)
+%title(Title)

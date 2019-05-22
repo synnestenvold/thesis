@@ -39,7 +39,7 @@ xaxis
 
 ///How many points will be shown on the x-axis. See list below.
 numbx
-9
+7
 
 ////xAxis for showing on the plot
 xaxisPlot
@@ -48,9 +48,7 @@ xaxisPlot
 135
 320
 625
-1080
 1715
-2560
 3645
 
 -------------
@@ -103,7 +101,7 @@ yaxis
 -8.92857
 
 color
-y
+g
 
 legend
 Analythic_solution

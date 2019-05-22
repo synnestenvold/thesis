@@ -21,7 +21,7 @@ namespace SolidsVR.Components
         public TopOptComponent()
           : base("TopOpt", "TopOpt",
               "Topology Optimization",
-              "Category3", "Subcategory3")
+              "SolidsVR", "Subcategory3")
         {
         }
 
@@ -64,9 +64,9 @@ namespace SolidsVR.Components
             if (!DA.GetDataList(2, loadtxt)) return;
             if (!DA.GetDataList(3, deftxt)) return;
             if (!DA.GetData(4, ref material)) return;
-            
+
             // --- solve ---
-            
+
             List<List<int>> connectivity = mesh.GetConnectivity();
             List<List<Point3d>> elementPoints = mesh.GetElementPoints();
             int sizeOfMatrix = mesh.GetSizeOfMatrix();
@@ -89,10 +89,10 @@ namespace SolidsVR.Components
             int removeElem = -1;
             List<int> removeNodeNr = new List<int>();
             while (numberElements > minElements && max < material.GetY() || first) //Requirements for removal
-                //problem: when only > and || it will loop through the solution when 
-                
+                                                                                   //problem: when only > and || it will loop through the solution when 
+
             {
-                for (int i = 0; i<nodes.Count; i++)
+                for (int i = 0; i < nodes.Count; i++)
                 {
                     nodes[i].CleanStressAndStrain();
                 }
@@ -100,7 +100,7 @@ namespace SolidsVR.Components
                 List<Element> elements = mesh.GetElements();
                 //if (opt == false) 
                 first = false;
-                
+
                 //Remove selected element from last iterations, and update afftected nodes
                 if (removeElem != -1 && opt == true)
                 {
@@ -109,7 +109,7 @@ namespace SolidsVR.Components
                 //Create K_tot
                 var tupleK_B = CreateGlobalStiffnessMatrix(sizeOfMatrix, material, elements);
                 Matrix<double> K_tot = tupleK_B.Item1;
-                
+
                 //B_all
                 List<List<Matrix<double>>> B_all = tupleK_B.Item2;
 
@@ -135,7 +135,7 @@ namespace SolidsVR.Components
                 //Adding R-matrix for pre-deformations.
                 var V = Vector<double>.Build;
                 Vector<double> R = (V.DenseOfArray(R_array)).Subtract(R_def);
-                
+
                 //Apply boundary condition and predeformations (Puts 0 in columns of K)
                 K_tot = ApplyBC_Col(K_tot, bcNodes);
                 K_tot = ApplyBC_Col(K_tot, predefNodes);
@@ -149,10 +149,10 @@ namespace SolidsVR.Components
                     R = tuple.Item2;
                     nodes = tuple.Item3;
                 }
-                
+
                 //Inverting K matrix. Singular when all elements belonging to a node is removed
                 Matrix<double> K_tot_inverse = K_tot.Inverse();
-                
+
                 //Caluculation of the displacement vector u
                 Vector<double> u = K_tot_inverse.Multiply(R);
 
@@ -301,7 +301,6 @@ namespace SolidsVR.Components
                     {
                         K[bcNodes[i], j] = 0;
                     }
-
                 }*/
 
                 for (int j = 0; j < K.RowCount; j++)
@@ -552,7 +551,7 @@ namespace SolidsVR.Components
             Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 
             Plane headPlane = new Plane(p0, p1, p2);
-            headPlane.Translate(new Vector3d( 0, -headSize, 3.5 * refLength));
+            headPlane.Translate(new Vector3d(0, -headSize, 3.5 * refLength));
 
             Color headColor = Color.FromArgb(0, 100, 255);
 
@@ -608,13 +607,13 @@ namespace SolidsVR.Components
 
             return calcedStress;
         }
-        
+
 
         public Tuple<Matrix<double>, Vector<double>, List<Node>> UpdateK(List<int> removeNodeNr, Matrix<double> K_tot, Vector<double> R, List<Node> nodes_removed)
         {
             removeNodeNr.Sort();
             removeNodeNr.Reverse();
-            
+
             for (int i = 0; i < removeNodeNr.Count; i++)
             {
                 K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
@@ -668,7 +667,7 @@ namespace SolidsVR.Components
             elements.RemoveAt(removeElem);
 
         }
-        
+
 
         protected override System.Drawing.Bitmap Icon
         {
@@ -676,7 +675,7 @@ namespace SolidsVR.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return SolidsVR.Properties.Resource1.analyze;
             }
         }
 

@@ -19,7 +19,7 @@ namespace SolidsVR
         public StressDirectionSliderComponent()
           : base("StressDirectionSlider", "StressSlider",
               "Slider for what stress direction to show",
-              "Category3", "SliderVR")
+              "SolidsVR", "SliderVR")
         {
         }
 

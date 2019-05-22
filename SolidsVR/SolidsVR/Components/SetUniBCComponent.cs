@@ -13,7 +13,7 @@ namespace SolidsVR
         public SetUniBCComponent()
           : base("Uniform BC component for FEA", "UniBC",
               "Description",
-              "Category3", "BC")
+              "SolidsVR", "BC")
         {
         }
 

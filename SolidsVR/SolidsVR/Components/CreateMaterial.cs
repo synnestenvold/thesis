@@ -14,7 +14,7 @@ namespace SolidsVR
         public CreateMaterial()
           : base("CreateMaterial", "Material",
               "Create material with Young's modulus and Poisson's ratio",
-              "Category3", "Material")
+              "SolidsVR", "Material")
         {
         }
 
@@ -59,7 +59,7 @@ namespace SolidsVR
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null; //Resources.del;
+                return SolidsVR.Properties.Resource1.material;
             }
         }
 

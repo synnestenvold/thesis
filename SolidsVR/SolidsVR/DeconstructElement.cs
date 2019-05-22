@@ -14,7 +14,7 @@ namespace SolidsVR
         public DeconstructElement()
           : base("Deconstruct Element", "Deconstruct Element",
               "Description",
-              "Category3", "Element")
+              "SolidsVR", "Element")
         {
         }
 
@@ -65,7 +65,7 @@ namespace SolidsVR
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return SolidsVR.Properties.Resource1.decElement;
             }
         }
 

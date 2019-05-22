@@ -21,7 +21,7 @@ namespace SolidsVR
         public FEMeshTBrepComponent()
           : base("Finite Element of meshed TBrep", "FEMeshTBrep",
               "Description",
-              "Category3", "Subcategory3")
+              "SolidsVR", "Subcategory3")
         {
         }
 

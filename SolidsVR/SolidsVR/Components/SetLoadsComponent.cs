@@ -24,7 +24,7 @@ namespace SolidsVR
         public SetLoadsComponent()
           : base("Load component for FEA", "Loads",
               "Description",
-              "Category3", "Loads")
+              "SolidsVR", "Loads")
         {
         }
 

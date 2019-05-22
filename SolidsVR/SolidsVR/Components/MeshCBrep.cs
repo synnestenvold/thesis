@@ -16,7 +16,7 @@ namespace SolidsVR
         public MeshCBrep()
           : base("MeshCBrep", "MeshCBrep",
               "Description",
-              "Category3", "Mesh")
+              "SolidsVR", "Mesh")
         {
         }
 

@@ -13,7 +13,7 @@ namespace SolidsVR
         public SetBCComponent()
           : base("BC component for FEA", "BC",
               "Description",
-              "Category3", "BC")
+              "SolidsVR", "BC")
         {
         }
 

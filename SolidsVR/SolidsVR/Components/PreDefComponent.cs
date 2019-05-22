@@ -14,7 +14,7 @@ namespace SolidsVR
         public PreDefComponent()
           : base("PreDef", "PreDef",
               "Prescribed deformation",
-              "Category3", "Def")
+              "SolidsVR", "Def")
         {
         }
 
@@ -147,7 +147,7 @@ namespace SolidsVR
             {
                 // You can add image files to your project resources and access them like this:
                 //return Resources.IconForThisComponent;
-                return null;
+                return SolidsVR.Properties.Resource1.predef;
             }
         }
 

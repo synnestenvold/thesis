@@ -6,7 +6,7 @@ plots
 
 ///How many points are in each plot?
 numpoints
-10
+7
 
 ////Want logarithmic x-scale? True means yes!
 logarithmic
@@ -28,44 +28,35 @@ Displacement[mm]
 xaxis
 6 
 10
-40
 80
-180
 360
 800
 1280
-2000 
 2500
 
 
 ///How many points will be shown on the x-axis. See list below.
 numbx
-10
+7
 
 ////xAxis for showing on the plot
 xaxisPlot
 6 
 10
-40
 80
-180
 360
 800
 1280
-2000 
 2500
 
 -------------
 
 yaxis
 -0.291285
--0.408233
 -0.37079
 -0.470938
--0.464955
 -0.509202
 -0.513305
--0.519655
 -0.519655
 -0.520981
 
@@ -78,10 +69,8 @@ Abaqus
 
 yaxis
 -0.281243
--0.358025
 -0.363513
 -0.449277
--0.454326
 -0.495904
 -0.505271
 -0.512712

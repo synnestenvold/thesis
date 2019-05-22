@@ -16,7 +16,7 @@ namespace SolidsVR
         public DeconstructMesh()
           : base("Deconstruct Mesh", "Deconstruct MeshCBrep",
               "Description",
-              "Category3", "Mesh")
+              "SolidsVR", "Mesh")
         {
         }
 
@@ -94,7 +94,7 @@ namespace SolidsVR
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return SolidsVR.Properties.Resource1.decMesh;
             }
         }
 

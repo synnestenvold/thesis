@@ -18,7 +18,7 @@ namespace SolidsVR
         public MeshSurfBrep()
           : base("MeshSBrep", "MeshSBrep",
               "Description",
-              "Category3", "Mesh")
+              "SolidsVR", "Mesh")
         {
         }
 

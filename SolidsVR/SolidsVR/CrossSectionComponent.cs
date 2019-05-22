@@ -15,7 +15,7 @@ namespace SolidsVR
         public CrossSectionComponent()
           : base("Get information of CrossSec", "CrossSec",
               "Description",
-              "Category3", "CrossSec")
+              "SolidsVR", "CrossSec")
         {
         }
 
@@ -182,7 +182,7 @@ namespace SolidsVR
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return SolidsVR.Properties.Resource1.crossSec;
             }
         }
 

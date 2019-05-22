@@ -22,7 +22,7 @@ namespace SolidsVR
         public DeconstructNode()
           : base("Deconstruct Node", "Deconstruct Node",
               "Description",
-              "Category3", "Node")
+              "SolidsVR", "Node")
         {
         }
 
@@ -109,7 +109,7 @@ namespace SolidsVR
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return SolidsVR.Properties.Resource1.decNode;
             }
         }
 

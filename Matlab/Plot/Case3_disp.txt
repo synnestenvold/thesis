@@ -6,7 +6,7 @@ plots
 
 ///How many points are in each plot?
 numpoints
-8
+7
 
 ////Want logarithmic x-scale? True means yes!
 logarithmic
@@ -33,12 +33,11 @@ xaxis
 936
 1470
 2304
-2944
 
 
 ///How many points will be shown on the x-axis. See list below.
 numbx
-8
+7
 
 ////xAxis for showing on the plot
 xaxisPlot
@@ -49,7 +48,6 @@ xaxisPlot
 936
 1470
 2304
-2944
 
 -------------
 
@@ -61,7 +59,6 @@ yaxis
 -1.11893
 -1.13879
 -1.15532
--1.16665
 
 color
 b
@@ -78,7 +75,6 @@ yaxis
 -1.114068
 -1.133583
 -1.151293
--1.164101
 
 color
 r

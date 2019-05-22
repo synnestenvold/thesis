@@ -103,7 +103,7 @@ yaxis
 -0.0476
 
 color
-y
+g
 
 legend
 Analythic_solution

@@ -6,7 +6,7 @@ plots
 
 ///How many points are in each plot?
 numpoints
-10
+7
 
 ////Want logarithmic x-scale? True means yes!
 logarithmic
@@ -28,31 +28,25 @@ Von_Mises[MPa]
 xaxis
 6 
 10
-40
 80
-180
 360
 800
 1280
-2000 
 2500
 
 
 ///How many points will be shown on the x-axis. See list below.
 numbx
-10
+7
 
 ////xAxis for showing on the plot
 xaxisPlot
 6 
 10
-40
 80
-180
 360
 800
 1280
-2000 
 2500
 
 -------------
@@ -60,12 +54,9 @@ xaxisPlot
 yaxis
 55.0883
 77.5718
-72.9398
 87.7692
-86.9053
 92.7583
 93.6149
-94.5659
 94.5659
 94.8890
 
@@ -79,13 +70,10 @@ Abaqus
 yaxis
 27.820993
 49.058389
-48.996115
 75.162632
-76.040197
 88.582133
 91.081072
 93.224445
-93.620404
 94.144081
 
 color

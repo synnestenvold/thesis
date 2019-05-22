@@ -13,7 +13,7 @@ namespace SolidsVR
         public DeformationSliderComponent()
           : base("DeformationSlider", "DefSlider",
               "Slider for deformation scale in VR",
-              "Category3", "SliderVR")
+              "SolidsVR", "SliderVR")
         {
         }
 

@@ -14,7 +14,7 @@ namespace SolidsVR.Components
         public VolumePercentageSlider()
           : base("VolumePercentageSlider", "VolumeSlider",
               "Volume reduction in percentage",
-              "Category3", "SliderVR")
+              "SolidsVR", "SliderVR")
         {
         }
 
@@ -117,7 +117,7 @@ namespace SolidsVR.Components
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return SolidsVR.Properties.Resource1.volumeSlider;
             }
         }
 
