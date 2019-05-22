@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Grasshopper.Kernel;
+using MathNet.Numerics.LinearAlgebra;
 using Rhino.Geometry;
 
 namespace SolidsVR
@@ -34,6 +35,7 @@ namespace SolidsVR
             pManager.AddGenericParameter("Nodes", "Nodes", "Nodes inside element", GH_ParamAccess.list);
             pManager.AddNumberParameter("ElementNr", "ElementNr", "Number of elment in global elements", GH_ParamAccess.item);
             pManager.AddNumberParameter("Connectivity", "Connectivity", "Connectivity in each element", GH_ParamAccess.list);
+            pManager.AddNumberParameter("AvgMises", "AvgM", "Average von Mises in each element", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -49,11 +51,13 @@ namespace SolidsVR
             List<Node> nodes = element.GetVertices();
             int elementNr = element.GetElementNr();
             List<int> connectivity = element.GetConnectivity();
+            double avgStress = element.GetAverageStressDir(6);
 
 
             DA.SetDataList(0, nodes);
             DA.SetData(1, elementNr);
             DA.SetDataList(2, connectivity);
+            DA.SetData(3, avgStress);
         }
 
         /// <summary>s
