@@ -24,7 +24,7 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddNumberParameter("Displacement", "D", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scale", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
         }

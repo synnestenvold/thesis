@@ -23,7 +23,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
 
-            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddNumberParameter("Stress", "S", "Stress in each dof", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Stress direction", "S dir", "S11, S22, S33, S12, S13, S23, mises as 0, 1, 2, 3, 4, 5, 6", GH_ParamAccess.item);
             pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
