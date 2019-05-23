@@ -9,10 +9,10 @@ using System.Linq;
 
 namespace SolidsVR
 {
-    public class SetUniLoadComponent : GH_Component
+    public class SetUniLoad : GH_Component
     {
       
-        public SetUniLoadComponent()
+        public SetUniLoad()
           : base("SetUniLoad", "UniLoads",
               "Uniform load component for FEA",
               "SolidsVR", "Load")

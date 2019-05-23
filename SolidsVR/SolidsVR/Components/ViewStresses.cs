@@ -10,10 +10,10 @@ using System.Linq;
 
 namespace SolidsVR
 {
-    public class ViewStressesComponent : GH_Component
+    public class ViewStresses : GH_Component
     {
 
-        public ViewStressesComponent()
+        public ViewStresses()
           : base("ViewStresses", "ViewStress",
               "Display stress in VR",
               "SolidsVR", "VR Preview")

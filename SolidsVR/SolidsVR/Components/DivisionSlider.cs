@@ -10,11 +10,11 @@ namespace SolidsVR
 {
 
 
-    public class DivisionSliderComponent : GH_Component
+    public class DivisionSlider : GH_Component
     {
         readonly int max = 15;
 
-        public DivisionSliderComponent()
+        public DivisionSlider()
           : base("DivisionSlider", "DivSlider",
               "Slider for division in VR",
               "SolidsVR", "VR Slider")
@@ -29,9 +29,9 @@ namespace SolidsVR
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("U count", "U", "Number of divisions", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("V count", "V", "Number of divisions", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("W count", "W", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("U count", "u", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("V count", "v", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("W count", "w", "Number of divisions", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "Text", "Division text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);

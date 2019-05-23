@@ -8,11 +8,11 @@ using Rhino.Geometry;
 
 namespace SolidsVR
 {
-    public class SurfaceSliderComponent : GH_Component
+    public class SurfaceSlider : GH_Component
     {
         int max = 6;
        
-        public SurfaceSliderComponent()
+        public SurfaceSlider()
           : base("SurfaceSlider", "SurfSlider",
               "Surface slider in VR",
               "SolidsVR", "VR Slider")

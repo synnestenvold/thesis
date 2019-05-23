@@ -7,12 +7,12 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class CrossSectionComponent : GH_Component
+    public class CrossSection : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the CrossSectionComponent class.
         /// </summary>
-        public CrossSectionComponent()
+        public CrossSection()
           : base("CrossSection", "CrossSec",
               "Get information of CrossSec",
               "SolidsVR", "VR Info")

@@ -14,12 +14,12 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class DeconstructNodeComponent : GH_Component
+    public class DeconstructNode : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the DeconstructNode class.
         /// </summary>
-        public DeconstructNodeComponent()
+        public DeconstructNode()
           : base("Deconstruct Node", "DeconstructNode",
               "Deconstruct Node",
               "SolidsVR", "Deconstruct")

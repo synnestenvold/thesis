@@ -8,12 +8,12 @@ using Rhino.Geometry;
 
 namespace SolidsVR
 {
-    public class DeconstructMeshComponent : GH_Component
+    public class DeconstructMesh : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the DeconstructMesh class.
         /// </summary>
-        public DeconstructMeshComponent()
+        public DeconstructMesh()
           : base("DeconstructMesh", "Deconstruct Mesh",
               "Deconstruct Mesh",
               "SolidsVR", "Deconstruct")

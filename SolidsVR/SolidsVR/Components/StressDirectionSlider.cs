@@ -12,11 +12,11 @@ using Rhino.Geometry;
 
 namespace SolidsVR
 {
-    public class StressDirectionSliderComponent : GH_Component
+    public class StressDirectionSlider : GH_Component
     {
         int max = 6;
 
-        public StressDirectionSliderComponent()
+        public StressDirectionSlider()
           : base("StressDirectionSlider", "StressSlider",
               "Slider for what stress direction to show",
               "SolidsVR", "VR Slider")

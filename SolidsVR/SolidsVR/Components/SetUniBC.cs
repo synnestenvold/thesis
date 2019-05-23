@@ -8,9 +8,9 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class SetUniBCComponent : GH_Component
+    public class SetUniBC : GH_Component
     {
-        public SetUniBCComponent()
+        public SetUniBC()
           : base("SetUniBC", "UniBC",
               "Uniform BC component for FEA",
               "SolidsVR", "BC")

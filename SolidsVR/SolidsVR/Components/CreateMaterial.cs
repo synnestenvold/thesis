@@ -6,12 +6,12 @@ using Rhino.Geometry;
 
 namespace SolidsVR
 {
-    public class CreateMaterialComponent : GH_Component
+    public class CreateMaterial : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the CreateMaterial class.
         /// </summary>
-        public CreateMaterialComponent()
+        public CreateMaterial()
           : base("CreateMaterial", "Material",
               "Create material",
               "SolidsVR", "Material")

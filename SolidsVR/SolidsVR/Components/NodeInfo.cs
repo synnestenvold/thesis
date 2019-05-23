@@ -16,7 +16,7 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class NodeInfoComponent : GH_Component
+    public class NodeInfo : GH_Component
     {
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
@@ -25,7 +25,7 @@ namespace SolidsVR
         /// Subcategory the panel. If you use non-existing tab or panel names, 
         /// new tabs/panels will automatically be created.
         /// </summary>
-        public NodeInfoComponent()
+        public NodeInfo()
           : base("NodeInfo", "NodeInfo",
               "Get information in node",
               "SolidsVR", "VR Info")
