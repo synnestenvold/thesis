@@ -69,28 +69,29 @@ namespace SolidsVR.Components
 
             List<List<int>> connectivity = mesh.GetConnectivity();
             List<List<Point3d>> elementPoints = mesh.GetElementPoints();
-            int sizeOfMatrix = mesh.GetSizeOfMatrix();
+            
             Point3d[] globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
             BrepGeometry brp = mesh.GetBrep();
             Brep origBrep = brp.GetBrep();
-            double removableVolume = mesh.GetOptVolume();
+            
+            int sizeOfMatrix = mesh.GetSizeOfMatrix();
             int removableElements = FindRemovableElements(nodes, mesh.GetElements());
             int totalElements = mesh.GetElements().Count;
-            double minElements = totalElements - Math.Floor(totalElements * removableVolume / 100);
             int numberElements = mesh.GetElements().Count;
-            if (removableVolume != 0)
-            {
-                opt = true;
-            }
+            double removableVolume = mesh.GetOptVolume();
+            double minElements = totalElements - Math.Floor(totalElements * removableVolume / 100);
+            
+            
+            if (removableVolume != 0) opt = true;
+
             DataTree<double> defTree = new DataTree<double>();
             Boolean first = true;
             double max = 0;
             int removeElem = -1;
             List<int> removeNodeNr = new List<int>();
-            while (numberElements > minElements && max < material.GetY() || first) //Requirements for removal
-                                                                                   //problem: when only > and || it will loop through the solution when 
 
+            while (numberElements > minElements && max < material.GetY() || first) //Requirements for removal                                                                
             {
                 for (int i = 0; i < nodes.Count; i++)
                 {
@@ -98,7 +99,6 @@ namespace SolidsVR.Components
                 }
 
                 List<Element> elements = mesh.GetElements();
-                //if (opt == false) 
                 first = false;
 
                 //Remove selected element from last iterations, and update afftected nodes
@@ -106,6 +106,7 @@ namespace SolidsVR.Components
                 {
                     RemoveElementAndUpdateNodes(elements, removeElem, removeNodeNr);
                 }
+
                 //Create K_tot
                 var tupleK_B = CreateGlobalStiffnessMatrix(sizeOfMatrix, material, elements);
                 Matrix<double> K_tot = tupleK_B.Item1;
@@ -163,7 +164,6 @@ namespace SolidsVR.Components
                 CalcStrainAndStress(elements, material);
 
                 //Calculate global stresses from strain
-
                 CalcStrainAndStressGlobal(nodes, material);
                 SetAverageStresses(elements);
 
