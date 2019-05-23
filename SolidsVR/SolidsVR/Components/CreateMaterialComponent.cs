@@ -6,12 +6,12 @@ using Rhino.Geometry;
 
 namespace SolidsVR
 {
-    public class CreateMaterial : GH_Component
+    public class CreateMaterialComponent : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the CreateMaterial class.
         /// </summary>
-        public CreateMaterial()
+        public CreateMaterialComponent()
           : base("CreateMaterial", "Material",
               "Create material with Young's modulus and Poisson's ratio",
               "SolidsVR", "Material")

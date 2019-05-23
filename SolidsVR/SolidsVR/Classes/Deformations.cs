@@ -6,7 +6,7 @@ namespace SolidsVR
 {
     class Deformations
     {
-        private double[,] m;
+        //private double[,] m;
         private List<double> load = new List<double>();
         private int rows = 0;
         private int cols = 0;

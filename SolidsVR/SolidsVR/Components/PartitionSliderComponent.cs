@@ -17,7 +17,7 @@ namespace SolidsVR
         public PartitionSliderComponent()
           : base("DivisionSlider", "DivSlider",
               "Slider for division in VR",
-              "SolidsVR", "SliderVR")
+              "SolidsVR", "VR Slider")
         {
         }
 

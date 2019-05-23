@@ -18,7 +18,7 @@ namespace SolidsVR
         public LoadSliderComponent()
           : base("LoadSlider", "LoadSlider",
               "Load slider for VR",
-              "SolidsVR", "SliderVR")
+              "SolidsVR", "VR Slider")
         {
         }
 

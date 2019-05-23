@@ -28,7 +28,7 @@ namespace SolidsVR
         public NodeInfoComponent()
           : base("Get information of Node", "Node info",
               "Description",
-              "SolidsVR", "Closest point")
+              "SolidsVR", "VR Info")
         {
         }
 

@@ -16,7 +16,7 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class ClosestPointComponent : GH_Component
+    public class ClosestPointComponent2 : GH_Component
     {
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
@@ -25,7 +25,7 @@ namespace SolidsVR
         /// Subcategory the panel. If you use non-existing tab or panel names, 
         /// new tabs/panels will automatically be created.
         /// </summary>
-        public ClosestPointComponent()
+        public ClosestPointComponent2()
           : base("Find the closest point to sphere", "Closest point",
               "Description",
               "SolidsVR", "Closest point")

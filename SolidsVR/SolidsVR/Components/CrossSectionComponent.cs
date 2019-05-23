@@ -15,7 +15,7 @@ namespace SolidsVR
         public CrossSectionComponent()
           : base("Get information of CrossSec", "CrossSec",
               "Description",
-              "SolidsVR", "CrossSec")
+              "SolidsVR", "VR Info")
         {
         }
 

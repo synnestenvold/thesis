@@ -14,7 +14,7 @@ namespace SolidsVR.Components
         public PreDefSlider()
           : base("PreDefSlider", "PreDefSlider",
               "Prescribed deformation slider in VR",
-              "SolidsVR", "SliderVR")
+              "SolidsVR", "VR Slider")
         {
         }
 

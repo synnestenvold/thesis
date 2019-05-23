@@ -12,7 +12,7 @@ namespace SolidsVR
         public PointsToBrepComponent()
           : base("PointsToBrep", "P2B",
               "Created brep from 8 points",
-              "SolidsVR", "Subcategory3")
+              "SolidsVR", "Geometry")
         {
         }
 

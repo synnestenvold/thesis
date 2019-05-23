@@ -8,12 +8,12 @@ using System.Linq;
 
 namespace SolidsVR
 {
-    public class MeshCBrep : GH_Component
+    public class MeshCurveComponent : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MeshCBrep class.
         /// </summary>
-        public MeshCBrep()
+        public MeshCurveComponent()
           : base("MeshCBrep", "MeshCBrep",
               "Description",
               "SolidsVR", "Mesh")

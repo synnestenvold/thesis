@@ -14,7 +14,7 @@ namespace SolidsVR
         public PreDefComponent()
           : base("PreDef", "PreDef",
               "Prescribed deformation",
-              "SolidsVR", "Def")
+              "SolidsVR", "Load")
         {
         }
 

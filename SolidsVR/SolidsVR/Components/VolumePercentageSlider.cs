@@ -10,11 +10,11 @@ namespace SolidsVR.Components
     public class VolumePercentageSlider : GH_Component
     {
         int max = 30;
-        int zero = 10;
+        //int zero = 10;
         public VolumePercentageSlider()
           : base("VolumePercentageSlider", "VolumeSlider",
               "Volume reduction in percentage",
-              "SolidsVR", "SliderVR")
+              "SolidsVR", "VR Slider")
         {
         }
 

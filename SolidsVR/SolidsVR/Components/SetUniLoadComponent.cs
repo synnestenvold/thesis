@@ -15,7 +15,7 @@ namespace SolidsVR
         public SetUniLoadComponent()
           : base("Uniform load component for FEA", "UniLoads",
               "Description",
-              "SolidsVR", "Loads")
+              "SolidsVR", "Load")
         {
         }
 
@@ -80,7 +80,7 @@ namespace SolidsVR
             List<double> loadCoord = new List<double>();
             List<double> pointValues = new List<double>();
 
-            double loadRef = 0.05;
+            //double loadRef = 0.05;
             double arrowRef = 0.8;
 
             double maxLength = refLength * 2;

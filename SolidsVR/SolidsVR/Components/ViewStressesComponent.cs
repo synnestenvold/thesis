@@ -16,7 +16,7 @@ namespace SolidsVR
         public ViewStressesComponent()
           : base("ViewStresses", "ViewStress",
               "View stress",
-              "SolidsVR", "Preview")
+              "SolidsVR", "VR Preview")
         {
         }
 

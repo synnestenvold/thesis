@@ -7,15 +7,15 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class headLineComponent : GH_Component
+    public class HeadLineComponent : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the headLineComponent class.
         /// </summary>
-        public headLineComponent()
+        public HeadLineComponent()
           : base("Create headlines", "HeadLines",
               "Description",
-              "SolidsVR", "HeadLines")
+              "SolidsVR", "VR Info")
         {
         }
 

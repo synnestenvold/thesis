@@ -7,7 +7,6 @@ using Rhino.Geometry;
 using System.Linq;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics;
-using Grasshopper.Kernel.Data;
 
 
 namespace SolidsVR

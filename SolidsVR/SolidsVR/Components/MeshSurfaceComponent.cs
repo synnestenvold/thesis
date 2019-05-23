@@ -10,12 +10,12 @@ using System.Linq;
 
 namespace SolidsVR
 {
-    public class MeshSurfBrep : GH_Component
+    public class MeshSurfaceComponent : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MeshSurfBrep class.
         /// </summary>
-        public MeshSurfBrep()
+        public MeshSurfaceComponent()
           : base("MeshSBrep", "MeshSBrep",
               "Description",
               "SolidsVR", "Mesh")

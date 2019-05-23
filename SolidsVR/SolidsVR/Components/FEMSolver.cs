@@ -13,15 +13,15 @@ using System.Drawing;
 
 namespace SolidsVR.Components
 {
-    public class TopOptComponent : GH_Component
+    public class FEMSolver : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the TopOpt class.
         /// </summary>
-        public TopOptComponent()
-          : base("TopOpt", "TopOpt",
-              "Topology Optimization",
-              "SolidsVR", "Subcategory3")
+        public FEMSolver()
+          : base("FEMSolver", "FEMSolver",
+              "Component for FEA",
+              "SolidsVR", "Analyze")
         {
         }
 
