@@ -20,14 +20,14 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddIntegerParameter("Surface number", "Surface number", "Surface number for BC (0-5)", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh class", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "M", "MeshGeometry class", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("BC points", "BC", "BC in point, (x,y,z);(Rx,Ry,Rz)", GH_ParamAccess.list);
-            pManager.AddBrepParameter("BC cones", "Geometry", "Cones showing the boundary conditions", GH_ParamAccess.list);
-            pManager.AddColourParameter("Coloring for BC-cones", "Color", "Coloring of cones", GH_ParamAccess.item);
+            pManager.AddTextParameter("Boundary conditions", "BC", "BC in point, (x,y,z);(Rx,Ry,Rz)", GH_ParamAccess.list);
+            pManager.AddBrepParameter("Geometry", "Geometry", "Cones showing the boundary conditions", GH_ParamAccess.list);
+            pManager.AddColourParameter("Color", "Color", "Coloring of cones", GH_ParamAccess.item);
 
         }
 

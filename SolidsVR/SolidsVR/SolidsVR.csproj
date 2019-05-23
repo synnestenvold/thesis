@@ -74,7 +74,7 @@
     <Compile Include="Classes\Node.cs" />
     <Compile Include="Classes\CMatrix.cs" />
     <Compile Include="Components\CreateMaterialComponent.cs" />
-    <Compile Include="Components\PartitionSliderComponent.cs" />
+    <Compile Include="Components\DivisionSliderComponent.cs" />
     <Compile Include="Classes\Deformations.cs" />
     <Compile Include="Components\DeformationSliderComponent.cs" />
     <Compile Include="Components\LoadSliderComponent.cs" />

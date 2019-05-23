@@ -25,7 +25,7 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddBrepParameter("Brep", "B", "Input cube as a (twisted) brep", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Input cube as a (twisted) brep", GH_ParamAccess.item);
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);
@@ -37,7 +37,7 @@ namespace SolidsVR
             //pManager.AddIntegerParameter("Nodes", "N", "List of new node numbering for each cube", GH_ParamAccess.tree);
             //pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
             //pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
-            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh of Brep", GH_ParamAccess.item);
 
             
 

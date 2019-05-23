@@ -25,7 +25,7 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh of Brep", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -33,13 +33,13 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddPointParameter("Element vertices", "V", "Vertices in each element", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Connectivity", "C", "Connectivity for each element", GH_ParamAccess.tree);
-            pManager.AddLineParameter("Edges", "E", "Edges for each element", GH_ParamAccess.tree);
-            pManager.AddBrepParameter("Surfaces", "S", "Surfaces for each element", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Points", "P", "Global coordinates", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Nodes", "N", "Nodes class", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Elements", "E", "Elements in mesh", GH_ParamAccess.list);
+            pManager.AddPointParameter("Element vertices", "Vertices", "Vertices in each element", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Connectivity", "Connect", "Connectivity for each element", GH_ParamAccess.tree);
+            pManager.AddLineParameter("Edges", "Edge", "Edges for each element", GH_ParamAccess.tree);
+            pManager.AddBrepParameter("Surfaces", "Surf", "Surfaces for each element", GH_ParamAccess.tree);
+            pManager.AddPointParameter("Points", "Point", "Global coordinates", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Nodes", "Node", "Nodes class", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Elements", "Elem", "Elements in mesh", GH_ParamAccess.list);
         }
 
         /// <summary>

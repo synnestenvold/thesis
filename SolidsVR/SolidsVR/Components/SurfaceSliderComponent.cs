@@ -22,12 +22,12 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
-            pManager.AddBrepParameter("Brep", "B", "Brep as reference size", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Geometry as reference size", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Surface number", "Surface no", "Number of surface (0-5)", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Surface number", "S", "Number of surface (0-5)", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Text placement", GH_ParamAccess.list);

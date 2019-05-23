@@ -27,7 +27,7 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddBrepParameter("Brep", "B", "Input geometry as a curved brep", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Input geometry as a curved brep", GH_ParamAccess.item);
             pManager.AddPointParameter("Point", "P", "Corner points in right order", GH_ParamAccess.list);
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
@@ -38,7 +38,7 @@ namespace SolidsVR
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh of Brep", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
