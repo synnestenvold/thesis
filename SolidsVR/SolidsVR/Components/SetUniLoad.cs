@@ -22,7 +22,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddIntegerParameter("Surface number", "S", "Surface number for loading (0-5)", GH_ParamAccess.item);
-            pManager.AddVectorParameter("Load vector", "L", "Direction and load amount in kN/m", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Load vector", "Load", "Direction and load amount in kN/m", GH_ParamAccess.item);
             pManager.AddGenericParameter("Mesh", "Mesh", "MeshGeometry class", GH_ParamAccess.item);
         }
 
