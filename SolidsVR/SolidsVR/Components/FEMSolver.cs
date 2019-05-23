@@ -49,7 +49,7 @@ namespace SolidsVR.Components
         {
             // --- variables ---
 
-            Mesh_class mesh = new Mesh_class();
+            MeshGeometry mesh = new MeshGeometry();
             List<string> bctxt = new List<string>();
             List<string> loadtxt = new List<string>();
             List<string> deftxt = new List<string>();
@@ -72,7 +72,7 @@ namespace SolidsVR.Components
             int sizeOfMatrix = mesh.GetSizeOfMatrix();
             Point3d[] globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
-            Brep_class brp = mesh.GetBrep();
+            BrepGeometry brp = mesh.GetBrep();
             Brep origBrep = brp.GetBrep();
             double removableVolume = mesh.GetOptVolume();
             int removableElements = FindRemovableElements(nodes, mesh.GetElements());

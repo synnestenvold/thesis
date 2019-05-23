@@ -91,7 +91,7 @@ namespace SolidsVR
                 
 
                 //Setting values for Mesh class
-                Mesh_class mesh = new Mesh_class(u, v, w);
+                MeshGeometry mesh = new MeshGeometry(u, v, w);
                 mesh.SetConnectivity(connectivity);
                 mesh.SetElementPoints(elementPoints);
                 mesh.SetEdgesMesh(edgeMesh);
@@ -101,7 +101,7 @@ namespace SolidsVR
                 mesh.SetNodeList(nodes);
                 mesh.SetElements(elements);
                 mesh.SetOrigBrep(brp);
-                mesh.SetBrep(new Brep_class(brp));
+                mesh.SetBrep(new BrepGeometry(brp));
                 mesh.OrderSurfaces(corners);
                 mesh.SetOptVolume(removeVolume);
                 

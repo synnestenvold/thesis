@@ -41,7 +41,7 @@ namespace SolidsVR
 
             List<Brep> spheres = new List<Brep>();
             Vector3d def = new Vector3d(0, 0, 0);
-            Mesh_class mesh = new Mesh_class();
+            MeshGeometry mesh = new MeshGeometry();
 
             List<string> pointsString = new List<string>();
 

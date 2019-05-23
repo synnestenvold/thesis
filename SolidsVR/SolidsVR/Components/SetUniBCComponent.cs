@@ -37,14 +37,14 @@ namespace SolidsVR
             
             int surfNo = 0;
             string restrains = "0,0,0";
-            Mesh_class mesh = new Mesh_class();
+            MeshGeometry mesh = new MeshGeometry();
 
             //---input---
 
             if (!DA.GetData(0, ref surfNo)) return;
             if (!DA.GetData(1, ref mesh)) return;
 
-            Brep_class brp = mesh.GetBrep();
+            BrepGeometry brp = mesh.GetBrep();
             List<Node> nodes = mesh.GetNodeList();
 
             //---solve---

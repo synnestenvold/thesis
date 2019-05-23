@@ -67,7 +67,7 @@ namespace SolidsVR
             //---variables---
 
             Brep sphere = new Brep();
-            Mesh_class mesh = new Mesh_class();
+            MeshGeometry mesh = new MeshGeometry();
 
             //---input---
 

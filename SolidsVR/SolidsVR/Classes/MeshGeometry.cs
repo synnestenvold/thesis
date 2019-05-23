@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace SolidsVR
 {
-    class Mesh_class
+    class MeshGeometry
     {
         private int u = 1;
         private int v = 1;
@@ -19,7 +19,7 @@ namespace SolidsVR
         List<List<Line>> edgesMesh = new List<List<Line>>();
         List<List<Brep>> surfacesMesh = new List<List<Brep>>();
         List<Node> nodes = new List<Node>();
-        Brep_class brp = new Brep_class();
+        BrepGeometry brp = new BrepGeometry();
         Brep origBrep = new Brep();
         List<Brep> surfaces = new List<Brep>();
         List<Element> elements = new List<Element>();
@@ -28,13 +28,13 @@ namespace SolidsVR
         Point3d[] globalPoints = null;
         int sizeOfMatrix = 0;
 
-        public Mesh_class(int _u, int _v, int _w)
+        public MeshGeometry(int _u, int _v, int _w)
         {
             u = _u;
             v = _v;
             w = _w;
         }
-        public Mesh_class() { }
+        public MeshGeometry() { }
 
         public int getU()
         {
@@ -122,12 +122,12 @@ namespace SolidsVR
             return nodes;
         }
 
-        public Brep_class GetBrep()
+        public BrepGeometry GetBrep()
         {
             return brp;
         }
 
-        public void SetBrep(Brep_class _brp)
+        public void SetBrep(BrepGeometry _brp)
         {
             brp = _brp;
         }

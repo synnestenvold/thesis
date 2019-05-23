@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 
 namespace SolidsVR
 {
-    public class Brep_class
+    public class BrepGeometry
     {
         Brep brp = new Brep();
         private List<Brep> surfaces = new List<Brep>();
         Point3d centroid = new Point3d(0, 0, 0);
 
-        public Brep_class(Brep _brp) {
+        public BrepGeometry(Brep _brp) {
             brp = _brp;
             VolumeMassProperties vmp = VolumeMassProperties.Compute(brp);
             centroid = vmp.Centroid;
 
         }
 
-        public Brep_class() { }
+        public BrepGeometry() { }
 
         public void SetBrep(Brep _brp)
         {

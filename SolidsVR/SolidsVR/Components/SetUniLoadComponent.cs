@@ -40,8 +40,8 @@ namespace SolidsVR
             
             int surfNo = 0;
             Vector3d forceVec = new Vector3d();
-            Brep_class brp = new Brep_class();
-            Mesh_class mesh = new Mesh_class();
+            BrepGeometry brp = new BrepGeometry();
+            MeshGeometry mesh = new MeshGeometry();
 
             //---input---
 
@@ -173,7 +173,7 @@ namespace SolidsVR
             return arrows;
         }
 
-        public Tuple<List<string>, double> FindPointLoads(int surfNo, double area, Vector3d forceVec, List<Node> nodes, Brep_class brp)
+        public Tuple<List<string>, double> FindPointLoads(int surfNo, double area, Vector3d forceVec, List<Node> nodes, BrepGeometry brp)
         {
             List<string> pointLoads = new List<string>();
             Vector3d maxLoads = new Vector3d(0, 0, 0);

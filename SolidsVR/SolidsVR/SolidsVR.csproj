@@ -68,7 +68,7 @@
   <ItemGroup>
     <Compile Include="Classes\Assembly_StiffnessMatrix.cs" />
     <Compile Include="Classes\Bmatrix.cs" />
-    <Compile Include="Classes\Brep_class.cs" />
+    <Compile Include="Classes\BrepGeometry.cs" />
     <Compile Include="Classes\Element.cs" />
     <Compile Include="Classes\Material.cs" />
     <Compile Include="Classes\Node.cs" />
@@ -84,7 +84,7 @@
     <Compile Include="Components\PreDefSlider.cs" />
     <Compile Include="Components\SetUniBCComponent.cs" />
     <Compile Include="Components\SetUniLoadComponent.cs" />
-    <Compile Include="Classes\Mesh_class.cs" />
+    <Compile Include="Classes\MeshGeometry.cs" />
     <Compile Include="Components\FEMSolver.cs" />
     <Compile Include="Components\VolumePercentageSlider.cs" />
     <Compile Include="Components\CrossSectionComponent.cs" />

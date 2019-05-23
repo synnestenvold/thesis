@@ -47,7 +47,7 @@ namespace SolidsVR
         {
 
             List<Curve> curves = new List<Curve>();
-            Mesh_class mesh = new Mesh_class();
+            MeshGeometry mesh = new MeshGeometry();
 
             //---input---
 
