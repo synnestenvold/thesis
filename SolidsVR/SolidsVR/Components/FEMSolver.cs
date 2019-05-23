@@ -30,7 +30,7 @@ namespace SolidsVR.Components
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddTextParameter("Boundary conditions", "BC", "Nodes that are constrained", GH_ParamAccess.list);
             pManager.AddTextParameter("PointLoads", "PL", "Input loads", GH_ParamAccess.list);
-            pManager.AddTextParameter("PreDeformations", "PD", "Input deformations", GH_ParamAccess.list);
+            pManager.AddTextParameter("PreDeformations", "PreDef", "Input deformations", GH_ParamAccess.list);
             pManager.AddGenericParameter("Material", "M", "Material", GH_ParamAccess.item);
         }
 

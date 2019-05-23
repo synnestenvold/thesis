@@ -13,24 +13,24 @@ namespace SolidsVR
     {
       
         public SetUniLoadComponent()
-          : base("Uniform load component for FEA", "UniLoads",
-              "Description",
+          : base("SetUniLoad", "UniLoads",
+              "Uniform load component for FEA",
               "SolidsVR", "Load")
         {
         }
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Surface number", "Surface no", "Surface number for loading (0-5)", GH_ParamAccess.item);
-            pManager.AddVectorParameter("Load vector", "Load", "Direction and load amount in kN/m", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh class", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Surface number", "S", "Surface number for loading (0-5)", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Load vector", "L", "Direction and load amount in kN/m", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "MeshGeometry class", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("Point loads", "PL", "Lumped load to points, (x,y,z);(Fx,Fy,Fz)", GH_ParamAccess.list);
-            pManager.AddLineParameter("Load-arrows", "Geometry", "Arrows showing the load", GH_ParamAccess.list);
-            pManager.AddColourParameter("Arrow coloring", "Color", "Coloring of arrows", GH_ParamAccess.item);
+            pManager.AddLineParameter("Geometry", "Geometry", "Arrows showing the load", GH_ParamAccess.list);
+            pManager.AddColourParameter("Color", "Color", "Coloring of arrows", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

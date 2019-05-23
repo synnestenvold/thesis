@@ -13,8 +13,8 @@ namespace SolidsVR
         /// Initializes a new instance of the CrossSectionComponent class.
         /// </summary>
         public CrossSectionComponent()
-          : base("Get information of CrossSec", "CrossSec",
-              "Description",
+          : base("CrossSection", "CrossSec",
+              "Get information of CrossSec",
               "SolidsVR", "VR Info")
         {
         }
@@ -25,7 +25,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Curves", "C", "Curves for Surface for cross-section", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
         }
 
         /// <summary>

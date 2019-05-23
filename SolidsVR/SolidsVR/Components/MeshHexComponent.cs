@@ -17,15 +17,15 @@ namespace SolidsVR
     {
         
         public MeshTBrepComponent()
-          : base("MeshTBrep", "MeshTBrep",
-              "Description",
+          : base("MeshHex", "MeshH",
+              "Mesh hexahedron",
               "SolidsVR", "Mesh")
         {
         }
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddBrepParameter("Brep", "B", "Input cube as a (twisted) brep", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Input cube as a (twisted) brep", GH_ParamAccess.item);
             pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
             pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);

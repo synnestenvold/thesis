@@ -6,11 +6,11 @@ using Rhino.Geometry;
 
 namespace SolidsVR
 {
-    public class PointsToBrepComponent : GH_Component
+    public class PointsToGeometryComponent : GH_Component
     {
        
-        public PointsToBrepComponent()
-          : base("PointsToBrep", "P2B",
+        public PointsToGeometryComponent()
+          : base("PointsToGeometry", "P2G",
               "Created brep from 8 points",
               "SolidsVR", "Geometry")
         {
@@ -27,7 +27,7 @@ namespace SolidsVR
       
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddBrepParameter("Brep", "B", "Brep for analysis", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Brep for analysis", GH_ParamAccess.item);
         }
         
         protected override void SolveInstance(IGH_DataAccess DA)

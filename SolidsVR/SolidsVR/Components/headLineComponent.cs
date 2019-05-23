@@ -13,8 +13,8 @@ namespace SolidsVR
         /// Initializes a new instance of the headLineComponent class.
         /// </summary>
         public HeadLineComponent()
-          : base("Create headlines", "HeadLines",
-              "Description",
+          : base("HeadLine", "HeadLine",
+              "Create headlines in VR",
               "SolidsVR", "VR Info")
         {
         }
@@ -25,7 +25,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("Curves", "C", "Curves for Surface for cross-section", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
         }
 
         /// <summary>

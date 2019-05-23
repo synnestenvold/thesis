@@ -20,8 +20,8 @@ namespace SolidsVR
         /// Initializes a new instance of the DeconstructNode class.
         /// </summary>
         public DeconstructNodeComponent()
-          : base("Deconstruct Node", "Deconstruct Node",
-              "Description",
+          : base("Deconstruct Node", "DeconstructNode",
+              "Deconstruct Node",
               "SolidsVR", "Deconstruct")
         {
         }
@@ -31,7 +31,7 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Node", "Node", "Node for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Node", "N", "Node for Brep", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -39,12 +39,12 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddPointParameter("Point", "Point", "Coordinates of the node", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Elements", "Elements", "Which elements node include", GH_ParamAccess.list);
+            pManager.AddPointParameter("Point", "P", "Coordinates of the node", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Elements", "Elem", "Which elements node include", GH_ParamAccess.list);
             pManager.AddTextParameter("Position", "StringPos", "Position of node", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Surfaces", "Surfaces", "Which surface node include", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Deformations", "Deformation", "Deformations in each node", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Strains", "Strains", "Strains in each node", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Surfaces", "Surf", "Which surface node include", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Deformations", "Def", "Deformations in each node", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Strain", "Strain", "Strains in each node", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Global Strain", "Global srains", "Averaged strains in each node", GH_ParamAccess.list);
             pManager.AddNumberParameter("Global Stress", "Global stress", "Averaged stress in each node", GH_ParamAccess.list);
         }

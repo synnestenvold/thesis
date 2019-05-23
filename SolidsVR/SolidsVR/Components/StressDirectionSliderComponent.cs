@@ -26,12 +26,12 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
-            pManager.AddBrepParameter("Brep", "B", "Brep as reference", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Brep as reference", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Stress direction", "Stress dir", "Direction of stress (0-5)", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Stress direction", "S", "Direction of stress (0-5)", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "Text", "Direction text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);

@@ -22,7 +22,7 @@ namespace SolidsVR.Components
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
-            pManager.AddBrepParameter("Brep", "B", "Brep as reference", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geoemtry", "G", "Brep as reference", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)

@@ -10,11 +10,11 @@ namespace SolidsVR
 {
 
 
-    public class PartitionSliderComponent : GH_Component
+    public class DivisionSliderComponent : GH_Component
     {
         readonly int max = 15;
 
-        public PartitionSliderComponent()
+        public DivisionSliderComponent()
           : base("DivisionSlider", "DivSlider",
               "Slider for division in VR",
               "SolidsVR", "VR Slider")
@@ -24,7 +24,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Sliders as curves (U, V, W)", GH_ParamAccess.list);
-            pManager.AddBrepParameter("Brep", "B", "Brep as reference size", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Brep as reference size", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)

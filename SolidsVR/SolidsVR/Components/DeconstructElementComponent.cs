@@ -13,8 +13,8 @@ namespace SolidsVR
         /// Initializes a new instance of the DeconstructElement class.
         /// </summary>
         public DeconstructElementComponent()
-          : base("Deconstruct Element", "Deconstruct Element",
-              "Description",
+          : base("DeconstructElement", "DeconstructElement",
+              "Deconstruct Element",
               "SolidsVR", "Deconstruct")
         {
         }
@@ -24,7 +24,7 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Element", "Element", "Element in brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Element", "E", "Element in brep", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -32,9 +32,9 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Nodes", "Nodes", "Nodes inside element", GH_ParamAccess.list);
-            pManager.AddNumberParameter("ElementNr", "ElementNr", "Number of elment in global elements", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Connectivity", "Connectivity", "Connectivity in each element", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Nodes", "Node", "Nodes inside element", GH_ParamAccess.list);
+            pManager.AddNumberParameter("ElementNr", "Elem no", "Number of elment in global elements", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Connectivity", "Connect", "Connectivity in each element", GH_ParamAccess.list);
             pManager.AddNumberParameter("AvgMises", "AvgM", "Average von Mises in each element", GH_ParamAccess.item);
         }
 

@@ -17,31 +17,31 @@ namespace SolidsVR
 
         public ViewDeformationsComponent()
           : base("ViewDeformations", "ViewDef",
-              "Description",
+              "Display deformation in VR",
               "SolidsVR", "VR Preview")
         {
         }
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Displacement", "Disp", "Displacement in each dof", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Scaling", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Displacement", "D", "Displacement in each dof", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Scale", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
         }
 
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
 
-            pManager.AddGeometryParameter("Brep solid", "Solid", "3D Model of deformation with sphere", GH_ParamAccess.list);
+            pManager.AddGeometryParameter("Geometry solid", "Geometry solid", "3D Model of deformation with sphere", GH_ParamAccess.list);
             pManager.AddColourParameter("Color solid", "Color solid", "Colors for deformation", GH_ParamAccess.list);
-            pManager.AddGeometryParameter("Brep outer edges", "Edges", "Curves showing the original shape of solid", GH_ParamAccess.list);
+            pManager.AddGeometryParameter("Geometry edges", "Geometry edges", "Curves showing the original shape of solid", GH_ParamAccess.list);
             pManager.AddColourParameter("Color edges", "Color edges", "Colors for showing original shape", GH_ParamAccess.list);
 
             pManager.AddTextParameter("Text", "Text", "Text for max deformation", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
-            pManager.AddColourParameter("Colors", "Color T", "Colors for text", GH_ParamAccess.list);
+            pManager.AddColourParameter("Color T", "Color T", "Colors for text", GH_ParamAccess.list);
 
 
 

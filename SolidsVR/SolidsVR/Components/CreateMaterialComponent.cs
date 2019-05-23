@@ -13,7 +13,7 @@ namespace SolidsVR
         /// </summary>
         public CreateMaterialComponent()
           : base("CreateMaterial", "Material",
-              "Create material with Young's modulus and Poisson's ratio",
+              "Create material",
               "SolidsVR", "Material")
         {
         }
