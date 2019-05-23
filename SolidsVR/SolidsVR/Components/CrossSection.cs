@@ -74,7 +74,7 @@ namespace SolidsVR
 
             List <Point3d> points= CreatePoints(surface, u, v);
 
-            Color pointsColor = Color.Black;
+            Color pointsColor = Color.FromArgb(135, 206, 255);
 
             var tuple = CreateTextAndPlane(curves);
             List<string> texts = tuple.Item1;

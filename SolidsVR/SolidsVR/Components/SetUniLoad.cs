@@ -81,7 +81,7 @@ namespace SolidsVR
             List<double> pointValues = new List<double>();
 
             //double loadRef = 0.05;
-            double arrowRef = 0.8;
+            double arrowRef = 10;
 
             double maxLength = refLength * 2;
 
