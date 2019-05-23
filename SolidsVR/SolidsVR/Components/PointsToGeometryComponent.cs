@@ -6,10 +6,10 @@ using Rhino.Geometry;
 
 namespace SolidsVR
 {
-    public class PointsToBrepComponent : GH_Component
+    public class PointsToGeometryComponent : GH_Component
     {
        
-        public PointsToBrepComponent()
+        public PointsToGeometryComponent()
           : base("PointsToGeometry", "P2G",
               "Created brep from 8 points",
               "SolidsVR", "Geometry")
