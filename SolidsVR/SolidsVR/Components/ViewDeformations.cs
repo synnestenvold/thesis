@@ -299,7 +299,7 @@ namespace SolidsVR
             Vector3d def = new Vector3d(nodeMax.GetDeformation()[0], nodeMax.GetDeformation()[1], nodeMax.GetDeformation()[2]);
 
             Point3d newPoint = nodeMax.GetCoord() + def * scale;
-
+            newPoint = Point3d.Add(newPoint, new Point3d(0, -1.5 * refSize, 0));
             defMax = Math.Round(defMax, 3);
 
             string text = defMax.ToString() + " mm";
