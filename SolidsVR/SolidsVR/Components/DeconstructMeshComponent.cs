@@ -25,7 +25,7 @@ namespace SolidsVR
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "M", "Mesh of Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.item);
         }
 
         /// <summary>

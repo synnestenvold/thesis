@@ -22,7 +22,7 @@ namespace SolidsVR
         {
             pManager.AddBrepParameter("Sphere", "S", "Sphere for finding point", GH_ParamAccess.list);
             pManager.AddVectorParameter("Prescribed deformations", "PreDef", "Prescribed deformation as a vector", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)

@@ -38,7 +38,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBrepParameter("Sphere", "S", "Sphere for finding closest point", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
 
         }
 

@@ -37,7 +37,7 @@ namespace SolidsVR
             //pManager.AddIntegerParameter("Nodes", "N", "List of new node numbering for each cube", GH_ParamAccess.tree);
             //pManager.AddIntegerParameter("Connectivity", "C", "Relationship between local and global numbering", GH_ParamAccess.tree);
             //pManager.AddPointParameter("Nodes", "N", "Coordinates for corner nodes in brep", GH_ParamAccess.tree);
-            pManager.AddGenericParameter("Mesh", "M", "Mesh of Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.item);
 
             
 

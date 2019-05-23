@@ -19,8 +19,8 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Surface number", "Surface number", "Surface number for BC (0-5)", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Mesh", "M", "MeshGeometry class", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Surface number", "S", "Surface number for BC (0-5)", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "MeshGeometry class", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
