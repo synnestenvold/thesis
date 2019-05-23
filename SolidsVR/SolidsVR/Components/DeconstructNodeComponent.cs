@@ -20,8 +20,8 @@ namespace SolidsVR
         /// Initializes a new instance of the DeconstructNode class.
         /// </summary>
         public DeconstructNodeComponent()
-          : base("Deconstruct Node", "Deconstruct Node",
-              "Description",
+          : base("Deconstruct Node", "DeconstructNode",
+              "Deconstruct Node",
               "SolidsVR", "Deconstruct")
         {
         }

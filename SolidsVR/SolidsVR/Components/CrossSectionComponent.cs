@@ -13,8 +13,8 @@ namespace SolidsVR
         /// Initializes a new instance of the CrossSectionComponent class.
         /// </summary>
         public CrossSectionComponent()
-          : base("Get information of CrossSec", "CrossSec",
-              "Description",
+          : base("CrossSection", "CrossSec",
+              "Get information of CrossSec",
               "SolidsVR", "VR Info")
         {
         }

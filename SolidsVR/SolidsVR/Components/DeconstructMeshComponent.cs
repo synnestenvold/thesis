@@ -14,8 +14,8 @@ namespace SolidsVR
         /// Initializes a new instance of the DeconstructMesh class.
         /// </summary>
         public DeconstructMeshComponent()
-          : base("Deconstruct Mesh", "Deconstruct MeshCBrep",
-              "Description",
+          : base("DeconstructMesh", "Deconstruct Mesh",
+              "Deconstruct Mesh",
               "SolidsVR", "Deconstruct")
         {
         }
