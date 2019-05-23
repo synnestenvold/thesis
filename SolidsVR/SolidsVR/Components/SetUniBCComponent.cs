@@ -11,8 +11,8 @@ namespace SolidsVR
     public class SetUniBCComponent : GH_Component
     {
         public SetUniBCComponent()
-          : base("Uniform BC component for FEA", "UniBC",
-              "Description",
+          : base("SetUniBC", "UniBC",
+              "Uniform BC component for FEA",
               "SolidsVR", "BC")
         {
         }

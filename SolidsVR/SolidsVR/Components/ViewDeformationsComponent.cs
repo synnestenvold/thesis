@@ -17,7 +17,7 @@ namespace SolidsVR
 
         public ViewDeformationsComponent()
           : base("ViewDeformations", "ViewDef",
-              "Description",
+              "Display deformation in VR",
               "SolidsVR", "VR Preview")
         {
         }

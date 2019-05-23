@@ -14,7 +14,7 @@ namespace SolidsVR
        
         public SurfaceSliderComponent()
           : base("SurfaceSlider", "SurfSlider",
-              "Description",
+              "Surface slider in VR",
               "SolidsVR", "VR Slider")
         {
         }

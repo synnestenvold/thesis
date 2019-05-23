@@ -14,8 +14,8 @@ namespace SolidsVR
         /// Initializes a new instance of the MeshCBrep class.
         /// </summary>
         public MeshCurveComponent()
-          : base("MeshCBrep", "MeshCBrep",
-              "Description",
+          : base("MeshCurve", "MeshC",
+              "Mesh curve",
               "SolidsVR", "Mesh")
         {
         }

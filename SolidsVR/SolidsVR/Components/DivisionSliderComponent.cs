@@ -10,11 +10,11 @@ namespace SolidsVR
 {
 
 
-    public class PartitionSliderComponent : GH_Component
+    public class DivisionSliderComponent : GH_Component
     {
         readonly int max = 15;
 
-        public PartitionSliderComponent()
+        public DivisionSliderComponent()
           : base("DivisionSlider", "DivSlider",
               "Slider for division in VR",
               "SolidsVR", "VR Slider")

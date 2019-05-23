@@ -17,8 +17,8 @@ namespace SolidsVR
     {
         
         public MeshTBrepComponent()
-          : base("MeshTBrep", "MeshTBrep",
-              "Description",
+          : base("MeshHex", "MeshH",
+              "Mesh hexahedron",
               "SolidsVR", "Mesh")
         {
         }

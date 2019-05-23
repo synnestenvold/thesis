@@ -26,8 +26,8 @@ namespace SolidsVR
         /// new tabs/panels will automatically be created.
         /// </summary>
         public NodeInfoComponent()
-          : base("Get information of Node", "Node info",
-              "Description",
+          : base("NodeInfo", "NodeInfo",
+              "Get information in node",
               "SolidsVR", "VR Info")
         {
         }

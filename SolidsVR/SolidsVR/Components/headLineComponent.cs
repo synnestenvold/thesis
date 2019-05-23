@@ -13,8 +13,8 @@ namespace SolidsVR
         /// Initializes a new instance of the headLineComponent class.
         /// </summary>
         public HeadLineComponent()
-          : base("Create headlines", "HeadLines",
-              "Description",
+          : base("HeadLine", "HeadLine",
+              "Create headlines in VR",
               "SolidsVR", "VR Info")
         {
         }

@@ -13,8 +13,8 @@ namespace SolidsVR
     {
       
         public SetUniLoadComponent()
-          : base("Uniform load component for FEA", "UniLoads",
-              "Description",
+          : base("SetUniLoad", "UniLoads",
+              "Uniform load component for FEA",
               "SolidsVR", "Load")
         {
         }
