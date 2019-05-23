@@ -9,10 +9,10 @@ using System.Linq;
 
 namespace SolidsVR
 {
-    public class SetUniLoadComponent : GH_Component
+    public class SetUniLoad : GH_Component
     {
       
-        public SetUniLoadComponent()
+        public SetUniLoad()
           : base("SetUniLoad", "UniLoads",
               "Uniform load component for FEA",
               "SolidsVR", "Load")
@@ -22,7 +22,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddIntegerParameter("Surface number", "S", "Surface number for loading (0-5)", GH_ParamAccess.item);
-            pManager.AddVectorParameter("Load vector", "L", "Direction and load amount in kN/m", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Load vector", "Load", "Direction and load amount in kN/m", GH_ParamAccess.item);
             pManager.AddGenericParameter("Mesh", "Mesh", "MeshGeometry class", GH_ParamAccess.item);
         }
 
@@ -81,7 +81,7 @@ namespace SolidsVR
             List<double> pointValues = new List<double>();
 
             //double loadRef = 0.05;
-            double arrowRef = 0.8;
+            double arrowRef = 10;
 
             double maxLength = refLength * 2;
 

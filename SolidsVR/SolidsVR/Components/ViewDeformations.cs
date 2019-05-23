@@ -12,10 +12,10 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class ViewDeformationsComponent : GH_Component
+    public class ViewDeformations : GH_Component
     {
 
-        public ViewDeformationsComponent()
+        public ViewDeformations()
           : base("ViewDeformations", "ViewDef",
               "Display deformation in VR",
               "SolidsVR", "VR Preview")
@@ -24,7 +24,7 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mesh", "M", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
             pManager.AddNumberParameter("Displacement", "D", "Displacement in each dof", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Scale", "Scale", "Scale factor for the view", GH_ParamAccess.item, 1);
         }
@@ -299,7 +299,7 @@ namespace SolidsVR
             Vector3d def = new Vector3d(nodeMax.GetDeformation()[0], nodeMax.GetDeformation()[1], nodeMax.GetDeformation()[2]);
 
             Point3d newPoint = nodeMax.GetCoord() + def * scale;
-
+            newPoint = Point3d.Add(newPoint, new Point3d(0, -1.5 * refSize, 0));
             defMax = Math.Round(defMax, 3);
 
             string text = defMax.ToString() + " mm";

@@ -8,10 +8,10 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class PreDefComponent : GH_Component
+    public class PreDef : GH_Component
     {
  
-        public PreDefComponent()
+        public PreDef()
           : base("PreDef", "PreDef",
               "Prescribed deformation",
               "SolidsVR", "Load")

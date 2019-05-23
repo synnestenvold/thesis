@@ -13,10 +13,10 @@ using System.Linq;
 
 namespace SolidsVR
 {
-    public class MeshTBrepComponent : GH_Component
+    public class MeshHex : GH_Component
     {
         
-        public MeshTBrepComponent()
+        public MeshHex()
           : base("MeshHex", "MeshH",
               "Mesh hexahedron",
               "SolidsVR", "Mesh")
@@ -26,9 +26,9 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBrepParameter("Geometry", "G", "Input cube as a (twisted) brep", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
-            pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
-            pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);
+            pManager.AddIntegerParameter("U count", "u", "Number of divisions in U direction", GH_ParamAccess.item, 1);
+            pManager.AddIntegerParameter("V count", "v", "Number of divisions in V direction", GH_ParamAccess.item, 1);
+            pManager.AddIntegerParameter("W count", "w", "Number of divisions in W direction", GH_ParamAccess.item, 1);
             pManager.AddNumberParameter("Volume to remove", "V", "Volume percentage to remove", GH_ParamAccess.item, 0);
         }
 

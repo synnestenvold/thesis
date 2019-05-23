@@ -12,10 +12,10 @@ using Rhino.Geometry;
 
 namespace SolidsVR
 {
-    public class LoadSliderComponent : GH_Component
+    public class LoadSlider : GH_Component
     {
 
-        public LoadSliderComponent()
+        public LoadSlider()
           : base("LoadSlider", "LoadSlider",
               "Load slider for VR",
               "SolidsVR", "VR Slider")

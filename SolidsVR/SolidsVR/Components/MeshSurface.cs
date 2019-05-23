@@ -10,12 +10,12 @@ using System.Linq;
 
 namespace SolidsVR
 {
-    public class MeshSurfaceComponent : GH_Component
+    public class MeshSurface : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MeshSurfBrep class.
         /// </summary>
-        public MeshSurfaceComponent()
+        public MeshSurface()
           : base("MeshSurface", "MeshS",
               "Mesh arbitrary surface",
               "SolidsVR", "Mesh")
@@ -29,9 +29,9 @@ namespace SolidsVR
         {
             pManager.AddBrepParameter("Geometry", "G", "Input geometry as a curved brep", GH_ParamAccess.item);
             pManager.AddPointParameter("Point", "P", "Corner points in right order", GH_ParamAccess.list);
-            pManager.AddIntegerParameter("U count", "U", "Number of divisions in U direction", GH_ParamAccess.item, 1);
-            pManager.AddIntegerParameter("V count", "V", "Number of divisions in V direction", GH_ParamAccess.item, 1);
-            pManager.AddIntegerParameter("W count", "W", "Number of divisions in W direction", GH_ParamAccess.item, 1);
+            pManager.AddIntegerParameter("U count", "u", "Number of divisions in U direction", GH_ParamAccess.item, 1);
+            pManager.AddIntegerParameter("V count", "v", "Number of divisions in V direction", GH_ParamAccess.item, 1);
+            pManager.AddIntegerParameter("W count", "w", "Number of divisions in W direction", GH_ParamAccess.item, 1);
             pManager.AddNumberParameter("Volume to remove", "V", "Volume percentage to remove", GH_ParamAccess.item, 0);
 
         }

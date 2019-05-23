@@ -79,7 +79,7 @@
     <Compile Include="Components\DeformationSliderComponent.cs" />
     <Compile Include="Components\LoadSliderComponent.cs" />
     <Compile Include="Components\MeshHexComponent.cs" />
-    <Compile Include="Components\PointsToBrepComponent.cs" />
+    <Compile Include="Components\PointsToGeometryComponent.cs" />
     <Compile Include="Components\PreDefComponent.cs" />
     <Compile Include="Components\PreDefSlider.cs" />
     <Compile Include="Components\SetUniBCComponent.cs" />
