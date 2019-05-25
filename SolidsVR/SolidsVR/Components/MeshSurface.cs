@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Grasshopper;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
 using Rhino.Geometry.Collections;
 using Rhino.Geometry;
 using System.Linq;
@@ -12,9 +10,6 @@ namespace SolidsVR
 {
     public class MeshSurface : GH_Component
     {
-        /// <summary>
-        /// Initializes a new instance of the MeshSurfBrep class.
-        /// </summary>
         public MeshSurface()
           : base("MeshSurface", "MeshS",
               "Mesh arbitrary surface",
@@ -22,9 +17,7 @@ namespace SolidsVR
         {
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
+
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBrepParameter("Geometry", "G", "Input geometry as a curved brep", GH_ParamAccess.item);
@@ -36,22 +29,17 @@ namespace SolidsVR
 
         }
 
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of Brep", GH_ParamAccess.list);
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             {
-                // Define local variables to catch the incoming data from Grasshopper
+                //NOTE: This meshing class can mesh any type of geometry as long as it consist of 8 corners and no holes.
+                //This is the meshing component for CASE 3.
+
                 // ---variables-- -
 
                 Brep brp = new Brep();
@@ -60,7 +48,7 @@ namespace SolidsVR
                 int v = 1;
                 int w = 1;
                 double removeVolume = 0;
-                //List<Curve> c = new List<Curve>();
+
                 // --- input ---
 
                 if (!DA.GetData(0, ref brp)) return;
@@ -71,7 +59,6 @@ namespace SolidsVR
                 if (!DA.GetData(5, ref removeVolume)) return;
 
                 Curve[] edges = brp.DuplicateEdgeCurves();
-
                 Curve[] sortedEdges = SortEdges(corners, edges);
 
                 Surface[] surfaces = CreateSortedSurfaces(brp, edges, corners);
@@ -84,9 +71,8 @@ namespace SolidsVR
                 List<List<Brep>> surfacesMesh = tuple.Item4;
                 List<Node> nodes = tuple.Item5;
                 List<Element> elements = tuple.Item6;
-                List<NurbsCurve> curves = tuple.Item7;
+                List<Point3d> globalPoints = tuple.Item7;
                 int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
-                Point3d[] globalPoints = CreatePointList(connectivity, elementPoints, sizeOfMatrix);
 
                 
 
@@ -104,7 +90,6 @@ namespace SolidsVR
                 mesh.SetBrep(new BrepGeometry(brp));
                 mesh.OrderSurfaces(corners);
                 mesh.SetOptVolume(removeVolume);
-                
 
                 //---output---
 
@@ -233,49 +218,14 @@ namespace SolidsVR
                 
             }
 
-
             return sortedSurfaces;
         }
 
-        public Surface[] CreateCrossSection(Curve[] edges)
+        public (List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>, List<Point3d>) CreateMesh(Brep brep, int u, int v, int w, Curve[] edges, Surface [] oSurfaces)
         {
-            Surface[] crossSecSurfaces = new Surface[6];
-
-            Curve[] edges2 = edges;
-
-            //edges2 = RoundEdgePoints(edges2); 
-
-            List<NurbsCurve> curves5 = new List<NurbsCurve>() { edges[0].ToNurbsCurve(), edges[5].ToNurbsCurve(), edges[1].ToNurbsCurve(), edges[4].ToNurbsCurve() };
-            List<NurbsCurve> curves6 = new List<NurbsCurve>() { edges[2].ToNurbsCurve(), edges[7].ToNurbsCurve(), edges[3].ToNurbsCurve(), edges[6].ToNurbsCurve() };
-
-            Brep brepSurf5 = Brep.CreateEdgeSurface(curves5);
-            Brep brepSurf6 = Brep.CreateEdgeSurface(curves6);
-
-            foreach (BrepFace surf in brepSurf5.Faces)
-            {
-                crossSecSurfaces[0] = surf.DuplicateSurface();
-            }
-
-            foreach (BrepFace surf in brepSurf6.Faces)
-            {
-                crossSecSurfaces[1] = surf.DuplicateSurface();
-            }
-            /*
-            BrepFace face5 = brebSurf5.Faces[0];
-            crossSecSurfaces[0] = face5.DuplicateSurface();
-            BrepFace face6 = brebSurf6.Faces[0];
-            crossSecSurfaces[1] = face6.DuplicateSurface();
-            */
-
-            return crossSecSurfaces;
-
-        }
-
-        public Tuple<List<List<Point3d>>, List<List<int>>, List<List<Line>>, List<List<Brep>>, List<Node>, List<Element>, List<NurbsCurve>> CreateMesh(Brep brep, int u, int v, int w, Curve[] edges, Surface [] oSurfaces)
-        {
-            List<Point3d> points = new List<Point3d>();
-            List<List<int>> global_numbering = new List<List<int>>();
-            List<List<Point3d>> points_brep = new List<List<Point3d>>();
+            List<Point3d> globalPoints = new List<Point3d>();
+            List<List<int>> globalConnectivity = new List<List<int>>();
+            List<List<Point3d>> hexPoints = new List<List<Point3d>>();
             List<List<Line>> edgeMesh = new List<List<Line>>();
             List<List<Brep>> surfacesMesh = new List<List<Brep>>();
 
@@ -326,39 +276,16 @@ namespace SolidsVR
                 Brep brepSurf = Brep.CreateEdgeSurface(curve);
 
                 Surface surface = brepSurf.Faces[0].DuplicateSurface();
-                //Surface surface = surf.DuplicateSurface();
 
                 List<Point3d> pointList = new List<Point3d>() { p_1, p_2, p_3, p_4 };
 
-                var tuple = CreatePoints(surface, u, v, w, i, cornerPoints, pointList, points, nodes);
-
-                points = tuple.Item1;
-                nodes = tuple.Item2;
-
-                /*
-                Surface surface = null;
-
-                foreach (BrepFace surf in brepSurf.Faces)
-                {
-                    surface = surf.DuplicateSurface();
-                }*/
-
-                curves.Add(c1);
-                curves.Add(c2);
-                curves.Add(c3);
-                curves.Add(c4);
-                
+                (globalPoints, nodes) = CreatePoints(surface, u, v, w, i, cornerPoints, pointList, globalPoints, nodes);
             }
 
+            // Putting together Hex elements:
 
-
-
-            // Putting together the breps:
-
-            //*******So much shitty code. Just trying to make it work:)))((:
-
-            List<int> listJumpOne = new List<int>(); // List with points where it must move in v-direction
-            List<int> listJumpUp = new List<int>(); // List with points where it must move upwards w-direction
+            List<int> jumpOne = new List<int>(); // List with points where it must move in v-direction
+            List<int> jumpUp = new List<int>(); // List with points where it must move upwards w-direction
 
 
             //Finding indexes for jumping in v-direction
@@ -366,107 +293,101 @@ namespace SolidsVR
             {
                 for (int j = 0; j < v - 1; j++)
                 {
-                    listJumpOne.Add((u - 1) + j * (u + 1) + (u + 1) * (v + 1) * i);
+                    jumpOne.Add((u - 1) + j * (u + 1) + (u + 1) * (v + 1) * i);
                 }
-
             }
 
             //Finding indexes for jumping in w-direction
             for (int i = 0; i < w; i++)
             {
-                listJumpUp.Add((u + 1) * (v + 1) - (u + 1) - 2 + (u + 1) * (v + 1) * i);
+                jumpUp.Add((u + 1) * (v + 1) - (u + 1) - 2 + (u + 1) * (v + 1) * i);
             }
 
-            int index = 0;
+            int counter = 0;
 
-            for (int i = 0; i < u * v * w; i++) // Creating u*v*w new breps having the 8 corner points
+            for (int i = 0; i < u * v * w; i++) // Creating u*v*w hexahedron having the 8 corner points
             {
+                //Putting together 8 points to create hex
+                List<Point3d> hex = new List<Point3d>()
+                {
+                    globalPoints[counter],
+                    globalPoints[counter + 1],
+                    globalPoints[(u + 1) + (counter + 1)],
+                    globalPoints[(u + 1) + (counter)],
+                    globalPoints[(u + 1) * (v + 1) + counter],
+                    globalPoints[(u + 1) * (v + 1) + (counter + 1)],
+                    globalPoints[(u + 1) * (v + 1) + (u + 1) + (counter + 1)],
+                    globalPoints[(u + 1) * (v + 1) + (u + 1) + (counter)]
 
-                List<Point3d> brp = new List<Point3d>();
+                };
 
-                //Putting together the 8 points to make the brep
-                brp.Add(points[index]);
-                brp.Add(points[index + 1]);
-                brp.Add(points[(u + 1) + (index + 1)]);
-                brp.Add(points[(u + 1) + (index)]);
-                brp.Add(points[(u + 1) * (v + 1) + index]);
-                brp.Add(points[(u + 1) * (v + 1) + (index + 1)]);
-                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (index + 1)]);
-                brp.Add(points[(u + 1) * (v + 1) + (u + 1) + (index)]);
+                hexPoints.Add(hex);
 
-                points_brep.Add(brp);
+                //Putting together 8 nodes to craete hex
+                List<Node> hexNodes = new List<Node>()
+                {
+                    nodes[counter],
+                    nodes[counter + 1],
+                    nodes[(u + 1) + (counter + 1)],
+                    nodes[(u + 1) + (counter)],
+                    nodes[(u + 1) * (v + 1) + counter],
+                    nodes[(u + 1) * (v + 1) + (counter + 1)],
+                    nodes[(u + 1) * (v + 1) + (u + 1) + (counter + 1)],
+                    nodes[(u + 1) * (v + 1) + (u + 1) + (counter)],
+                };
 
-                List<Node> elementNodes = new List<Node>();
+                //Adding element number to each node which is part of the element
+                nodes[counter].AddElementNr(i);
+                nodes[counter + 1].AddElementNr(i);
+                nodes[(u + 1) + (counter + 1)].AddElementNr(i);
+                nodes[(u + 1) + (counter)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + counter].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (counter + 1)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (u + 1) + (counter + 1)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (u + 1) + (counter)].AddElementNr(i);
 
-                //Putting together the 8 points to make the brep
-                elementNodes.Add(nodes[index]);
-                elementNodes.Add(nodes[index + 1]);
-                elementNodes.Add(nodes[(u + 1) + (index + 1)]);
-                elementNodes.Add(nodes[(u + 1) + (index)]);
-                elementNodes.Add(nodes[(u + 1) * (v + 1) + index]);
-                elementNodes.Add(nodes[(u + 1) * (v + 1) + (index + 1)]);
-                elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (index + 1)]);
-                elementNodes.Add(nodes[(u + 1) * (v + 1) + (u + 1) + (index)]);
-
-                nodes[index].AddElementNr(i);
-                nodes[index + 1].AddElementNr(i);
-                nodes[(u + 1) + (index + 1)].AddElementNr(i);
-                nodes[(u + 1) + (index)].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + index].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + (index + 1)].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + (u + 1) + (index + 1)].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + (u + 1) + (index)].AddElementNr(i);
-
-
-
-
-                List<Line> edgesElement = CreateEdgesMesh(brp);
-                List<Brep> surfaces = CreateSurfaceMesh(brp);
+                List<Line> edgesElement = CreateEdgesMesh(hex);
+                List<Brep> surfacesElement = CreateSurfaceMesh(hex);
 
                 edgeMesh.Add(edgesElement);
-                surfacesMesh.Add(surfaces);
+                surfacesMesh.Add(surfacesElement);
 
                 //Showing the connectivity between local and global nodes
-                List<int> connectivity = new List<int>();
-                connectivity.Add(index);
-                connectivity.Add(index + 1);
-                connectivity.Add((u + 1) + (index + 1));
-                connectivity.Add((u + 1) + (index));
-                connectivity.Add((u + 1) * (v + 1) + index);
-                connectivity.Add((u + 1) * (v + 1) + (index + 1));
-                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index + 1));
-                connectivity.Add((u + 1) * (v + 1) + (u + 1) + (index));
+                List<int> connectivity = new List<int>()
+                {
+                    counter,
+                    counter + 1,
+                    (u + 1) + (counter + 1),
+                    (u + 1) + (counter),
+                    (u + 1) * (v + 1) + counter,
+                    (u + 1) * (v + 1) + (counter + 1),
+                    (u + 1) * (v + 1) + (u + 1) + (counter + 1),
+                    (u + 1) * (v + 1) + (u + 1) + (counter),
+                };
 
-                Element element = new Element(elementNodes, i, connectivity);
-
+                Element element = new Element(hexNodes, i, connectivity);
                 elements.Add(element);
 
-                global_numbering.Add(connectivity);
+                globalConnectivity.Add(connectivity);
 
-                if (listJumpOne.Contains(index)) //Checking if we need to move to next row
-                {
-                    index += 1;
-                }
+                //Checking if we need to move to next row
+                if (jumpOne.Contains(counter)) counter += 1;
 
 
-                if (listJumpUp.Contains(index)) //Checking if we need to move to next level
-                {
-                    index += (u + 2);
-                }
+                //Checking if we need to move to next level
+                if (jumpUp.Contains(counter)) counter += (u + 2);
 
-                index++;
+                counter++;
             }
-            
-            return Tuple.Create(points_brep, global_numbering, edgeMesh, surfacesMesh, nodes, elements, curves);
-            //return points;
+
+            return (hexPoints, globalConnectivity, edgeMesh, surfacesMesh, nodes, elements, globalPoints);
         }
 
-        public Tuple<List<Point3d>, List<Node>> CreatePoints(Surface surface, int u, int v, int w, int i, Point3d[] cornerNodes, List<Point3d> pointList, List<Point3d> points, List<Node> nodes)
+        public (List<Point3d>, List<Node>) CreatePoints(Surface surface, int u, int v, int w, int i, Point3d[] cornerNodes, List<Point3d> pointList, List<Point3d> points, List<Node> nodes)
         {
+            //Domain of surface
             Interval domainU = surface.Domain(0);
             Interval domainV = surface.Domain(1);
-
-            //List<Node> nodes = new List<Node>();
 
             double tu0 = domainU.ParameterAt(0);
             double tu1 = domainU.ParameterAt(1);
@@ -488,6 +409,7 @@ namespace SolidsVR
             Interval point2 = new Interval(0, 0);
             Interval point3 = new Interval(0, 0);
 
+            //Finding new domain starting in correct point.
             for (int k = 0; k < tempPoints.Count; k++)
             {
                 double test = tempPoints[k].DistanceTo(pointList[0]);
@@ -528,13 +450,10 @@ namespace SolidsVR
             double d31 = point3.ParameterAt(0);
             double d32 = point3.ParameterAt(1);
 
-
-            //List<Point3d> points = new List<Point3d>();
-            List<Vector3d> vectors = new List<Vector3d>();
-
             double tu = 0;
             double tv = 0;
 
+            //Populating surface with points
             for (int j = 0; j <= v; j++)
             {
                 if ((d31 - d11) != 0) tu = (double)(d11 - j * (d11 - d31) / v);
@@ -553,11 +472,21 @@ namespace SolidsVR
                     SetNodePosition(node, p1, cornerNodes, i, j, k, u, v, w);
                     SetNodeSurface(node, i, j, k, u, v, w);
                     nodes.Add(node);
-
                 }
             }
 
-            return Tuple.Create(points, nodes);
+            return (points, nodes);
+        }
+
+        public void SetNodePosition(Node node, Point3d p, Point3d[] cornerPoints, int i, int j, int k, int u, int v, int w)
+        {
+            p = new Point3d(Math.Round(p.X, 1), Math.Round(p.Y, 1), Math.Round(p.Z, 1));
+
+            cornerPoints = RoundPoints(cornerPoints);
+
+            if (cornerPoints.Contains(p)) node.SetIsCorner();
+            else if (i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0 || i == w && j == 0 || i == 0 && k == u || j == v && k == 0 || i == 0 && j == v || i == w && k == 0 || j == 0 && k == u || i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0 || i == w && j == v || i == w && k == u || j == v && k == u) node.SetIsEdge();
+            else node.SetIsMiddle();
         }
 
         public void SetNodeSurface(Node node, int i, int j, int k, int u, int v, int w)
@@ -568,33 +497,6 @@ namespace SolidsVR
             if (k == 0) node.SetSurfaceNum(3);
             if (i == 0) node.SetSurfaceNum(4);
             if (i == w) node.SetSurfaceNum(5);
-        }
-
-        public void SetNodePosition(Node node, Point3d p, Point3d[] cornerPoints, int i, int j, int k, int u, int v, int w)
-        {
-            p = new Point3d(Math.Round(p.X, 1), Math.Round(p.Y, 1), Math.Round(p.Z, 1));
-            cornerPoints = RoundPoints(cornerPoints);
-            if (cornerPoints.Contains(p)) node.SetIsCorner();
-            else if (i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0 || i == w && j == 0 || i == 0 && k == u || j == v && k == 0 || i == 0 && j == v || i == w && k == 0 || j == 0 && k == u || i == 0 && j == 0 || i == 0 && k == 0 || j == 0 && k == 0 || i == w && j == v || i == w && k == u || j == v && k == u) node.SetIsEdge();
-            else node.SetIsMiddle();
-        }
-
-        public Point3d[] CreatePointList(List<List<int>> treeConnectivity, List<List<Point3d>> treePoints, int sizeOfM)
-        {
-            Point3d[] pointList = new Point3d[sizeOfM / 3];
-
-            for (int i = 0; i < treeConnectivity.Count; i++)
-            {
-                List<int> connectedNodes = treeConnectivity[i];
-                List<Point3d> connectedPoints = treePoints[i];
-
-                for (int j = 0; j < connectedNodes.Count; j++)
-                {
-                    pointList[connectedNodes[j]] = connectedPoints[j];
-                }
-            }
-            return pointList;
-
         }
 
         public List<Line> CreateEdgesMesh(List<Point3d> elementPoints)
@@ -673,23 +575,15 @@ namespace SolidsVR
             return vertices;
         }
 
-
-        /// <summary>
-        /// Provides an Icon for the component.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
+
                 return SolidsVR.Properties.Resource1.meshS;
             }
         }
 
-        /// <summary>
-        /// Gets the unique ID for this component. Do not change this ID after release.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return new Guid("1fd92232-70a8-4fc2-b2c0-144195bc7e29"); }

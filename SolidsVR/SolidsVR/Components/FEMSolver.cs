@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics;
 using Grasshopper;
 using Grasshopper.Kernel.Data;
-using Grasshopper.Kernel.Types;
 using System.Linq;
 using System.Drawing;
 
@@ -15,9 +12,6 @@ namespace SolidsVR.Components
 {
     public class FEMSolver : GH_Component
     {
-        /// <summary>
-        /// Initializes a new instance of the TopOpt class.
-        /// </summary>
         public FEMSolver()
           : base("FEMSolver", "FEMSolver",
               "Component for FEA",
@@ -65,12 +59,10 @@ namespace SolidsVR.Components
             if (!DA.GetDataList(3, deftxt)) return;
             if (!DA.GetData(4, ref material)) return;
 
-            // --- solve ---
+            // --- setup ---
 
             List<List<int>> connectivity = mesh.GetConnectivity();
-            List<List<Point3d>> elementPoints = mesh.GetElementPoints();
-            
-            Point3d[] globalPoints = mesh.GetGlobalPoints();
+            List<Point3d> globalPoints = mesh.GetGlobalPoints();
             List<Node> nodes = mesh.GetNodeList();
             BrepGeometry brp = mesh.GetBrep();
             Brep origBrep = brp.GetBrep();
@@ -81,25 +73,27 @@ namespace SolidsVR.Components
             int numberElements = mesh.GetElements().Count;
             double removableVolume = mesh.GetOptVolume();
             double minElements = totalElements - Math.Floor(totalElements * removableVolume / 100);
-            
-            
+
+            // --- solve ---
+
             if (removableVolume != 0) opt = true;
 
-            DataTree<double> defTree = new DataTree<double>();
             Boolean first = true;
             double max = 0;
             int removeElem = -1;
             List<int> removeNodeNr = new List<int>();
+            DataTree<double> defTree = new DataTree<double>();
 
             while (numberElements > minElements && max < material.GetY() || first) //Requirements for removal                                                                
             {
+                first = false;
+
                 for (int i = 0; i < nodes.Count; i++)
                 {
-                    nodes[i].CleanStressAndStrain();
+                    nodes[i].CleanStress();
                 }
 
                 List<Element> elements = mesh.GetElements();
-                first = false;
 
                 //Remove selected element from last iterations, and update afftected nodes
                 if (removeElem != -1 && opt == true)
@@ -107,55 +101,45 @@ namespace SolidsVR.Components
                     RemoveElementAndUpdateNodes(elements, removeElem, removeNodeNr);
                 }
 
-                //Create K_tot
-                var tupleK_B = CreateGlobalStiffnessMatrix(sizeOfMatrix, material, elements);
-                Matrix<double> K_tot = tupleK_B.Item1;
-
-                //B_all
-                List<List<Matrix<double>>> B_all = tupleK_B.Item2;
+                //Create Ktot and B
+                Matrix<double> Ktot = CreateGlobalStiffnessMatrix(sizeOfMatrix, material, elements);
 
                 //Create boundary condition list AND predeformations
-                var tupleBC = CreateBCList(bctxt, globalPoints);
-                List<int> bcNodes = tupleBC.Item1;
+                (List<int> bcNodes, List<double> reatrains) = CreateBCList(bctxt, globalPoints);
 
-                var tupleDef = CreateBCList(deftxt, globalPoints);
-                List<int> predefNodes = tupleDef.Item1;
-                List<double> predef = tupleDef.Item2;
+                (List<int> predefNodes, List<double> predef) = CreateBCList(deftxt, globalPoints);
 
                 //Setter 0 i hver rad med bc og predef, og diagonal til 1.
-                K_tot = ApplyBC_Row(K_tot, bcNodes);
-                K_tot = ApplyBC_Row(K_tot, predefNodes);
+                Ktot = ApplyBCrow(Ktot, bcNodes);
+                Ktot = ApplyBCrow(Ktot, predefNodes);
 
                 //Needs to take the predefs into account
-                Vector<double> R_def = Vector<double>.Build.Dense(sizeOfMatrix);
-                if (deftxt.Any()) R_def = ApplyPreDef(K_tot, predefNodes, predef, sizeOfMatrix);
+                Vector<double> Rdef = Vector<double>.Build.Dense(sizeOfMatrix);
+                if (deftxt.Any()) Rdef = ApplyPreDef(Ktot, predefNodes, predef, sizeOfMatrix);
 
                 //double[] R_array = SetLoads(sizeOfM, loadtxt);
-                double[] R_array = AssignLoadsDefAndBC(loadtxt, predefNodes, predef, bcNodes, globalPoints);
+                double[] Rload = AssignLoadsDefAndBC(loadtxt, predefNodes, predef, bcNodes, globalPoints);
 
                 //Adding R-matrix for pre-deformations.
                 var V = Vector<double>.Build;
-                Vector<double> R = (V.DenseOfArray(R_array)).Subtract(R_def);
+                Vector<double> R = (V.DenseOfArray(Rload)).Subtract(Rdef);
 
                 //Apply boundary condition and predeformations (Puts 0 in columns of K)
-                K_tot = ApplyBC_Col(K_tot, bcNodes);
-                K_tot = ApplyBC_Col(K_tot, predefNodes);
+                Ktot = ApplyBCcol(Ktot, bcNodes);
+                Ktot = ApplyBCcol(Ktot, predefNodes);
 
                 //Removing row and column in K and R, and nodes with removeNodeNr
                 if (opt == true)
                 {
                     List<Node> nodes_removed = mesh.GetNodeList().ConvertAll(x => x);
-                    var tuple = UpdateK(removeNodeNr, K_tot, R, nodes_removed);
-                    K_tot = tuple.Item1;
-                    R = tuple.Item2;
-                    nodes = tuple.Item3;
+                    (Ktot, R, nodes) = UpdateK(removeNodeNr, Ktot, R, nodes_removed);
                 }
 
                 //Inverting K matrix. Singular when all elements belonging to a node is removed
-                Matrix<double> K_tot_inverse = K_tot.Inverse();
+                Matrix<double> KtotInverse = Ktot.Inverse();
 
                 //Caluculation of the displacement vector u
-                Vector<double> u = K_tot_inverse.Multiply(R);
+                Vector<double> u = KtotInverse.Multiply(R);
 
                 //Creating tree for output of deformation. Structured in x,y,z for each node. As well as asigning deformation to each node class
                 defTree = DefToTree(u, nodes);
@@ -170,9 +154,7 @@ namespace SolidsVR.Components
                 //Find element to be removed next
                 if (opt == true)
                 {
-                    var tupleRemoved = mesh.RemoveOneElement();
-                    max = tupleRemoved.Item1;
-                    removeElem = tupleRemoved.Item2;
+                    (max, removeElem) = mesh.RemoveOneElement();
                     numberElements = mesh.GetElements().Count;
                 }
             }
@@ -188,24 +170,16 @@ namespace SolidsVR.Components
             //FOR PREVIEW OF HEADLINE
 
             //Setting up reference values
-            var tupleRef = GetRefValues(origBrep);
-            double refLength = tupleRef.Item1;
-            Point3d centroid = tupleRef.Item2;
+            (double refLength, Point3d centroid ) = GetRefValues(origBrep);
 
             //Creating text-information for showing in VR
-            var tupleHeadline = CreateHeadline(centroid, refLength);
-
-            string headText = tupleHeadline.Item1;
-            double headSize = tupleHeadline.Item2;
-            Plane headPlane = tupleHeadline.Item3;
-            Color headColor = tupleHeadline.Item4;
+            (string headText, double headSize, Plane headPlane, Color headColor) = CreateHeadline(centroid, refLength);
 
             //---output---
 
             DA.SetDataTree(0, defTree);
             DA.SetDataTree(1, strainTree);
             DA.SetDataTree(2, stressTree);
-
             DA.SetData(3, headText);
             DA.SetData(4, headSize);
             DA.SetData(5, headPlane);
@@ -213,39 +187,64 @@ namespace SolidsVR.Components
 
         }
 
-
-        public Tuple<Matrix<double>, List<List<Matrix<double>>>> CreateGlobalStiffnessMatrix(int sizeOfMatrix, Material material, List<Element> elements)
+        public void RemoveElementAndUpdateNodes(List<Element> elements, int removeElem, List<int> removeNodeNr)
         {
-            Matrix<double> K_i = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
-            Matrix<double> K_tot = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
-            List<Matrix<Double>> B_e = new List<Matrix<Double>>();
-            List<List<Matrix<double>>> B_all = new List<List<Matrix<double>>>();
+            List<Node> nodeElem = elements[removeElem].GetVertices();
+            int removeElemNr = elements[removeElem].GetElementNr();
+            for (int i = 0; i < nodeElem.Count; i++)
+            {
+                nodeElem[i].GetElementNr().RemoveAll(item => item == removeElemNr);
+                if (nodeElem[i].GetElementNr().Count == 0)
+                {
+                    removeNodeNr.Add(nodeElem[i].GetNodeNr());
+                }
+            }
+            elements.RemoveAt(removeElem);
+
+        }
+
+        public Matrix<double> CreateGlobalStiffnessMatrix(int sizeOfMatrix, Material material, List<Element> elements)
+        {
+            Matrix<double> Ktot = Matrix<double>.Build.Dense(sizeOfMatrix, sizeOfMatrix);
             double E = material.GetE();
             double nu = material.GetNu();
             StiffnessMatrix sm = new StiffnessMatrix(E, nu);
-            Assembly_StiffnessMatrix aSM = new Assembly_StiffnessMatrix();
 
             for (int i = 0; i < elements.Count; i++)
             {
                 List<int> connectedNodes = elements[i].GetConnectivity();
                 List<Node> nodes = elements[i].GetVertices();
 
-                var tuple = sm.CreateMatrix(nodes);
-                Matrix<double> K_e = tuple.Item1;
-                B_e = tuple.Item2;
-                elements[i].SetStiffnessMatrix(K_e);
-                elements[i].SetBMatrices(B_e);
+                (Matrix<double> Ke, List<Matrix<Double>> Be) = sm.CreateMatrix(nodes);
 
-                B_all.Add(B_e);
-                K_tot = aSM.AssemblyMatrix(K_tot, K_e, connectedNodes);
+                elements[i].SetStiffnessMatrix(Ke);
+                elements[i].SetBMatrices(Be);
+
+                Ktot = AssemblyMatrix(Ktot, Ke, connectedNodes);
             }
-
-
-            return Tuple.Create(K_tot, B_all);
+            return Ktot;
         }
 
+        public Matrix<double> AssemblyMatrix(Matrix<double> K_tot, Matrix<double> K_e, List<int> connectivity)
+        {
+            for (int i = 0; i < connectivity.Count; i++)
+            {
+                for (int j = 0; j < connectivity.Count; j++)
+                {
+                    //Inserting 3x3 stiffness matrix
+                    for (int k = 0; k < 3; k++)
+                    {
+                        for (int e = 0; e < 3; e++)
+                        {
+                            K_tot[3 * connectivity[i] + k, 3 * connectivity[j] + e] = K_tot[3 * connectivity[i] + k, 3 * connectivity[j] + e] + Math.Round(K_e[3 * i + k, 3 * j + e], 8);
+                        }
+                    }
+                }
+            }
+            return K_tot;
+        }
 
-        public Tuple<List<int>, List<double>> CreateBCList(List<string> bctxt, Point3d[] points)
+        public (List<int>, List<double>) CreateBCList(List<string> bctxt, List<Point3d> points)
         {
             List<int> BC = new List<int>();
             List<double> BCPoints = new List<double>();
@@ -259,7 +258,6 @@ namespace SolidsVR.Components
                 string[] coord = (coordinate.Split(','));
                 string[] iBCs = (iBC.Split(','));
 
-
                 BCPoints.Add(Math.Round(double.Parse(coord[0]), 8));
                 BCPoints.Add(Math.Round(double.Parse(coord[1]), 8));
                 BCPoints.Add(Math.Round(double.Parse(coord[2]), 8));
@@ -270,7 +268,6 @@ namespace SolidsVR.Components
             }
 
             int index = 0;
-
 
             foreach (Point3d p in points)
             {
@@ -288,38 +285,13 @@ namespace SolidsVR.Components
                 index += 3;
             }
 
-            return Tuple.Create(BC, restrains);
+            return (BC, restrains);
         }
 
-        public Matrix<double> ApplyBC_Col(Matrix<double> K, List<int> bcNodes)
+        public Matrix<double> ApplyBCrow(Matrix<double> K, List<int> bcNodes)
         {
             for (int i = 0; i < bcNodes.Count; i++)
             {
-                /*for (int j = 0; j < K.ColumnCount; j++)
-                {
-                    if (bcNodes[i] != j)
-                    {
-                        K[bcNodes[i], j] = 0;
-                    }
-                }*/
-
-                for (int j = 0; j < K.RowCount; j++)
-                {
-                    if (bcNodes[i] != j)
-                    {
-                        K[j, bcNodes[i]] = 0;
-                    }
-
-                }
-            }
-            return K;
-        }
-
-        public Matrix<double> ApplyBC_Row(Matrix<double> K, List<int> bcNodes)
-        {
-            for (int i = 0; i < bcNodes.Count; i++)
-            {
-
 
                 for (int j = 0; j < K.RowCount; j++)
                 {
@@ -336,7 +308,6 @@ namespace SolidsVR.Components
             }
             return K;
         }
-
 
         public Vector<double> ApplyPreDef(Matrix<double> K_tot, List<int> predefNodes, List<double> predef, int sizeOfM)
         {
@@ -373,12 +344,12 @@ namespace SolidsVR.Components
             return R_def;
         }
 
-        public double[] AssignLoadsDefAndBC(List<string> pointLoads, List<int> predefNodes, List<double> predef, List<int> bcNodes, Point3d[] points)
+        public double[] AssignLoadsDefAndBC(List<string> pointLoads, List<int> predefNodes, List<double> predef, List<int> bcNodes, List<Point3d> points)
         {
             List<double> loadCoord = new List<double>();
             List<double> pointValues = new List<double>();
 
-            double[] loads = new double[points.Length * 3];
+            double[] loads = new double[points.Count * 3];
 
             foreach (string s in pointLoads)
             {
@@ -426,6 +397,52 @@ namespace SolidsVR.Components
             return loads;
         }
 
+        public Matrix<double> ApplyBCcol(Matrix<double> K, List<int> bcNodes)
+        {
+            for (int i = 0; i < bcNodes.Count; i++)
+            {
+
+                for (int j = 0; j < K.RowCount; j++)
+                {
+                    if (bcNodes[i] != j)
+                    {
+                        K[j, bcNodes[i]] = 0;
+                    }
+
+                }
+            }
+            return K;
+        }
+
+        public (Matrix<double>, Vector<double>, List<Node>) UpdateK(List<int> removeNodeNr, Matrix<double> K_tot, Vector<double> R, List<Node> nodes_removed)
+        {
+            removeNodeNr.Sort();
+            removeNodeNr.Reverse();
+
+            for (int i = 0; i < removeNodeNr.Count; i++)
+            {
+                K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
+                K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
+
+                List<double> R_removed = R.ToList();
+
+                R_removed.RemoveAt(3 * removeNodeNr[i]);
+                R_removed.RemoveAt(3 * removeNodeNr[i]);
+                R_removed.RemoveAt(3 * removeNodeNr[i]);
+
+                var V = Vector<double>.Build;
+
+                R = (V.DenseOfArray(R_removed.ToArray()));
+
+                nodes_removed.RemoveAt(removeNodeNr[i]);
+            }
+            return (K_tot, R, nodes_removed);
+        }
+
         public DataTree<double> DefToTree(Vector<double> u, List<Node> nodes)
         {
             DataTree<double> defTree = new DataTree<double>();
@@ -448,7 +465,6 @@ namespace SolidsVR.Components
 
         public void CalcStrainAndStress(List<Element> elements, Material material)
         {
-
             double E = material.GetE();
             double nu = material.GetNu();
             Cmatrix C = new Cmatrix(E, nu);
@@ -458,18 +474,89 @@ namespace SolidsVR.Components
             List<int> c_e = new List<int>();
             List<Node> nodes_e = new List<Node>();
 
-            StrainCalc sC = new StrainCalc();
-
             for (int i = 0; i < elements.Count; i++)
             {
-                B_e = elements[i].GetBMatrixes();
+                B_e = elements[i].GetBMatrices();
                 nodes_e = elements[i].GetVertices();
 
-                sC.StrainCalculations(B_e, nodes_e, C_matrix);
+                StrainCalculations(B_e, nodes_e, C_matrix);
             }
 
         }
 
+        public void StrainCalculations(List<Matrix<double>> B_e, List<Node> nodes_e, Matrix<double> C_Matrix)
+        {
+            List<Vector<double>> elementStrain = new List<Vector<double>>();
+            List<Vector<double>> elementStress = new List<Vector<double>>();
+            Vector<double> u_e = Vector<double>.Build.Dense(24);
+
+            double g = Math.Sqrt(3);
+            List<List<double>> gaussPoints = new List<List<double>>()
+            {
+                new List<double>() { -g, -g, -g },
+                new List<double>() { g, -g, -g },
+                new List<double>() { g, g, -g },
+                new List<double>() { -g, g, -g },
+                new List<double>() { -g, -g, g },
+                new List<double>() { g, -g, g },
+                new List<double>() { g, g, g },
+                new List<double>() { -g, g, g },
+            };
+
+            for (int i = 0; i < nodes_e.Count; i++)
+            {
+                List<double> deformations = nodes_e[i].GetDeformation();
+                u_e[i * 3] = deformations[0];
+                u_e[i * 3 + 1] = deformations[1];
+                u_e[i * 3 + 2] = deformations[2];
+            }
+
+            for (int j = 0; j < B_e.Count; j++)
+            {
+                Vector<double> nodeStrain = B_e[j].Multiply(u_e); /// IN GAUSS POINTS
+                Vector<double> nodeStress = C_Matrix.Multiply(nodeStrain); /// IN GAUSS POINTS
+                elementStrain.Add(nodeStrain);
+                elementStress.Add(nodeStress);
+            }
+
+
+            for (int i = 0; i < elementStress.Count; i++)
+            {
+                Vector<double> intStress = InterpolateStress(elementStress, gaussPoints[i]);
+
+                nodes_e[i].SetStress(intStress); //INTERPOLATED TO NODES
+            }
+        }
+
+        public Vector<double> InterpolateStress(List<Vector<double>> gaussStress, List<double> gaussPoints)
+        {
+            double r = gaussPoints[0];
+            double s = gaussPoints[1];
+            double t = gaussPoints[2];
+
+            List<double> shapeF = new List<double> {
+            (double)1 / 8 * ((1 - r) * (1 - s) * (1 - t)),
+            (double)1 / 8 * ((1 + r) * (1 - s) * (1 - t)),
+            (double)1 / 8 * ((1 + r) * (1 + s) * (1 - t)),
+            (double)1 / 8 * ((1 - r) * (1 + s) * (1 - t)),
+            (double)1 / 8 * ((1 - r) * (1 - s) * (1 + t)),
+            (double)1 / 8 * ((1 + r) * (1 - s) * (1 + t)),
+            (double)1 / 8 * ((1 + r) * (1 + s) * (1 + t)),
+            (double)1 / 8 * ((1 - r) * (1 + s) * (1 + t)),
+            };
+
+            Vector<double> stressNode = Vector<double>.Build.Dense(6);
+
+            for (int i = 0; i < stressNode.Count; i++)
+            {
+                for (int j = 0; j < shapeF.Count; j++)
+                {
+                    stressNode[i] += gaussStress[j][i] * shapeF[j];
+                }
+
+            }
+            return stressNode;
+        }
 
 
         public void CalcStrainAndStressGlobal(List<Node> nodes, Material material)
@@ -481,7 +568,6 @@ namespace SolidsVR.Components
 
             for (int i = 0; i < nodes.Count; i++)
             {
-
                 List<Vector<double>> stress = nodes[i].GetStress();
 
                 double amount = stress.Count;
@@ -516,9 +602,7 @@ namespace SolidsVR.Components
                 tempStressVec.At(6, mises);
 
                 nodes[i].SetGlobalStress(tempStressVec);
-
             }
-
         }
 
         public void SetAverageStresses(List<Element> elements)
@@ -529,7 +613,26 @@ namespace SolidsVR.Components
             }
         }
 
-        public Tuple<double, Point3d> GetRefValues(Brep origBrep)
+
+        public int FindRemovableElements(List<Node> nodes, List<Element> elements)
+        {
+            int count = 0;
+            for (int i = 0; i < elements.Count; i++)
+            {
+                List<Node> checkNodes = elements[i].GetVertices();
+                for (int j = 0; j < checkNodes.Count; j++)
+                {
+                    if (!(checkNodes[j].IsRemovable()))
+                    {
+                        elements[i].SetRemovable(false);
+                    }
+                }
+                if (elements[i].IsRemovable()) { count++; }
+            }
+            return count;
+        }
+
+        public (double, Point3d) GetRefValues(Brep origBrep)
         {
             VolumeMassProperties vmp = VolumeMassProperties.Compute(origBrep);
             Point3d centroid = vmp.Centroid;
@@ -537,10 +640,10 @@ namespace SolidsVR.Components
             double sqrt3 = (double)1 / 3;
             double refLength = Math.Pow(volume, sqrt3);
 
-            return Tuple.Create(refLength, centroid);
+            return (refLength, centroid);
         }
 
-        public Tuple<string, double, Plane, Color> CreateHeadline(Point3d centroid, double refLength)
+        public (string, double, Plane, Color) CreateHeadline(Point3d centroid, double refLength)
         {
             string headText = "Model";
 
@@ -555,133 +658,17 @@ namespace SolidsVR.Components
 
             Color headColor = Color.FromArgb(0, 100, 255);
 
-            return Tuple.Create(headText, headSize, headPlane, headColor);
+            return (headText, headSize, headPlane, headColor);
         }
-
-
-        private static bool IsSymmetric(Matrix<Double> K)
-        {
-
-            for (int i = 0; i < K.RowCount; i++)
-            {
-                for (int j = 0; j < i; j++)
-                {
-                    if (K[i, j] != K[j, i])
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        public Matrix<double> RoundOf(Matrix<Double> K)
-        {
-            for (int i = 0; i < K.RowCount; i++)
-            {
-                for (int j = 0; j < K.ColumnCount; j++)
-                {
-                    K[i, j] = Math.Round(K[i, j], 1);
-                }
-            }
-
-            return K;
-        }
-
-
-
-
-
-
-
-        public List<Vector<double>> CalcStress(List<Vector<double>> calcedStrain, Matrix<double> C_matrix)
-        {
-
-            DataTree<double> treeStress = new DataTree<double>();
-            List<Vector<double>> calcedStress = new List<Vector<double>>();
-            for (int i = 0; i < calcedStrain.Count; i++)
-            {
-                calcedStress.Add(C_matrix.Multiply(calcedStrain[i]));
-
-            }
-
-            return calcedStress;
-        }
-
-
-        public Tuple<Matrix<double>, Vector<double>, List<Node>> UpdateK(List<int> removeNodeNr, Matrix<double> K_tot, Vector<double> R, List<Node> nodes_removed)
-        {
-            removeNodeNr.Sort();
-            removeNodeNr.Reverse();
-
-            for (int i = 0; i < removeNodeNr.Count; i++)
-            {
-                K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
-                K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
-                K_tot = K_tot.RemoveColumn(3 * removeNodeNr[i]);
-                K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
-                K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
-                K_tot = K_tot.RemoveRow(3 * removeNodeNr[i]);
-                List<double> R_removed = R.ToList();
-                R_removed.RemoveAt(3 * removeNodeNr[i]);
-                R_removed.RemoveAt(3 * removeNodeNr[i]);
-                R_removed.RemoveAt(3 * removeNodeNr[i]);
-                var V = Vector<double>.Build;
-                R = (V.DenseOfArray(R_removed.ToArray()));
-
-                nodes_removed.RemoveAt(removeNodeNr[i]);
-            }
-            return Tuple.Create(K_tot, R, nodes_removed);
-        }
-
-        public int FindRemovableElements(List<Node> nodes, List<Element> elements)
-        {
-            int count = 0;
-            for (int i = 0; i < elements.Count; i++)
-            {
-                List<Node> checkNodes = elements[i].GetVertices();
-                for (int j = 0; j < checkNodes.Count; j++)
-                {
-                    if (!(checkNodes[j].isRemovable()))
-                    {
-                        elements[i].setRemovable(false);
-                    }
-                }
-                if (elements[i].isRemovable()) { count++; }
-            }
-            return count;
-        }
-
-        public void RemoveElementAndUpdateNodes(List<Element> elements, int removeElem, List<int> removeNodeNr)
-        {
-            List<Node> nodeElem = elements[removeElem].GetVertices();
-            int removeElemNr = elements[removeElem].GetElementNr();
-            for (int i = 0; i < nodeElem.Count; i++)
-            {
-                nodeElem[i].GetElementNr().RemoveAll(item => item == removeElemNr);
-                if (nodeElem[i].GetElementNr().Count == 0)
-                {
-                    removeNodeNr.Add(nodeElem[i].GetNodeNr());
-                }
-            }
-            elements.RemoveAt(removeElem);
-
-        }
-
 
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return SolidsVR.Properties.Resource1.analyze;
             }
         }
 
-        /// <summary>
-        /// Gets the unique ID for this component. Do not change this ID after release.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return new Guid("f0cb3c4f-cdc0-4e69-b554-84d9e3e112f4"); }

@@ -121,7 +121,7 @@ namespace SolidsVR
                     Point3d node = nodes[i].GetCoord();
                     string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
                     pointsBC.Add(pointString + ";" + restrains);
-                    nodes[i].setRemovable(false);
+                    nodes[i].SetRemovable(false);
                 }
             }
             return pointsBC;

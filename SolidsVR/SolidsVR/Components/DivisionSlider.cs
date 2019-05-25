@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Grasshopper.Kernel;
-using Rhino.Display;
 using Rhino.Geometry;
-
 
 namespace SolidsVR
 {
-
-
     public class DivisionSlider : GH_Component
     {
         readonly int max = 15;
@@ -23,15 +19,15 @@ namespace SolidsVR
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("SliderVR", "S", "Sliders as curves (U, V, W)", GH_ParamAccess.list);
-            pManager.AddBrepParameter("Geometry", "G", "Brep as reference size", GH_ParamAccess.item);
+            pManager.AddCurveParameter("SliderVR", "S", "Sliders as curves (u, v, w)", GH_ParamAccess.list);
+            pManager.AddBrepParameter("Geometry", "G", "Geometry as reference size", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("U count", "u", "Number of divisions", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("V count", "v", "Number of divisions", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("W count", "w", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("u count", "u", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("v count", "v", "Number of divisions", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("w count", "w", "Number of divisions", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "Text", "Division text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Size for text", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
@@ -72,17 +68,14 @@ namespace SolidsVR
                 div = div > max ? max : div;
                 divAll.Add(div);
 
-                var tuple = CreateText(curve[i], div, refLength, i);
-                List<string> text = tuple.Item1;
-                List<double> size = tuple.Item2;
-                List<Plane> textPlane = tuple.Item3;
+                (List<string> text, List<double> size, List<Plane> textPlane)= CreateText(curve[i], div, refLength, i);
+
                 Sphere sphere = new Sphere(curve[i].PointAtEnd, (double)(size[0] / 2));
 
                 textAll.AddRange(text);
                 sizeAll.AddRange(size); 
                 textPlaneAll.AddRange(textPlane);
                 sphereAll.Add(sphere);
-
             }
 
             //---output---
@@ -98,7 +91,7 @@ namespace SolidsVR
 
         }
 
-        public Tuple<List<string>, List<double>, List<Plane>> CreateText(Curve curve, double div, double refLength, int count)
+        public (List<string>, List<double>, List<Plane>) CreateText(Curve curve, double div, double refLength, int count)
         {
             List<string> text = new List<string>();
             string direction = "u";
@@ -109,8 +102,10 @@ namespace SolidsVR
                 direction = "w";
             }
             text.Add(direction+"-direction: "+div.ToString());
+
             double refSize = (double)(refLength / 7);
             List<double> size = new List<double>() { refSize };
+
             List<Plane> textPlane = new List<Plane>();
             Point3d start = curve.PointAtStart;
             Point3d end = curve.PointAtEnd;
@@ -118,6 +113,7 @@ namespace SolidsVR
             Point3d p1 = Point3d.Add(end, new Point3d(1, 0, 2 * refSize));
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, (1 + 2 * refSize)));
             textPlane.Add(new Plane(p0, p1, p2));
+
             double range = (double)(refLength / 8);
             for (int i = 1; i < 16; i++)
             {
@@ -130,20 +126,13 @@ namespace SolidsVR
                 Plane plane = new Plane(p3, p4, p5);
                 textPlane.Add(plane);
             }
-
-            return Tuple.Create(text, size, textPlane);
+            return (text, size, textPlane);
         }
         
-        /// <summary>
-        /// Provides an Icon for every component that will be visible in the User Interface.
-        /// Icons need to be 24x24 pixels.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
                 return SolidsVR.Properties.Resource1.divSlider;
             }
         }
@@ -152,6 +141,5 @@ namespace SolidsVR
         { 
             get { return new Guid("f55bdd6e-1c71-44eb-b1d5-40d997763b3e"); }
         }
-
     }
 }

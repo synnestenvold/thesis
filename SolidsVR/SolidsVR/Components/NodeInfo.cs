@@ -87,7 +87,7 @@ namespace SolidsVR
             //---solve---
 
             //List of global points with correct numbering
-            Point3d[] globalPoints = mesh.GetGlobalPoints();
+            List<Point3d> globalPoints = mesh.GetGlobalPoints();
 
             VolumeMassProperties vmpSphere = VolumeMassProperties.Compute(sphere);
             Point3d centroidSphere = vmpSphere.Centroid;
@@ -200,13 +200,13 @@ namespace SolidsVR
         
 
 
-        public Point3d FindClosestPoint(Point3d[] globalPoints, Point3d centroid, double refLength)
+        public Point3d FindClosestPoint(List<Point3d> globalPoints, Point3d centroid, double refLength)
         {
             Point3d closestPoint = new Point3d(999.999, 999.999, 999.999);
 
             double length = double.PositiveInfinity;
 
-            for (int i = 0; i < globalPoints.Length; i++)
+            for (int i = 0; i < globalPoints.Count; i++)
             {
                 double checkLength = globalPoints[i].DistanceTo(centroid);
 

@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Grasshopper.Kernel;
 using Rhino.Geometry;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using Grasshopper.Kernel.Types;
-using Grasshopper.Kernel.Data;
 using System.Linq;
 
 namespace SolidsVR
 {
     class StiffnessMatrix
     {
-
         private double E = 0;
         private double nu = 0;
 
@@ -21,17 +16,12 @@ namespace SolidsVR
         {
             E = _E;
             nu = _nu;
-
         }
 
-       
-
-        public Tuple<Matrix<double>, List<Matrix<Double>>> CreateMatrix(List<Node> pList)
-
+        public (Matrix<double>, List<Matrix<Double>>) CreateMatrix(List<Node> nodeList)
         {
             Matrix<double> Ke = Matrix<double>.Build.Dense(24, 24);
             List<Matrix<double>> Be = new List<Matrix<double>>();
-
 
             //3D Constitutive matrix: C
             double value = (double) E / ((1 + nu) * (1 - 2 * nu));
@@ -43,12 +33,9 @@ namespace SolidsVR
                 {0, 0, 0, (1-2*nu)/2, 0, 0},
                 {0, 0, 0, 0, (1-2*nu)/2, 0},
                 {0, 0, 0, 0, 0, (1-2*nu)/2},
-
             });
 
-
             C = C.Multiply(value); //Constitutive matrix
-
 
             //Gauss points
             Vector<double> gaussPoints = DenseVector.OfArray(new double[] { -1 / Math.Sqrt(3), 1 / Math.Sqrt(3) }); //Gauss points
@@ -56,16 +43,11 @@ namespace SolidsVR
             Point3d point = new Point3d(0, 0, 0);
             List<Point3d> pNatural = Enumerable.Repeat(point, 8).ToList();
 
-
-            for (int i = 0; i < pList.Count; i++)
+            for (int i = 0; i < nodeList.Count; i++)
             {
-                //Point3d pointA = new Point3d(pList[i].X - centroid.X, pList[i].Y - centroid.Y, pList[i].Z - centroid.Z);
-                Point3d pointA = pList[i].GetCoord();
-                pNatural[i] = pointA;
-
+                pNatural[i] = nodeList[i].GetCoord();
             }
 
-            //Center points for each line
             Matrix<double> coordinates = DenseMatrix.OfArray(new double[,]
             {
                 {pNatural[0].X,pNatural[0].Y , pNatural[0].Z},
@@ -76,9 +58,7 @@ namespace SolidsVR
                 {pNatural[5].X,pNatural[5].Y , pNatural[5].Z},
                 {pNatural[6].X,pNatural[6].Y , pNatural[6].Z},
                 {pNatural[7].X,pNatural[7].Y , pNatural[7].Z},
-
             });
-
 
             //Numerical integration
             foreach (double g3 in gaussPoints)
@@ -87,7 +67,6 @@ namespace SolidsVR
                 {
                     foreach (double g1 in gaussPoints)
                     {
-
                         //Shape functions
                         Matrix<double> shapeF = DenseMatrix.OfArray(new double[,]
                        {
@@ -98,7 +77,6 @@ namespace SolidsVR
                        });
 
                         shapeF = shapeF.Divide(8); //Divided by 8
-
 
                         //Jacobi Matrix
 
@@ -164,7 +142,7 @@ namespace SolidsVR
                 }
             }
             
-            //Changing order of Be to fix the global numbering
+            //Changing order of Be to fit the global numbering
             Matrix<double> B_2 = Be[2];
             Be[2] = Be[3];
             Be[3] = B_2;
@@ -172,76 +150,7 @@ namespace SolidsVR
             Be[6] = Be[7];
             Be[7] = B_6;
 
-            return Tuple.Create(Ke, Be);
-
-        }
-
-        public Boolean IsRectangle(List<Point3d> pList)
-        {
-            double lx1 = pList[0].DistanceTo(pList[1]);
-            double lx2 = pList[3].DistanceTo(pList[2]);
-            double lx3 = pList[4].DistanceTo(pList[5]);
-            double lx4 = pList[7].DistanceTo(pList[6]);
-
-            double ly1 = pList[0].DistanceTo(pList[3]);
-            double ly2 = pList[1].DistanceTo(pList[2]);
-            double ly3 = pList[4].DistanceTo(pList[7]);
-            double ly4 = pList[5].DistanceTo(pList[6]);
-
-            double lz1 = pList[0].DistanceTo(pList[4]);
-            double lz2 = pList[1].DistanceTo(pList[5]);
-            double lz3 = pList[2].DistanceTo(pList[6]);
-            double lz4 = pList[3].DistanceTo(pList[7]);
-
-            if(lx1==lx2 && lx3 == lx4 && ly1==ly2 && ly3==ly4 && lz1 == lz4 && lz2 == lz3)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        public Point3d FindCentroidTwisted(List<Point3d> pList)
-        {
-
-            Mesh mesh = new Mesh();
-
-            for (int i = 0; i < pList.Count; i++)
-            {
-                mesh.Vertices.Add(pList[i]);
-            }
-
-            mesh.Faces.AddFace(0, 3, 2, 1); //Bottom
-            mesh.Faces.AddFace(4, 5, 6, 7); //Top
-            mesh.Faces.AddFace(2, 3, 7, 6); //Back
-            mesh.Faces.AddFace(0, 1, 5, 4); //Front
-            mesh.Faces.AddFace(1, 2, 6, 5); //Right
-            mesh.Faces.AddFace(0, 4, 7, 3); //Left
-
-            Brep brep = Brep.CreateFromMesh(mesh, true);
-            VolumeMassProperties vmp = VolumeMassProperties.Compute(brep);
-            Point3d centroid = vmp.Centroid;
-
-            return centroid;
-        }
-
-        public Point3d FindCentroidRectangle(List<Point3d> pList)
-        {
-
-            double c_x = 0;
-            double c_y = 0;
-            double c_z = 0;
-
-            foreach (Point3d p in pList)
-            {
-                c_x += p.X;
-                c_y += p.Y;
-                c_z += p.Z;
-            }
-
-            Point3d centroid = new Point3d(c_x / 8, c_y / 8, c_z / 8);
-
-            return centroid;
+            return (Ke, Be);
         }
     }
 }

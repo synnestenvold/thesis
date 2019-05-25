@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using Grasshopper.Kernel;
-using Rhino.Display;
 using Rhino.Geometry;
 
 namespace SolidsVR
@@ -20,7 +18,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
-            pManager.AddBrepParameter("Geometry", "G", "Brep as reference size", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Geometry as reference size", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -54,11 +52,7 @@ namespace SolidsVR
 
             //---solve---
 
-            var tuple = CreateText(curve, scale, refLength);
-            string text = tuple.Item1;
-            double refSize = tuple.Item2;
-            Plane textPlane = tuple.Item3;
-            Color color = tuple.Item4;
+            (string text, double refSize, Plane textPlane, Color color) = CreateText(curve, scale, refLength);
 
             Sphere sphere = new Sphere(curve.PointAtEnd, (double)(refSize/2));
 
@@ -71,7 +65,7 @@ namespace SolidsVR
             DA.SetData(4, color);
             DA.SetData(5, sphere);
         }
-        public Tuple<string, double, Plane, Color> CreateText(Curve curve, double scale, double refLength)
+        public (string, double, Plane, Color) CreateText(Curve curve, double scale, double refLength)
         {
             string text = "Scale: " + Math.Round(scale).ToString();
             double refSize = (double)(refLength / 7); //text size and sphere size
@@ -81,19 +75,13 @@ namespace SolidsVR
             Point3d p2 = Point3d.Add(end, new Point3d(0, 0, 1+2*refSize));
             Plane textPlane = new Plane(p0, p1, p2);
 
-            return Tuple.Create(text, refSize, textPlane, Color.White);
+            return (text, refSize, textPlane, Color.White);
         }
 
-        /// <summary>
-        /// Provides an Icon for every component that will be visible in the User Interface.
-        /// Icons need to be 24x24 pixels.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
                 return SolidsVR.Properties.Resource1.scaleSlider;
             }
         }

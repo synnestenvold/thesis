@@ -1,5 +1,4 @@
-﻿using System;
-using MathNet.Numerics.LinearAlgebra;
+﻿using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace SolidsVR
@@ -14,6 +13,7 @@ namespace SolidsVR
             E = _E;
             nu = _nu;
         }
+
         public Matrix<double> CreateMatrix()
         {
             double value = E / ((1 + nu) * (1 - 2 * nu));
@@ -27,9 +27,10 @@ namespace SolidsVR
                 {0, 0, 0, 0, 0, (1-2*nu)/2},
 
             });
+
             C = C.Multiply(value);
+
             return C;
         }
-
     }
 }

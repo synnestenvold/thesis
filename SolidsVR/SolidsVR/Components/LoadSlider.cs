@@ -2,13 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Grasshopper.Kernel;
-using Rhino.Display;
 using Rhino.Geometry;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
 namespace SolidsVR
 {
@@ -25,7 +20,7 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddCurveParameter("SliderVR", "S", "Slider as curve", GH_ParamAccess.item);
-            pManager.AddBrepParameter("Geometry", "G", "Brep as reference", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Geometry as reference", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -41,7 +36,7 @@ namespace SolidsVR
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
-            //---ovariables---
+            //---variables---
 
             Curve curve = null;
             Brep brep = new Brep();
@@ -63,11 +58,8 @@ namespace SolidsVR
 
             //---solve---
 
-            var tuple = CreateText(curve, load, refLength);
-            List<string> text = tuple.Item1;
-            double refSize = tuple.Item2;
-            List<Plane> textPlane = tuple.Item3;
-            Color color = tuple.Item4;
+            (List<string> text, double refSize, List<Plane> textPlane, Color color)= CreateText(curve, load, refLength);
+
             Sphere sphere = new Sphere(curve.PointAtEnd, (double)(refSize/2));
 
             //---output---
@@ -81,7 +73,7 @@ namespace SolidsVR
         }
 
        
-        public Tuple<List<string>, double, List<Plane>, Color> CreateText(Curve curve, Vector3d load, double refLength)
+        public (List<string>, double, List<Plane>, Color) CreateText(Curve curve, Vector3d load, double refLength)
         {
             List<string> text = new List<string>();
             text.Add("Adjust for load in N/mm^2");
@@ -95,24 +87,20 @@ namespace SolidsVR
             Point3d p1 = Point3d.Add(start, new Point3d(1, 0, 2*refSize));
             Point3d p2 = Point3d.Add(start, new Point3d(0, 0, (1+2*refSize)));
             textPlane.Add(new Plane(p0, p1, p2));
+
             Point3d end = curve.PointAtEnd;
             Point3d p3 = Point3d.Add(end, new Point3d(0, 0, -2 * refSize));
             Point3d p4 = Point3d.Add(end, new Point3d(1, 0, -2 * refSize));
             Point3d p5 = Point3d.Add(end, new Point3d(0, 0, (1 - 2 * refSize)));
             textPlane.Add(new Plane(p3, p4, p5));
-            return Tuple.Create(text, refSize, textPlane, Color.White);
+
+            return (text, refSize, textPlane, Color.White);
         }
 
-        /// <summary>
-        /// Provides an Icon for every component that will be visible in the User Interface.
-        /// Icons need to be 24x24 pixels.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
                 return SolidsVR.Properties.Resource1.loadSlider;
             }
         }
@@ -121,6 +109,5 @@ namespace SolidsVR
         {
             get { return new Guid("74238820-07e9-4490-966e-8a8dcfe33ca8"); }
         }
-        
     }
 }

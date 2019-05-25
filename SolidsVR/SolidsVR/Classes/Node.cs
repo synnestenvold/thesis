@@ -1,32 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using Grasshopper;
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
 using Rhino.Geometry;
-using System.Linq;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics;
 
 
 namespace SolidsVR
 {
     public class Node
     {
-        Point3d coordinate;
-        int nodeNr = 0;
-        List<int> partOfElement = new List<int>();
-        List<int> surfaceNum = new List<int>();
-        Boolean isCorner = false;
-        Boolean isMiddle = false;
-        Boolean isEdge = false;
-        List<Vector<double>> strain = new List<Vector<double>>();
-        List<Vector<double>> stress = new List<Vector<double>>();
-        Vector<double> globalStrain = Vector<double>.Build.Dense(6);
-        Vector<double> globalStress = Vector<double>.Build.Dense(6);
-        Boolean removable = true;
+        private Point3d coordinate;
+        private int nodeNr = 0;
 
-        List<double> deformation = new List<double>();
+        private Boolean isCorner = false;
+        private Boolean isMiddle = false;
+        private Boolean isEdge = false;
+        private Boolean removable = true;
+        private List<int> partOfElement = new List<int>();
+        private List<int> surfaceNum = new List<int>();
+        private List<Vector<double>> stress = new List<Vector<double>>();
+        private Vector<double> globalStrain = Vector<double>.Build.Dense(6);
+        private Vector<double> globalStress = Vector<double>.Build.Dense(6);
+        private List<double> deformation = new List<double>();
 
 
         public Node (Point3d _coordinate, int _nodeNr)
@@ -78,7 +72,6 @@ namespace SolidsVR
         public void SetNewCoord(Point3d _coord)
         {
             coordinate = _coord;
-
         }
 
         public Point3d GetCoord()
@@ -86,20 +79,9 @@ namespace SolidsVR
             return coordinate;
         }
 
-        public void SetStrain(Vector<double> _strain)
+        public void CleanStress()
         {
-            strain.Add(_strain);
-        }
-
-        public void CleanStressAndStrain()
-        {
-            strain.Clear();
             stress.Clear();
-        }
-
-        public List<Vector<double>> GetStrain()
-        {
-            return strain;
         }
 
         public void SetStress(Vector<double> _stress)
@@ -111,7 +93,6 @@ namespace SolidsVR
         {
             return stress;
         }
-
 
         public void SetGlobalStress(Vector<double> _globalStress)
         {
@@ -157,11 +138,13 @@ namespace SolidsVR
         {
             return globalStrain;
         }
-        public Boolean isRemovable()
+
+        public Boolean IsRemovable()
         {
             return removable;
         }
-        public void setRemovable(Boolean _removable)
+
+        public void SetRemovable(Boolean _removable)
         {
             removable = _removable;
         }

@@ -71,7 +71,7 @@ namespace SolidsVR
             {
                 Brep sphere = spheres[i];
                 //List of global points with correct numbering
-                Point3d[] globalPoints = mesh.GetGlobalPoints();
+                List<Point3d> globalPoints = mesh.GetGlobalPoints();
 
                 VolumeMassProperties vmpSphere = VolumeMassProperties.Compute(sphere);
                 Point3d centroidSphere = vmpSphere.Centroid;
@@ -122,13 +122,13 @@ namespace SolidsVR
         }
 
 
-        public Point3d FindClosestPoint(Point3d[] globalPoints, Point3d centroid, double refLength)
+        public Point3d FindClosestPoint(List<Point3d> globalPoints, Point3d centroid, double refLength)
         {
             Point3d closestPoint = new Point3d(999999, 999999, 999999);
 
             double length = double.PositiveInfinity;
 
-            for (int i = 0; i < globalPoints.Length; i++)
+            for (int i = 0; i < globalPoints.Count; i++)
             {
                 double checkLength = globalPoints[i].DistanceTo(centroid);
 
@@ -145,8 +145,6 @@ namespace SolidsVR
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
                 return SolidsVR.Properties.Resource1.predef;
             }
         }

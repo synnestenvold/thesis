@@ -1,26 +1,23 @@
 ﻿using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SolidsVR
 {
     public class BrepGeometry
     {
-        Brep brp = new Brep();
+        private Brep brp = new Brep();
+
+        private Point3d centroid = new Point3d(0, 0, 0);
         private List<Brep> surfaces = new List<Brep>();
-        Point3d centroid = new Point3d(0, 0, 0);
+
+        public BrepGeometry() { }
 
         public BrepGeometry(Brep _brp) {
             brp = _brp;
             VolumeMassProperties vmp = VolumeMassProperties.Compute(brp);
             centroid = vmp.Centroid;
-
         }
-
-        public BrepGeometry() { }
 
         public void SetBrep(Brep _brp)
         {
@@ -35,6 +32,7 @@ namespace SolidsVR
         {
             return brp.GetVolume();
         }
+
         public Point3d GetCentroid()
         {
             return centroid;
@@ -44,6 +42,7 @@ namespace SolidsVR
         {
             surfaces = _surf;
         }
+
         public List<Brep> GetSurfaces()
         {
             return surfaces;

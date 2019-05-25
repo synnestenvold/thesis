@@ -187,7 +187,7 @@ namespace SolidsVR
                 if (nodes[i].GetSurfaceNum().Contains(surfNo))
                     
                 {
-                    nodes[i].setRemovable(false);
+                    nodes[i].SetRemovable(false);
                     if (nodes[i].GetIsMiddle())
                     {
                         Point3d node = nodes[i].GetCoord();

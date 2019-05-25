@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Grasshopper;
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
 using Rhino.Geometry;
 using System.Linq;
 
@@ -14,19 +11,20 @@ namespace SolidsVR
         private int v = 1;
         private int w = 1;
 
-        List<List<Point3d>> elementPoints = new List<List<Point3d>>();
-        List<List<int>> connectivity = new List<List<int>>();
-        List<List<Line>> edgesMesh = new List<List<Line>>();
-        List<List<Brep>> surfacesMesh = new List<List<Brep>>();
-        List<Node> nodes = new List<Node>();
-        BrepGeometry brp = new BrepGeometry();
-        Brep origBrep = new Brep();
-        List<Brep> surfaces = new List<Brep>();
-        List<Element> elements = new List<Element>();
-        double removeVolume = 0;
+        private List<List<Point3d>> elementPoints = new List<List<Point3d>>();
+        private List<List<int>> connectivity = new List<List<int>>();
+        private List<List<Line>> edgesMesh = new List<List<Line>>();
+        private List<List<Brep>> surfacesMesh = new List<List<Brep>>();
+        private List<Node> nodes = new List<Node>();
+        private List<Brep> surfaces = new List<Brep>();
+        private List<Element> elements = new List<Element>();
+        private List<Point3d> globalPoints = new List<Point3d>();
+        private BrepGeometry brp = new BrepGeometry();
+        private Brep origBrep = new Brep();
+        private double removeVolume = 0;
+        private int sizeOfMatrix = 0;
 
-        Point3d[] globalPoints = null;
-        int sizeOfMatrix = 0;
+        public MeshGeometry() { }
 
         public MeshGeometry(int _u, int _v, int _w)
         {
@@ -34,26 +32,20 @@ namespace SolidsVR
             v = _v;
             w = _w;
         }
-        public MeshGeometry() { }
 
-        public int getU()
+        public int GetU()
         {
             return u;
         }
 
-        public int getV()
+        public int GetV()
         {
             return v;
         }
 
-        public int getW()
+        public int GetW()
         {
             return w;
-        }
-
-        public List<List<Point3d>> GetElementPoints()
-        {
-            return elementPoints;
         }
 
         public void SetElementPoints(List<List<Point3d>> _elementPoints)
@@ -61,9 +53,9 @@ namespace SolidsVR
             elementPoints = _elementPoints;
         }
 
-        public List<List<int>> GetConnectivity()
+        public List<List<Point3d>> GetElementPoints()
         {
-            return connectivity;
+            return elementPoints;
         }
 
         public void SetConnectivity(List<List<int>> _connectivity)
@@ -71,25 +63,29 @@ namespace SolidsVR
             connectivity = _connectivity;
         }
 
-   
-        public Point3d[] GetGlobalPoints()
+        public List<List<int>> GetConnectivity()
         {
-            return globalPoints;
+            return connectivity;
         }
 
-        public void SetGlobalPoints(Point3d[] _globalPoints)
+        public void SetGlobalPoints(List<Point3d> _globalPoints)
         {
             globalPoints = _globalPoints;
         }
 
-        public int GetSizeOfMatrix()
+        public List<Point3d> GetGlobalPoints()
         {
-            return sizeOfMatrix;
+            return globalPoints;
         }
 
         public void SetSizeOfMatrix(int _sizeOfMatrix)
         {
             sizeOfMatrix = _sizeOfMatrix;
+        }
+
+        public int GetSizeOfMatrix()
+        {
+            return sizeOfMatrix;
         }
 
         public void SetEdgesMesh(List<List<Line>> edges)
@@ -122,24 +118,26 @@ namespace SolidsVR
             return nodes;
         }
 
-        public BrepGeometry GetBrep()
-        {
-            return brp;
-        }
-
         public void SetBrep(BrepGeometry _brp)
         {
             brp = _brp;
+        }
+
+        public BrepGeometry GetBrep()
+        {
+            return brp;
         }
 
         public void SetOrigBrep(Brep _origBrep)
         {
             origBrep = _origBrep;
         }
+
         public Brep GetOrigBrep()
         {
             return origBrep;
         }
+
         public List<Brep> GetOrderedSurfaces()
         {
             return surfaces;
@@ -159,7 +157,6 @@ namespace SolidsVR
             return elements;
         }
 
-     
         public void SetOptVolume(double _removeVolume)
         {
             removeVolume = _removeVolume;
@@ -170,8 +167,7 @@ namespace SolidsVR
             return removeVolume;
         }
 
-     
-        public Tuple<double, int> RemoveOneElement()
+        public (double, int) RemoveOneElement()
         {
             double max = double.NegativeInfinity;
             double min = double.PositiveInfinity;
@@ -181,7 +177,7 @@ namespace SolidsVR
                 double mises = elements[i].GetAverageStressDir(6);
                 if (mises < min)
                 { 
-                    if (elements[i].isRemovable())
+                    if (elements[i].IsRemovable())
                     {
                         min = mises;
                         minElem = i;
@@ -192,10 +188,9 @@ namespace SolidsVR
                     max = mises;
                 }
             }
-        return Tuple.Create(max, minElem);
+        return (max, minElem);
         }
 
-       
         public void OrderSurfaces(List<Point3d> orderedPoints)
         {
             Brep[] orderedSurfaces = new Brep[6];
@@ -258,7 +253,6 @@ namespace SolidsVR
             }
             surfaces = orderedSurfaces.ToList();
         }
-
 
         public Point3d[] RoundPoints(Point3d[] vertices)
         {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SolidsVR
+﻿namespace SolidsVR
 {
     public class Material
     {
@@ -12,13 +6,14 @@ namespace SolidsVR
         private double nu;
         private double Y;
 
+        public Material() { }
+
         public Material(double _E, double _nu, double _Y)
         {
             E = _E;
             nu = _nu;
             Y = _Y;
         }
-        public Material() { }
 
         public double GetE()
         {
@@ -28,6 +23,11 @@ namespace SolidsVR
         public double GetNu()
         {
             return nu;
+        }
+
+        public double GetY()
+        {
+            return Y;
         }
 
         public void SetE(double _E)
@@ -43,13 +43,6 @@ namespace SolidsVR
         public void SetY(double _Y)
         {
             Y = _Y;
-        }
-
-        public double GetY()
-        {
-            return Y;
-        }
-    }
-
-    
+        }  
+    }   
 }

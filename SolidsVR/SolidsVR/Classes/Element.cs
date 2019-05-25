@@ -1,30 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using Grasshopper;
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
-using Rhino.Geometry;
-using System.Linq;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics;
 
 namespace SolidsVR
 {
     public class Element
     {
-        List<Node> vertices = new List<Node>();
-        List<int> connectivity = new List<int>();
-        int elementNr = 0;
-        Matrix<double> K_e = Matrix<double>.Build.Dense(24, 24);
-        List<Matrix<Double>> B_e = new List<Matrix<Double>>();
-        List<double> averageStress = new List<double>();
-        Boolean removable = true;
+        private List<Node> vertices = new List<Node>();
+        private List<int> connectivity = new List<int>();
+        private int elementNr = 0;
+
+        private List<Matrix<Double>> B_e = new List<Matrix<Double>>();
+        private List<double> averageStress = new List<double>();
+        private Matrix<double> K_e = Matrix<double>.Build.Dense(24, 24);
+        private Boolean removable = true;
 
         public Element (List<Node> _vertices, int _elementNr, List<int> _connectivity)
         {
             vertices = _vertices;
-            elementNr = _elementNr;
             connectivity = _connectivity;
+            elementNr = _elementNr;
         }
 
         public List<Node> GetVertices()
@@ -57,7 +52,7 @@ namespace SolidsVR
             B_e = _B_e;
         }
 
-        public List<Matrix<double>> GetBMatrixes()
+        public List<Matrix<double>> GetBMatrices()
         {
             return B_e;
         }
@@ -80,14 +75,15 @@ namespace SolidsVR
         {
             return averageStress[dir];
         }
-        public Boolean isRemovable()
-        {
-            return removable;
-        }
-        public void setRemovable(Boolean _removable)
+
+        public void SetRemovable(Boolean _removable)
         {
             removable = _removable;
         }
 
+        public Boolean IsRemovable()
+        {
+            return removable;
+        }
     }
 }
