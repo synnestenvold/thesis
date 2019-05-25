@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Drawing;
@@ -8,11 +7,11 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class SetUniBC : GH_Component
+    public class SurfaceBC : GH_Component
     {
-        public SetUniBC()
-          : base("SetUniBC", "UniBC",
-              "Uniform BC component for FEA",
+        public SurfaceBC()
+          : base("SurfaceBC", "BC",
+              "Surface BC component for FEA",
               "SolidsVR", "BC")
         {
         }
@@ -51,9 +50,7 @@ namespace SolidsVR
 
             List<string> pointsBC = FindBCPoints(surfNo, restrains, nodes);
 
-            ///////FOR PREVIEWING OF BC///////
-
-           
+            //For previewing of bc
             double refLength = brp.GetRefLength();
             List<Brep> cones = DrawBC(pointsBC, refLength);
             Color color = Color.FromArgb(0, 100, 255);
@@ -63,6 +60,22 @@ namespace SolidsVR
             DA.SetDataList(0, pointsBC);
             DA.SetDataList(1, cones);
             DA.SetData(2, color);
+        }
+
+        public List<string> FindBCPoints (int surfNo, string restrains, List<Node> nodes)
+        {
+            List<string> pointsBC = new List<string>();
+            for (int i = 0; i<nodes.Count; i++)
+            {
+                if (nodes[i].GetSurfaceNum().Contains(surfNo))
+                {
+                    Point3d node = nodes[i].GetCoord();
+                    string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
+                    pointsBC.Add(pointString + ";" + restrains);
+                    nodes[i].SetRemovable(false);
+                }
+            }
+            return pointsBC;
         }
 
         public List<Brep> DrawBC(List<string> pointsBC, double refLength)
@@ -107,32 +120,13 @@ namespace SolidsVR
                 bcCones.Add(brep);
 
             }
-
             return bcCones;
         }
 
-        public List<string> FindBCPoints (int surfNo, string restrains, List<Node> nodes)
-        {
-            List<string> pointsBC = new List<string>();
-            for (int i = 0; i<nodes.Count; i++)
-            {
-                if (nodes[i].GetSurfaceNum().Contains(surfNo))
-                {
-                    Point3d node = nodes[i].GetCoord();
-                    string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
-                    pointsBC.Add(pointString + ";" + restrains);
-                    nodes[i].SetRemovable(false);
-                }
-            }
-            return pointsBC;
-        }
-        
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
                 return SolidsVR.Properties.Resource1.bc;
             }
         }

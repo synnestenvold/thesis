@@ -16,9 +16,6 @@ namespace SolidsVR
         {
         }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Points", "P", "8 points in right order", GH_ParamAccess.list);
@@ -27,7 +24,7 @@ namespace SolidsVR
       
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddBrepParameter("Geometry", "G", "Brep for analysis", GH_ParamAccess.item);
+            pManager.AddBrepParameter("Geometry", "G", "Geometry for analysis", GH_ParamAccess.item);
         }
         
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -56,7 +53,6 @@ namespace SolidsVR
             mesh.Faces.AddFace(4, 5, 6, 7); //Top
 
             Brep brep = Brep.CreateFromMesh(mesh, true);
-            //Brep brep = new Brep();
             Curve[] curves = brep.DuplicateEdgeCurves();
             
             //---output---
@@ -65,25 +61,14 @@ namespace SolidsVR
 
         }
 
-        /// <summary>
-        /// Provides an Icon for every component that will be visible in the User Interface.
-        /// Icons need to be 24x24 pixels.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
                 return SolidsVR.Properties.Resource1.pointsToBrep;
             }
         }
 
-        /// <summary>
-        /// Each component must have a unique Guid to identify it. 
-        /// It is vital this Guid doesn't change otherwise old ghx files 
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return new Guid("96ec01d3-1b69-4d00-9104-c18bf3f07d6d"); }

@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Drawing;
-using System.Linq;
 
 
 namespace SolidsVR
 {
-    public class SetUniLoad : GH_Component
+    public class SurfaceLoad : GH_Component
     {
       
-        public SetUniLoad()
-          : base("SetUniLoad", "UniLoads",
+        public SurfaceLoad()
+          : base("SurfaceLoad", "SurfaceLoad",
               "Uniform load component for FEA",
               "SolidsVR", "Load")
         {
@@ -55,11 +53,9 @@ namespace SolidsVR
             Brep surface = mesh.GetSurfaceAsBrep(surfNo);
             double area = surface.GetArea();
             List<Node> nodes = mesh.GetNodeList();
-            var tuple = FindPointLoads(surfNo, area, forceVec, nodes, brp);
-            List<string> pointLoads = tuple.Item1;
-            double maxLoad = tuple.Item2;
+            (List<string> pointLoads, double maxLoad) = FindPointLoads(surfNo, area, forceVec, nodes, brp);
 
-            ///////FOR PREVIEWING OF LOADS///////
+            // For previewing of loads
 
             double refLength = brp.GetRefLength();
             List<Line> arrows = DrawLoads(pointLoads, refLength, maxLoad);
@@ -70,110 +66,9 @@ namespace SolidsVR
             DA.SetDataList(0, pointLoads);
             DA.SetDataList(1, arrows);
             DA.SetData(2, color);
-
         }
 
-        public List<Line> DrawLoads(List<string> pointLoads, double refLength, double maxLoad)
-        {
-            List<Line> arrows = new List<Line>();
-
-            List<double> loadCoord = new List<double>();
-            List<double> pointValues = new List<double>();
-
-            //double loadRef = 0.05;
-            double arrowRef = 10;
-
-            double maxLength = refLength * 2;
-
-            foreach (string s in pointLoads)
-            {
-                string coordinate = (s.Split(';'))[0];
-                string iLoad = (s.Split(';'))[1];
-
-                string[] coord = (coordinate.Split(','));
-                string[] iLoads = (iLoad.Split(','));
-
-                double loadCoord1 = Math.Round(double.Parse(coord[0]), 8);
-                double loadCoord2 = Math.Round(double.Parse(coord[1]), 8);
-                double loadCoord3 = Math.Round(double.Parse(coord[2]), 8);
-
-                double loadX = Math.Round(double.Parse(iLoads[0]), 8);
-                double loadY = Math.Round(double.Parse(iLoads[1]), 8);
-                double loadZ = Math.Round(double.Parse(iLoads[2]), 8);
-
-                Point3d startPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3);
-                Point3d arrowPart1 = new Point3d(0, 0, 0);
-                Point3d arrowPart2 = new Point3d(0, 0, 0);
-                Point3d endPoint = new Point3d(0, 0, 0);
-
-                if (loadX != 0)
-                {
-                    endPoint = new Point3d(loadCoord1 - loadX * maxLength/maxLoad, loadCoord2, loadCoord3);
-
-
-                    if (loadX > 0)
-                    {
-                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 - arrowRef, loadCoord3);
-                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2 + arrowRef, loadCoord3);
-                    }
-                    else
-                    {
-                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2 + arrowRef, loadCoord3);
-                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 - arrowRef, loadCoord3);
-                    }
-                    arrows.Add(new Line(startPoint, endPoint));
-                    arrows.Add(new Line(startPoint, arrowPart1));
-                    arrows.Add(new Line(startPoint, arrowPart2));
-                }
-
-                if (loadY != 0)
-                {
-                    endPoint = new Point3d(loadCoord1, loadCoord2 - loadY *maxLength / maxLoad, loadCoord3);
-
-
-                    if (loadY > 0)
-                    {
-                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 - arrowRef, loadCoord3);
-                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 - arrowRef, loadCoord3);
-                    }
-                    else
-                    {
-                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 + arrowRef, loadCoord3);
-                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 + arrowRef, loadCoord3);
-                    }
-                    arrows.Add(new Line(startPoint, endPoint));
-                    arrows.Add(new Line(startPoint, arrowPart1));
-                    arrows.Add(new Line(startPoint, arrowPart2));
-                }
-
-
-
-                if (loadZ != 0)
-                {
-                    endPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3 - loadZ * maxLength / maxLoad);
-
-
-                    if (loadZ > 0)
-                    {
-                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2, loadCoord3 - arrowRef);
-                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2, loadCoord3 - arrowRef);
-                    }
-                    else
-                    {
-                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2, loadCoord3 + arrowRef);
-                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2, loadCoord3 + arrowRef);
-                    }
-                    arrows.Add(new Line(startPoint, endPoint));
-                    arrows.Add(new Line(startPoint, arrowPart1));
-                    arrows.Add(new Line(startPoint, arrowPart2));
-                }
-
-            }
-
-            return arrows;
-        }
-
-        public Tuple<List<string>, double> FindPointLoads(int surfNo, double area, Vector3d forceVec, List<Node> nodes, BrepGeometry brp)
+        public (List<string>, double) FindPointLoads(int surfNo, double area, Vector3d forceVec, List<Node> nodes, BrepGeometry brp)
         {
             List<string> pointLoads = new List<string>();
             Vector3d maxLoads = new Vector3d(0, 0, 0);
@@ -185,7 +80,7 @@ namespace SolidsVR
             for (int i = 0; i < nodes.Count; i++)
             {
                 if (nodes[i].GetSurfaceNum().Contains(surfNo))
-                    
+
                 {
                     nodes[i].SetRemovable(false);
                     if (nodes[i].GetIsMiddle())
@@ -193,7 +88,7 @@ namespace SolidsVR
                         Point3d node = nodes[i].GetCoord();
                         string pointString = node.X.ToString() + "," + node.Y.ToString() + "," + node.Z.ToString();
                         centerPointsString.Add(pointString);
-                     
+
                     }
                     else if (nodes[i].GetIsCorner())
                     {
@@ -210,7 +105,7 @@ namespace SolidsVR
                 }
             }
             double pointsCount = 4 * centerPointsString.Count + cornerPointsString.Count + 2 * edgePointsString.Count;
-            
+
             List<string> centerPointLoads = new List<string>();
             List<string> cornerPointLoads = new List<string>();
             List<string> edgePointLoads = new List<string>();
@@ -249,24 +144,112 @@ namespace SolidsVR
             pointLoads.AddRange(edgePointLoads);
             pointLoads.AddRange(cornerPointLoads);
 
-            return Tuple.Create(pointLoads, maxLoad);
+            return (pointLoads, maxLoad);
         }
-       
+
+        public List<Line> DrawLoads(List<string> pointLoads, double refLength, double maxLoad)
+        {
+            List<Line> arrows = new List<Line>();
+
+            List<double> loadCoord = new List<double>();
+            List<double> pointValues = new List<double>();
+
+            double arrowRef = refLength / 100;
+            double maxLength = refLength * 2;
+
+            foreach (string s in pointLoads)
+            {
+                string coordinate = (s.Split(';'))[0];
+                string iLoad = (s.Split(';'))[1];
+
+                string[] coord = (coordinate.Split(','));
+                string[] iLoads = (iLoad.Split(','));
+
+                double loadCoord1 = Math.Round(double.Parse(coord[0]), 8);
+                double loadCoord2 = Math.Round(double.Parse(coord[1]), 8);
+                double loadCoord3 = Math.Round(double.Parse(coord[2]), 8);
+
+                double loadX = Math.Round(double.Parse(iLoads[0]), 8);
+                double loadY = Math.Round(double.Parse(iLoads[1]), 8);
+                double loadZ = Math.Round(double.Parse(iLoads[2]), 8);
+
+                Point3d startPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3);
+                Point3d arrowPart1 = new Point3d(0, 0, 0);
+                Point3d arrowPart2 = new Point3d(0, 0, 0);
+                Point3d endPoint = new Point3d(0, 0, 0);
+
+                if (loadX != 0)
+                {
+                    endPoint = new Point3d(loadCoord1 - loadX * maxLength/maxLoad, loadCoord2, loadCoord3);
+
+                    if (loadX > 0)
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 - arrowRef, loadCoord3);
+                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2 + arrowRef, loadCoord3);
+                    }
+                    else
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2 + arrowRef, loadCoord3);
+                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 - arrowRef, loadCoord3);
+                    }
+                    arrows.Add(new Line(startPoint, endPoint));
+                    arrows.Add(new Line(startPoint, arrowPart1));
+                    arrows.Add(new Line(startPoint, arrowPart2));
+                }
+
+                if (loadY != 0)
+                {
+                    endPoint = new Point3d(loadCoord1, loadCoord2 - loadY *maxLength / maxLoad, loadCoord3);
+
+
+                    if (loadY > 0)
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 - arrowRef, loadCoord3);
+                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 - arrowRef, loadCoord3);
+                    }
+                    else
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 - arrowRef, loadCoord2 + arrowRef, loadCoord3);
+                        arrowPart2 = new Point3d(loadCoord1 + arrowRef, loadCoord2 + arrowRef, loadCoord3);
+                    }
+
+                    arrows.Add(new Line(startPoint, endPoint));
+                    arrows.Add(new Line(startPoint, arrowPart1));
+                    arrows.Add(new Line(startPoint, arrowPart2));
+                }
+
+                if (loadZ != 0)
+                {
+                    endPoint = new Point3d(loadCoord1, loadCoord2, loadCoord3 - loadZ * maxLength / maxLoad);
+
+
+                    if (loadZ > 0)
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2, loadCoord3 - arrowRef);
+                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2, loadCoord3 - arrowRef);
+                    }
+                    else
+                    {
+                        arrowPart1 = new Point3d(loadCoord1 + arrowRef, loadCoord2, loadCoord3 + arrowRef);
+                        arrowPart2 = new Point3d(loadCoord1 - arrowRef, loadCoord2, loadCoord3 + arrowRef);
+                    }
+
+                    arrows.Add(new Line(startPoint, endPoint));
+                    arrows.Add(new Line(startPoint, arrowPart1));
+                    arrows.Add(new Line(startPoint, arrowPart2));
+                }
+            }
+            return arrows;
+        }
+
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
                 return SolidsVR.Properties.Resource1.loads;
             }
         }
 
-        /// <summary>
-        /// Each component must have a unique Guid to identify it. 
-        /// It is vital this Guid doesn't change otherwise old ghx files 
-        /// that use the old ID will partially fail during loading.
-        /// </summary>
         public override Guid ComponentGuid
         {
             get { return new Guid("9fa57f7d-4d01-4004-aa03-214e25f02b6a"); }

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Drawing;
-
 
 namespace SolidsVR
 {
@@ -13,7 +11,7 @@ namespace SolidsVR
  
         public PreDef()
           : base("PreDef", "PreDef",
-              "Prescribed deformation",
+              "Prescribed deformation in nodes",
               "SolidsVR", "Load")
         {
         }
@@ -22,7 +20,7 @@ namespace SolidsVR
         {
             pManager.AddBrepParameter("Sphere", "S", "Sphere for finding point", GH_ParamAccess.list);
             pManager.AddVectorParameter("Prescribed deformations", "PreDef", "Prescribed deformation as a vector", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh for Brep", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of geometry", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -110,18 +108,6 @@ namespace SolidsVR
             DA.SetData(4, color);
         }
 
-        public Plane FindSpherePlane(Point3d centroid, double refLength)
-        {
-            Point3d p0 = new Point3d(centroid.X, centroid.Y, centroid.Z + refLength/5);
-            Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
-            Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
-
-            Plane p = new Plane(p0, p1, p2);
-
-            return p;
-        }
-
-
         public Point3d FindClosestPoint(List<Point3d> globalPoints, Point3d centroid, double refLength)
         {
             Point3d closestPoint = new Point3d(999999, 999999, 999999);
@@ -141,6 +127,18 @@ namespace SolidsVR
 
             return closestPoint;
         }
+
+        public Plane FindSpherePlane(Point3d centroid, double refLength)
+        {
+            Point3d p0 = new Point3d(centroid.X, centroid.Y, centroid.Z + refLength/5);
+            Point3d p1 = Point3d.Add(p0, new Point3d(1, 0, 0));
+            Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
+
+            Plane p = new Plane(p0, p1, p2);
+
+            return p;
+        }
+
         protected override System.Drawing.Bitmap Icon
         {
             get

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Grasshopper.Kernel.Data;
@@ -61,7 +60,6 @@ namespace SolidsVR
 
             //---setup---
 
-            //Setting up values for reflength and angle for rotation of area
             BrepGeometry brp = mesh.GetBrep();
             Brep brep = brp.GetBrep();
             Point3d centroid = brp.GetCentroid();
@@ -71,17 +69,13 @@ namespace SolidsVR
 
             //---solve---
 
-            //Creating deformation vectors
-
             List<Element> elements = mesh.GetElements();
             List<Node> nodes = mesh.GetNodeList();
 
             List<Brep> breps = CreateDefBreps(elements, scale, angle, center);
 
             //Getting colors for each brep
-            var tuple1 = ColorBreps(elements, breps, dir);
-            List<Color> brepColors = tuple1.Item1; //output BrepsColors
-            List<string> rangeValues = tuple1.Item2; //output text
+            (List <Color> brepColors, List<string> rangeValues) = ColorBreps(elements, breps, dir);
 
             //Creating breps stress legend
             List<Brep> brepRanges = CreateBrepRanges(centroid, refLength, center, angle);
@@ -89,9 +83,7 @@ namespace SolidsVR
             //Getting colors stress legend
             List<Color> colorRange = CreateColorRange(); //Output brep colors legend
 
-            var tuple2 = CreateTextPlanes(brepRanges, refLength);
-            List<Plane> planeRanges = tuple2.Item1;
-            double textSize = tuple2.Item2;
+            (List <Plane> planeRanges, double textSize) = CreateTextPlanes(brepRanges, refLength);
 
             List<double> textSizeRange = Enumerable.Repeat(textSize, rangeValues.Count).ToList();  //Output text legend size
             List<Color> textColorRange = Enumerable.Repeat(Color.White, rangeValues.Count).ToList(); // Output text color legend
@@ -111,7 +103,6 @@ namespace SolidsVR
 
             textSizeRange.Add(headSize);
             List<double> textSizes = textSizeRange;
-            
 
             planeRanges.Add(headPlane);
             List<Plane> textPlanes = planeRanges;
@@ -121,63 +112,104 @@ namespace SolidsVR
 
             //---output---
 
-            //Geometry
             DA.SetDataList(0, breps);
             DA.SetDataList(1, brepColors);
             DA.SetDataList(2, brepRanges);
             DA.SetDataList(3, colorRange);
-
-            //Text
             DA.SetDataList(4, text);
             DA.SetDataList(5, textSizes);
             DA.SetDataList(6, textPlanes);
             DA.SetDataList(7, textColors);
         }
 
-        public Tuple<string, double, Plane, Color> CreateHeadline(Point3d centroid, double angle, Point3d center, double refLength)
+        public List<Brep> CreateDefBreps(List<Element> elements, double scale, double angle, Point3d center)
         {
-            string headText = "Stress analysis";
-
-            double headSize = (double)refLength / 1.5;
-
-            Point3d p0 = centroid;
-            Point3d p1 = Point3d.Add(p0, new Point3d(-1, 0, 0));
-            Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
-
-            Plane headPlane = new Plane(p0, p1, p2);
-
-            
-            headPlane.Translate(new Vector3d(0, -headSize, 3.5*refLength));
-            headPlane.Rotate(angle, new Vector3d(0, 0, 1), center);
-
-            Color headColor = Color.FromArgb(0, 100, 255);
-
-            return Tuple.Create(headText, headSize, headPlane, headColor);
-        }
-
-        public List<Color> CreateColorRange()
-        {
-            List<Color> colorRange = new List<Color>
+            List<Brep> breps = new List<Brep>();
+            for (int j = 0; j < elements.Count; j++)
             {
-                Color.Blue,
-                Color.RoyalBlue,
-                Color.DeepSkyBlue,
-                Color.Cyan,
-                Color.PaleGreen,
-                Color.LimeGreen,
-                Color.Lime,
-                Color.Lime,
-                Color.GreenYellow,
-                Color.Yellow,
-                Color.Orange,
-                Color.OrangeRed,
-                Color.Red,
-            };
+                var mesh = new Mesh();
+                List<Node> vertices = elements[j].GetVertices();
 
+                for (int i = 0; i < vertices.Count; i++)
+                {
+                    Point3d p = vertices[i].GetCoord();
+                    Vector3d defVector = new Vector3d(vertices[i].GetDeformation()[0], vertices[i].GetDeformation()[1], vertices[i].GetDeformation()[2]);
+                    Point3d new_p = Point3d.Add(p, defVector * scale);
+                    mesh.Vertices.Add(new_p);
+                }
+                mesh.Faces.AddFace(0, 1, 5, 4);
+                mesh.Faces.AddFace(1, 2, 6, 5);
+                mesh.Faces.AddFace(2, 3, 7, 6);
+                mesh.Faces.AddFace(0, 3, 7, 4);
+                mesh.Faces.AddFace(4, 5, 6, 7);
+                mesh.Faces.AddFace(0, 1, 2, 3);
 
-            return colorRange;
+                Brep new_brep = Brep.CreateFromMesh(mesh, false);
+                Vector3d vecAxis = new Vector3d(0, 0, 1);
+                new_brep.Rotate(angle, vecAxis, center);
+                breps.Add(new_brep);
+            }
+            return breps;
         }
 
+        public (List<Color>, List<string>) ColorBreps(List<Element> elements, List<Brep> breps, int dir)
+        {
+            List<Color> brepColors = new List<Color>();
+            Color color = Color.White;
+            List<string> rangeValues = new List<String>();
+
+            double[] averageValues = AverageValuesStress(elements, dir);
+            double max = averageValues.Max();
+            double min = averageValues.Min();
+            double range = (max - min) / 13;
+
+            //Adding values to stress range
+            for (int i = 0; i <= 13; i++)
+            {
+                rangeValues.Add((Math.Round(min + i * range, 4)).ToString() + "_");
+            }
+
+            //Creating header
+            if (dir == 0) rangeValues.Add("S,xx [MPa]");
+            else if (dir == 1) rangeValues.Add("S,yy [Mpa]");
+            else if (dir == 2) rangeValues.Add("S,zz [Mpa]");
+            else if (dir == 3) rangeValues.Add("S,yz [Mpa]");
+            else if (dir == 4) rangeValues.Add("S,xz [Mpa]");
+            else if (dir == 5) rangeValues.Add("S,zy [Mpa]");
+            else if (dir == 6) rangeValues.Add("Mises [Mpa]");
+
+            for (int i = 0; i < breps.Count; i++)
+            {
+                if (averageValues[i] < min + range) color = Color.Blue;
+                else if (averageValues[i] < min + 2 * range) color = Color.RoyalBlue;
+                else if (averageValues[i] < min + 3 * range) color = Color.DeepSkyBlue;
+                else if (averageValues[i] < min + 4 * range) color = Color.Cyan;
+                else if (averageValues[i] < min + 5 * range) color = Color.PaleGreen;
+                else if (averageValues[i] < min + 6 * range) color = Color.LimeGreen;
+                else if (averageValues[i] < min + 7 * range) color = Color.Lime;
+                else if (averageValues[i] < min + 8 * range) color = Color.Lime;
+                else if (averageValues[i] < min + 9 * range) color = Color.GreenYellow;
+                else if (averageValues[i] < min + 10 * range) color = Color.Yellow;
+                else if (averageValues[i] < min + 11 * range) color = Color.Orange;
+                else if (averageValues[i] < min + 12 * range) color = Color.OrangeRed;
+                else color = Color.Red;
+                brepColors.Add(color);
+            }
+
+            return (brepColors, rangeValues);
+        }
+
+        public double[] AverageValuesStress(List<Element> elements, int dir)
+        {
+            double[] averageList = new double[elements.Count];
+
+            for (int i = 0; i < elements.Count; i++)
+            {
+                averageList[i] = elements[i].GetAverageStressDir(dir);
+
+            }
+            return averageList;
+        }
 
         public List<Brep> CreateBrepRanges(Point3d centroid, double refLength, Point3d center, double angle)
         {
@@ -213,7 +245,29 @@ namespace SolidsVR
             return brepRanges;
         }
 
-        public Tuple<List<Plane>, double> CreateTextPlanes(List<Brep> brepRanges, double refLength)
+        public List<Color> CreateColorRange()
+        {
+            List<Color> colorRange = new List<Color>
+            {
+                Color.Blue,
+                Color.RoyalBlue,
+                Color.DeepSkyBlue,
+                Color.Cyan,
+                Color.PaleGreen,
+                Color.LimeGreen,
+                Color.Lime,
+                Color.Lime,
+                Color.GreenYellow,
+                Color.Yellow,
+                Color.Orange,
+                Color.OrangeRed,
+                Color.Red,
+            };
+
+            return colorRange;
+        }
+
+        public (List<Plane>, double) CreateTextPlanes(List<Brep> brepRanges, double refLength)
         {
             int ranges = 13;
             double totLength = refLength * 1.2;
@@ -226,8 +280,7 @@ namespace SolidsVR
 
             Vector3d vecBrep = new Vector3d(0, 0, 0);
             Point3d p = new Point3d(0, 0, 0);
-            Plane plane = new Plane(p, p, p); 
-
+            Plane plane = new Plane(p, p, p);
 
             for (int i = 0; i < brepRanges.Count; i++)
             {
@@ -249,7 +302,6 @@ namespace SolidsVR
 
             plane.Translate(new Vector3d(0, 0, rangeHeight));
 
-
             planeRanges.Add(plane);
 
             plane.Translate(new Vector3d(0, 0, rangeHeight));
@@ -257,110 +309,28 @@ namespace SolidsVR
 
             planeRanges.Add(plane);
 
-            return Tuple.Create(planeRanges, textSize);
-        }
-
-        public Vector3d[] CreateVectors(GH_Structure<GH_Number> treeDef)
-        {
-            int number = treeDef.PathCount;
-            Vector3d[] vectors = new Vector3d[number];
-            for (int i = 0; i < number; i++)
-            {
-                List<GH_Number> def = (List<GH_Number>)treeDef.get_Branch(i);
-                Vector3d vector = new Vector3d((def[0].Value), (def[1].Value), (def[2].Value));
-                vectors[i] = vector;
-            }
-            return vectors;
-        }
-
-        public List<Brep> CreateDefBreps(List<Element> elements, double scale, double angle, Point3d center)
-        {
-            List<Brep> breps = new List<Brep>();
-            for (int j = 0; j < elements.Count; j++)
-            {
-                var mesh = new Mesh();
-                List<Node> vertices = elements[j].GetVertices();
-
-                for (int i = 0; i < vertices.Count; i++)
-                {
-                    Point3d p = vertices[i].GetCoord();
-                    Vector3d defVector = new Vector3d(vertices[i].GetDeformation()[0], vertices[i].GetDeformation()[1], vertices[i].GetDeformation()[2]);
-                    Point3d new_p = Point3d.Add(p, defVector * scale);
-                    mesh.Vertices.Add(new_p);
-                }
-                mesh.Faces.AddFace(0, 1, 5, 4);
-                mesh.Faces.AddFace(1, 2, 6, 5);
-                mesh.Faces.AddFace(2, 3, 7, 6);
-                mesh.Faces.AddFace(0, 3, 7, 4);
-                mesh.Faces.AddFace(4, 5, 6, 7);
-                mesh.Faces.AddFace(0, 1, 2, 3);
-
-                Brep new_brep = Brep.CreateFromMesh(mesh, false);
-                Vector3d vecAxis = new Vector3d(0, 0, 1);
-                new_brep.Rotate(angle, vecAxis, center);
-                breps.Add(new_brep);
-            }
-            return breps;
+            return (planeRanges, textSize);
         }
 
 
-        public Tuple<List<Color>, List<string>> ColorBreps(List<Element> elements, List<Brep> breps, int dir)
+        public (string, double, Plane, Color) CreateHeadline(Point3d centroid, double angle, Point3d center, double refLength)
         {
-            List<Color> brepColors = new List<Color>();
-            Color color = Color.White;
-            List<string> rangeValues = new List<String>();
+            string headText = "Stress analysis";
 
-            double[] averageValues = AverageValuesStress(elements, dir);
-            double max = averageValues.Max();
-            double min = averageValues.Min();
-            double range = (max - min) / 13;
+            double headSize = (double)refLength / 1.5;
 
-            //Adding values to stress range
-            for (int i = 0; i <= 13; i++)
-            {
-                rangeValues.Add((Math.Round(min + i * range, 4)).ToString()+"_" );
-            }
+            Point3d p0 = centroid;
+            Point3d p1 = Point3d.Add(p0, new Point3d(-1, 0, 0));
+            Point3d p2 = Point3d.Add(p0, new Point3d(0, 0, 1));
 
-            //Creating header
-            if (dir == 0) rangeValues.Add("S,xx [MPa]");
-            else if (dir == 1) rangeValues.Add("S,yy [Mpa]");
-            else if (dir == 2) rangeValues.Add("S,zz [Mpa]");
-            else if (dir == 3) rangeValues.Add("S,yz [Mpa]");
-            else if (dir == 4) rangeValues.Add("S,xz [Mpa]");
-            else if (dir == 5) rangeValues.Add("S,zy [Mpa]");
-            else if (dir == 6) rangeValues.Add("Mises [Mpa]");
+            Plane headPlane = new Plane(p0, p1, p2);
+            
+            headPlane.Translate(new Vector3d(0, -headSize, 3.5*refLength));
+            headPlane.Rotate(angle, new Vector3d(0, 0, 1), center);
 
-            for (int i = 0; i < breps.Count; i++)
-            {
-                if (averageValues[i] < min + range) color = Color.Blue;
-                else if (averageValues[i] < min + 2 * range) color = Color.RoyalBlue;
-                else if (averageValues[i] < min + 3 * range) color = Color.DeepSkyBlue;
-                else if (averageValues[i] < min + 4 * range) color = Color.Cyan;
-                else if (averageValues[i] < min + 5 * range) color = Color.PaleGreen;
-                else if (averageValues[i] < min + 6 * range) color = Color.LimeGreen;
-                else if (averageValues[i] < min + 7 * range) color = Color.Lime;
-                else if (averageValues[i] < min + 8 * range) color = Color.Lime;
-                else if (averageValues[i] < min + 9 * range) color = Color.GreenYellow;
-                else if (averageValues[i] < min + 10 * range) color = Color.Yellow;
-                else if (averageValues[i] < min + 11 * range) color = Color.Orange;
-                else if (averageValues[i] < min + 12 * range) color = Color.OrangeRed;
-                else color = Color.Red;
-                brepColors.Add(color);
-            }
+            Color headColor = Color.FromArgb(0, 100, 255);
 
-            return Tuple.Create(brepColors, rangeValues);
-        }
-
-        public double[] AverageValuesStress(List<Element> elements, int dir)
-        {
-            double[] averageList = new double[elements.Count];
-
-            for (int i = 0; i < elements.Count; i++)
-            {
-                averageList[i] = elements[i].GetAverageStressDir(dir);
-
-            }
-            return averageList;
+            return (headText, headSize, headPlane, headColor);
         }
 
         protected override System.Drawing.Bitmap Icon

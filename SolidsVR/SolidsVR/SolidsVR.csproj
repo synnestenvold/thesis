@@ -80,8 +80,8 @@
     <Compile Include="Components\PointsToGeometry.cs" />
     <Compile Include="Components\PreDef.cs" />
     <Compile Include="Components\PreDefSlider.cs" />
-    <Compile Include="Components\SetUniBC.cs" />
-    <Compile Include="Components\SetUniLoad.cs" />
+    <Compile Include="Components\SurfaceBC.cs" />
+    <Compile Include="Components\SurfaceLoad.cs" />
     <Compile Include="Classes\MeshGeometry.cs" />
     <Compile Include="Components\FEMSolver.cs" />
     <Compile Include="Components\VolumePercentageSlider.cs" />
