@@ -203,13 +203,13 @@ namespace SolidsVR
                 List<Point3d> hex = new List<Point3d>()
                 {
                     globalPoints[counter],
-                    globalPoints[counter + 1],
-                    globalPoints[(u + 1) + (counter + 1)],
                     globalPoints[(u + 1) + (counter)],
+                    globalPoints[(u + 1) + (counter + 1)],
+                    globalPoints[counter + 1],
                     globalPoints[(u + 1) * (v + 1) + counter],
-                    globalPoints[(u + 1) * (v + 1) + (counter + 1)],
+                    globalPoints[(u + 1) * (v + 1) + (u + 1) + (counter)],
                     globalPoints[(u + 1) * (v + 1) + (u + 1) + (counter + 1)],
-                    globalPoints[(u + 1) * (v + 1) + (u + 1) + (counter)]
+                    globalPoints[(u + 1) * (v + 1) + (counter + 1)],
 
                 };
 
@@ -219,24 +219,24 @@ namespace SolidsVR
                 List<Node> hexNodes = new List<Node>()
                 {
                     nodes[counter],
-                    nodes[counter + 1],
-                    nodes[(u + 1) + (counter + 1)],
                     nodes[(u + 1) + (counter)],
+                    nodes[(u + 1) + (counter + 1)],
+                    nodes[counter + 1],
                     nodes[(u + 1) * (v + 1) + counter],
-                    nodes[(u + 1) * (v + 1) + (counter + 1)],
-                    nodes[(u + 1) * (v + 1) + (u + 1) + (counter + 1)],
                     nodes[(u + 1) * (v + 1) + (u + 1) + (counter)],
+                    nodes[(u + 1) * (v + 1) + (u + 1) + (counter + 1)],
+                    nodes[(u + 1) * (v + 1) + (counter + 1)],
                 };
 
                 //Adding element number to each node which is part of the element
                 nodes[counter].AddElementNr(i);
-                nodes[counter + 1].AddElementNr(i);
-                nodes[(u + 1) + (counter + 1)].AddElementNr(i);
                 nodes[(u + 1) + (counter)].AddElementNr(i);
+                nodes[(u + 1) + (counter + 1)].AddElementNr(i);
+                nodes[counter + 1].AddElementNr(i);
                 nodes[(u + 1) * (v + 1) + counter].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + (counter + 1)].AddElementNr(i);
-                nodes[(u + 1) * (v + 1) + (u + 1) + (counter + 1)].AddElementNr(i);
                 nodes[(u + 1) * (v + 1) + (u + 1) + (counter)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (u + 1) + (counter + 1)].AddElementNr(i);
+                nodes[(u + 1) * (v + 1) + (counter + 1)].AddElementNr(i);
 
                 List<Line> edgesElement = CreateEdgesMesh(hex);
                 List<Brep> surfacesElement = CreateSurfaceMesh(hex);
@@ -248,13 +248,13 @@ namespace SolidsVR
                 List<int> connectivity = new List<int>()
                 {
                     counter,
-                    counter + 1,
-                    (u + 1) + (counter + 1),
                     (u + 1) + (counter),
+                    (u + 1) + (counter + 1),
+                    counter + 1,
                     (u + 1) * (v + 1) + counter,
-                    (u + 1) * (v + 1) + (counter + 1),
-                    (u + 1) * (v + 1) + (u + 1) + (counter + 1),
                     (u + 1) * (v + 1) + (u + 1) + (counter),
+                    (u + 1) * (v + 1) + (u + 1) + (counter + 1),
+                    (u + 1) * (v + 1) + (counter + 1),
                 };
 
                 Element element = new Element(hexNodes, i, connectivity);

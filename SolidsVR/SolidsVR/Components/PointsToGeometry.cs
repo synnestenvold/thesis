@@ -45,12 +45,12 @@ namespace SolidsVR
             {
                 mesh.Vertices.Add(points[i]);
             }
-            mesh.Faces.AddFace(0, 1, 5, 4); //Front
-            mesh.Faces.AddFace(1, 2, 6, 5); //Right
-            mesh.Faces.AddFace(2, 3, 7, 6); //Back
-            mesh.Faces.AddFace(0, 4, 7, 3); //Left
-            mesh.Faces.AddFace(0, 3, 2, 1); //Bottom
-            mesh.Faces.AddFace(4, 5, 6, 7); //Top
+            mesh.Faces.AddFace(0, 4, 5, 1); //Front
+            mesh.Faces.AddFace(1, 5, 6, 2); //Right
+            mesh.Faces.AddFace(2, 6, 7, 3); //Back
+            mesh.Faces.AddFace(0, 3, 7, 4); //Left
+            mesh.Faces.AddFace(0, 1, 2, 3); //Bottom
+            mesh.Faces.AddFace(4, 7, 6, 5); //Top
 
             Brep brep = Brep.CreateFromMesh(mesh, true);
             Curve[] curves = brep.DuplicateEdgeCurves();

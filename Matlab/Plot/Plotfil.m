@@ -1,6 +1,6 @@
 clc; clear;
 
-content = fileread( 'Case3_disp.txt' ) ;
+content = fileread( 'StressCantilever.txt' ) ;
 data = textscan( content, '%s','HeaderLines',2) ;
 text = data{1};
 
