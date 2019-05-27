@@ -51,7 +51,8 @@ namespace SolidsVR
         public double GetRefLength()
         {
             double sqrt3 = (double)1 / 3;
-            double refLength = Math.Pow(brp.GetVolume(), sqrt3);
+            double volume = brp.GetVolume();
+            double refLength = Math.Pow(volume, sqrt3);
             return refLength;
         }
     }

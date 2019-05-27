@@ -349,7 +349,7 @@ namespace SolidsVR.Components
             List<double> loadCoord = new List<double>();
             List<double> pointValues = new List<double>();
 
-            double[] loads = new double[points.Count * 3];
+            double[] R = new double[points.Count * 3];
 
             foreach (string s in pointLoads)
             {
@@ -377,9 +377,9 @@ namespace SolidsVR.Components
                 {
                     if (loadCoord[3 * j] == Math.Round(p.X, 8) && loadCoord[3 * j + 1] == Math.Round(p.Y, 8) && loadCoord[3 * j + 2] == Math.Round(p.Z, 8))
                     {
-                        loads[index] = pointValues[3 * j];
-                        loads[index + 1] = pointValues[3 * j + 1];
-                        loads[index + 2] = pointValues[3 * j + 2];
+                        R[index] = pointValues[3 * j];
+                        R[index + 1] = pointValues[3 * j + 1];
+                        R[index + 2] = pointValues[3 * j + 2];
                     }
                 }
                 index += 3;
@@ -387,14 +387,14 @@ namespace SolidsVR.Components
             //Corresponding value in R is set to 0 if it is a BC/predef here. Ref page 309 in FEM book.
             foreach (int bc in bcNodes)
             {
-                loads[bc] = 0;
+                R[bc] = 0;
             }
             for (int i = 0; i < predefNodes.Count; i++)
             {
-                loads[predefNodes[i]] = predef[i];
+                R[predefNodes[i]] = predef[i];
             }
 
-            return loads;
+            return R;
         }
 
         public Matrix<double> ApplyBCcol(Matrix<double> K, List<int> bcNodes)

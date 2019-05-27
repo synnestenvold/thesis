@@ -69,8 +69,8 @@ namespace SolidsVR
             DA.SetData(2, pos);
             DA.SetDataList(3, surfaceNum);
             DA.SetDataList(4, def);
-            DA.SetDataList(6, globalStrain);
-            DA.SetDataList(7, globalStress);
+            DA.SetDataList(5, globalStrain);
+            DA.SetDataList(6, globalStress);
         }
 
         protected override System.Drawing.Bitmap Icon
