@@ -73,7 +73,6 @@ namespace SolidsVR
                 List<Element> elements = tuple.Item6;
                 List<Point3d> globalPoints = tuple.Item7;
                 int sizeOfMatrix = 3 * (u + 1) * (v + 1) * (w + 1);
-
                 
 
                 //Setting values for Mesh class

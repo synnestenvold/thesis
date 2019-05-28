@@ -75,7 +75,7 @@ namespace SolidsVR
             //Plane for mesh headline
             Point3d mp1 = curves[0].PointAtStart;
 
-            Point3d mplane0 = new Point3d(mp1.X+70, mp1.Y, mp1.Z + 150);
+            Point3d mplane0 = new Point3d(mp1.X + (double)refLength/3.5, mp1.Y, mp1.Z + (double)refLength/1.5);
             Point3d mplane1 = Point3d.Add(mplane0, new Point3d(1, 0, 0));
             Point3d mplane2 = Point3d.Add(mplane1, new Point3d(0, 0, 1));
 
@@ -84,7 +84,7 @@ namespace SolidsVR
             //Plane for bc headline
             Point3d bp1 = curves[1].PointAtStart;
 
-            Point3d bplane0 = new Point3d(bp1.X + refLength, bp1.Y, bp1.Z + 150);
+            Point3d bplane0 = new Point3d(bp1.X + refLength, bp1.Y, bp1.Z + (double)refLength/1.5);
             Point3d bplane1 = Point3d.Add(bplane0, new Point3d(1, 0, 0));
             Point3d bplane2 = Point3d.Add(bplane1, new Point3d(0, 0, 1));
 
@@ -93,7 +93,7 @@ namespace SolidsVR
             //Plane for load headline
             Point3d lp1 = curves[2].PointAtStart;
 
-            Point3d lplane0 = new Point3d(lp1.X + 70, lp1.Y, lp1.Z + 150);
+            Point3d lplane0 = new Point3d(lp1.X + (double) refLength/3.5, lp1.Y, lp1.Z + (double) refLength/1.5);
             Point3d lplane1 = Point3d.Add(lplane0, new Point3d(1, 0, 0));
             Point3d lplane2 = Point3d.Add(lplane1, new Point3d(0, 0, 1));
 

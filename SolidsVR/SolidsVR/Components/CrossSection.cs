@@ -89,12 +89,13 @@ namespace SolidsVR
 
             for (int i = 0; i <= v; i++)
             {
-                //Get domain values in v-direction
-                double tv = domainV.ParameterAt(i / (double)v);
+                //Get domain values in u-direction
+                double tu = domainU.ParameterAt(i / (double)v);
+
                 for (int j = 0; j <= u; j++)
                 {
-                    //Get domain values in u-direction
-                    double tu = domainU.ParameterAt(j / (double)u);
+                    //Get domain values in v-direction
+                    double tv = domainV.ParameterAt(j / (double)u);
                     Point3d p1 = surface.PointAt(tu, tv); //Creating points in domain
                     points.Add(p1);
                 }
@@ -108,7 +109,7 @@ namespace SolidsVR
             List<Plane> planes = new List<Plane>();
 
             //Text that will be added
-            string header = "CROSS-SECTION";
+            string header = "CROSS SECTION";
             string uDir = "u-direction";
             string vDir = "v-direction";
 
@@ -120,7 +121,7 @@ namespace SolidsVR
             Point3d headPoint = Point3d.Add(hp1, headerVec);
 
             //Creating plane for header
-            Point3d hplane0 = new Point3d(headPoint.X, headPoint.Y, headPoint.Z + refLength);
+            Point3d hplane0 = new Point3d(headPoint.X, headPoint.Y, headPoint.Z + refLength/1.8);
             Point3d hplane1 = Point3d.Add(hplane0, new Point3d(1, 0, 0));
             Point3d hplane2 = Point3d.Add(hplane1, new Point3d(0, 0, 1));
 
@@ -128,22 +129,13 @@ namespace SolidsVR
 
             planes.Add(hplane);
 
-            //Creating plane for text in v-direction
-            Point3d vplane0 = new Point3d(headPoint.X, headPoint.Y, headPoint.Z + refLength / 3 + 10);
-            Point3d vplane1 = Point3d.Add(vplane0, new Point3d(1, 0, 0));
-            Point3d vplane2 = Point3d.Add(vplane1, new Point3d(0, 0, 1));
-
-            Plane vplane = new Plane(vplane0, vplane1, vplane2);
-
-            planes.Add(vplane);
-
-            //Creating plane for text in u-direction
-            Point3d up1 = curves[1].PointAtEnd;
-            Point3d up2 = curves[1].PointAtStart;
-            Vector3d uVec = (up2 - up1)/2;
+            Point3d up1 = curves[2].PointAtEnd;
+            Point3d up2 = curves[2].PointAtStart;
+            Vector3d uVec = (up2 - up1) / 2;
             Point3d uPoint = Point3d.Add(up1, uVec);
 
-            Point3d uplane0 = new Point3d(uPoint.X+120, uPoint.Y, uPoint.Z);
+            //Creating plane for text in u-direction
+            Point3d uplane0 = new Point3d(uPoint.X, uPoint.Y, uPoint.Z - refLength / 3 - 10);
             Point3d uplane1 = Point3d.Add(uplane0, new Point3d(1, 0, 0));
             Point3d uplane2 = Point3d.Add(uplane1, new Point3d(0, 0, 1));
 
@@ -151,9 +143,23 @@ namespace SolidsVR
 
             planes.Add(uplane);
 
+            //Creating plane for text in u-direction
+            Point3d vp1 = curves[1].PointAtEnd;
+            Point3d vp2 = curves[1].PointAtStart;
+            Vector3d vVec = (vp2 - vp1)/2;
+            Point3d vPoint = Point3d.Add(vp1, vVec);
+
+            Point3d vplane0 = new Point3d(vPoint.X+120, vPoint.Y, vPoint.Z);
+            Point3d vplane1 = Point3d.Add(vplane0, new Point3d(1, 0, 0));
+            Point3d vplane2 = Point3d.Add(vplane1, new Point3d(0, 0, 1));
+
+            Plane vplane = new Plane(vplane0, vplane1, vplane2);
+
+            planes.Add(vplane);
+
             text.Add(header);
-            text.Add(vDir);
             text.Add(uDir);
+            text.Add(vDir);
 
             return (text, planes);
         }
