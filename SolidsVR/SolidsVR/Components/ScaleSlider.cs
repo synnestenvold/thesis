@@ -5,10 +5,10 @@ using Rhino.Geometry;
 
 namespace SolidsVR
 {
-    public class DeformationSlider : GH_Component
+    public class ScaleSlider : GH_Component
     {
        
-        public DeformationSlider()
+        public ScaleSlider()
           : base("DeformationSlider", "DefSlider",
               "Slider for deformation scale in VR",
               "SolidsVR", "VR Slider")

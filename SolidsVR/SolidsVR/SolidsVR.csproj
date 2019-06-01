@@ -73,7 +73,7 @@
     <Compile Include="Classes\CMatrix.cs" />
     <Compile Include="Components\CreateMaterial.cs" />
     <Compile Include="Components\DivisionSlider.cs" />
-    <Compile Include="Components\DeformationSlider.cs" />
+    <Compile Include="Components\ScaleSlider.cs" />
     <Compile Include="Components\LoadSlider.cs" />
     <Compile Include="Components\MeshHex.cs" />
     <Compile Include="Components\PointsToGeometry.cs" />

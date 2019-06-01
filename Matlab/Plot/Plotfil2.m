@@ -1,6 +1,6 @@
 clc; clear;
 
-content = fileread( 'DispCube.txt' ) ;
+content = fileread( 'Case3_stress.txt' ) ;
 data = textscan( content, '%s','HeaderLines',2) ;
 text = data{1};
 
@@ -76,11 +76,6 @@ for i = 1: length(text)
     
 end
 
-
-xq2 = xaxis(1):1:xaxis(length(xaxis))
-
-
-
 %figure(1)
 figure('Renderer', 'painters', 'Position', [10 10 1000 400])
 hold on
@@ -97,29 +92,23 @@ if(strcmp(log,"true"))
 end
 
 if it == 1
-    vq1 = interp1(xaxis,yaxis(:,1),xq2,'pchip');
-    p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
+    p1 = plot(xaxis,yaxis(:,1),'o-',cell2mat(colors(1)),'LineWidth',1,'MarkerSize',5);
 end
 
 if it == 2
-    vq1 = interp1(xaxis,yaxis(:,1),xq2,'pchip');
-    vq2 = interp1(xaxis,yaxis(:,2),xq2,'pchip');
-    p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,'color',cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
-    p2 = plot(xaxis,yaxis(:,2),'*',xq2,vq2,'color',cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
+    p1 = plot(xaxis,yaxis(:,1),'o-','color',cell2mat(colors(1)),'LineWidth',1,'MarkerSize',5);
+    p2 = plot(xaxis,yaxis(:,2),'*-','color',cell2mat(colors(2)),'LineWidth',1,'MarkerSize',5);
     
     h = [p1(1);p2(1)];
  % Now call the legend function passing the handle h and specify the text
-    legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)));
+    legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)),'Location','east');
     xlim([xaxis(1),xaxis(length(xaxis))]);
 end
 
 if it == 3
-    vq1 = interp1(xaxis,yaxis(:,1),xq2,'pchip');
-    vq2 = interp1(xaxis,yaxis(:,2),xq2,'pchip');
-    vq3 = interp1(xaxis,yaxis(:,3),xq2,'pchip');
-    p1 = plot(xaxis,yaxis(:,1),'o',xq2,vq1,'color',cell2mat(colors(1)),'LineWidth',1,'MarkerSize',4);
-    p2 = plot(xaxis,yaxis(:,2),'*',xq2,vq2,'color',cell2mat(colors(2)),'LineWidth',1,'MarkerSize',4);
-    p3 = plot(xaxis,yaxis(:,3),'x',xq2,vq3,'color',cell2mat(colors(3)),'LineWidth',1,'MarkerSize',4);
+    p1 = plot(xaxis,yaxis(:,1),'o-','color',cell2mat(colors(1)),'LineWidth',1,'MarkerSize',5);
+    p2 = plot(xaxis,yaxis(:,2),'*-','color',cell2mat(colors(2)),'LineWidth',1,'MarkerSize',5);
+    p3 = plot(xaxis,yaxis(:,3),'x-','color',cell2mat(colors(3)),'LineWidth',1,'MarkerSize',5);
     
     %legend([p1,p2],'t','t','Location','southeast');
     

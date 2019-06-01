@@ -11,10 +11,10 @@ data = [total; k; bcLoad; invertK; uSS]
 A = 'BC+Load';
 k = '\delta, \epsilon and \sigma';
 
-names = {'FEMSolver', 'Create K', 'BC+Load', 'Invert K', 'u, \epsilon and \sigma'};
+names = {'FEMSolver', 'Create K', 'Apply', 'Invert K', 'Calculate'};
 
 
-figure('Renderer', 'painters', 'Position', [10 10 900 600])
+figure('Renderer', 'painters', 'Position', [10 10 900 500])
 hold on
 b = bar(data,'FaceColor','flat');
 

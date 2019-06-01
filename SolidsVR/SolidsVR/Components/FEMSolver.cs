@@ -479,12 +479,12 @@ namespace SolidsVR.Components
                 B_e = elements[i].GetBMatrices();
                 nodes_e = elements[i].GetVertices();
 
-                StrainCalculations(B_e, nodes_e, C_matrix);
+                Calculations(B_e, nodes_e, C_matrix);
             }
 
         }
 
-        public void StrainCalculations(List<Matrix<double>> B_e, List<Node> nodes_e, Matrix<double> C_Matrix)
+        public void Calculations(List<Matrix<double>> B_e, List<Node> nodes_e, Matrix<double> C_Matrix)
         {
             List<Vector<double>> elementStrain = new List<Vector<double>>();
             List<Vector<double>> elementStress = new List<Vector<double>>();

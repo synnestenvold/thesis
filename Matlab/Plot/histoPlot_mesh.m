@@ -7,7 +7,7 @@ mesh2 = [6.8	32	67.2	184.6	255	496.8	732.6];
 mesh = [5.4,6.8;29,32;58.2,67.2;139,184.6;256.2,255;492.8,496.8;717.8,732.6];
 
 
-figure('Renderer', 'painters', 'Position', [10 10 900 600])
+figure('Renderer', 'painters', 'Position', [10 10 900 500])
 hold on
 b = bar(mesh,'FaceColor','flat');
 

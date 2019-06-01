@@ -71,9 +71,7 @@ namespace SolidsVR
             breps = CreateDefBreps(elements, scale, angle, center);
 
             //Finding point with max deformation
-            var tuple = GetMaxDeformation(nodes);
-            double defMax = tuple.Item1; 
-            Node nodeMax = tuple.Item2;
+            (double defMax, Node nodeMax) = GetMaxDeformation(nodes);
 
             Brep sphere = DrawSphere(nodeMax, angle, center, scale, refSize);
             Color colorSphere = Color.Orange;
@@ -180,7 +178,7 @@ namespace SolidsVR
             return breps;
         }
 
-        public Tuple<double, Node> GetMaxDeformation(List<Node> nodes)
+        public (double, Node) GetMaxDeformation(List<Node> nodes)
         {
             double defMax = -1;
             Node maxDefNode = new Node(new Point3d(0, 0, 0), 0);
@@ -197,7 +195,7 @@ namespace SolidsVR
                 }
             }
 
-            return Tuple.Create(defMax, maxDefNode);
+            return (defMax, maxDefNode);
         }
 
         public Brep DrawSphere(Node nodeMax, double angle, Point3d center, double scale, double refSize)

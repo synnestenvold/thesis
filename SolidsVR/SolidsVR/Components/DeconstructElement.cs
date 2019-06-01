@@ -6,7 +6,7 @@ namespace SolidsVR
 {
     public class DeconstructElement : GH_Component
     {
-
+    
         public DeconstructElement()
           : base("DeconstructElement", "DeconstructElement",
               "Get information about element",
