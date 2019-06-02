@@ -545,17 +545,17 @@ namespace SolidsVR.Components
             (double)1 / 8 * ((1 - r) * (1 + s) * (1 + t)),
             };
 
-            Vector<double> stressNode = Vector<double>.Build.Dense(6);
+            Vector<double> nodeStress = Vector<double>.Build.Dense(6);
 
-            for (int i = 0; i < stressNode.Count; i++)
+            for (int i = 0; i < nodeStress.Count; i++)
             {
                 for (int j = 0; j < shapeF.Count; j++)
                 {
-                    stressNode[i] += gaussStress[j][i] * shapeF[j];
+                    nodeStress[i] += gaussStress[j][i] * shapeF[j];
                 }
 
             }
-            return stressNode;
+            return nodeStress;
         }
 
 

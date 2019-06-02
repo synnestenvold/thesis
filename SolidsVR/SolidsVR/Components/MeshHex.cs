@@ -127,8 +127,8 @@ namespace SolidsVR
 
             for (int i = 0; i <= w; i++)
             {
-                //Creating points in w-directoin
-                Point3d p1_w = new Point3d(cornerNodes[0].X + lz1 * i * vec_z1.X, cornerNodes[0].Y + lz1 * vec_z1.Y * i, cornerNodes[0].Z + lz1* vec_z1.Z * i);
+                //Creating points in w-direction
+                Point3d p1_w = new Point3d(cornerNodes[0].X + lz1 * i * vec_z1.X, cornerNodes[0].Y + lz1 * vec_z1.Y * i, cornerNodes[0].Z + lz1 * vec_z1.Z * i);
                 Point3d p2_w = new Point3d(cornerNodes[1].X + lz2 * i * vec_z2.X, cornerNodes[1].Y + lz2 * vec_z2.Y * i, cornerNodes[1].Z + lz2 * vec_z2.Z * i);
 
                 Point3d p3_w = new Point3d(cornerNodes[2].X + lz3 * i * vec_z3.X, cornerNodes[2].Y + lz3 * vec_z3.Y * i, cornerNodes[2].Z + lz3 * vec_z3.Z * i);
