@@ -132,7 +132,7 @@ namespace SolidsVR.Components
                 if (opt == true)
                 {
                     List<Node> nodes_removed = mesh.GetNodeList().ConvertAll(x => x);
-                    (Ktot, R, nodes) = UpdateK(removeNodeNr, Ktot, R, nodes_removed);
+                    (Ktot, R, nodes) = UpdateKandR(removeNodeNr, Ktot, R, nodes_removed);
                 }
 
                 //Inverting K matrix. Singular when all elements belonging to a node is removed
@@ -414,7 +414,7 @@ namespace SolidsVR.Components
             return K;
         }
 
-        public (Matrix<double>, Vector<double>, List<Node>) UpdateK(List<int> removeNodeNr, Matrix<double> K_tot, Vector<double> R, List<Node> nodes_removed)
+        public (Matrix<double>, Vector<double>, List<Node>) UpdateKandR(List<int> removeNodeNr, Matrix<double> K_tot, Vector<double> R, List<Node> nodes_removed)
         {
             removeNodeNr.Sort();
             removeNodeNr.Reverse();

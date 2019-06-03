@@ -8,10 +8,10 @@ uSS = [11	14	22	28	55	55	66];
 
 data = [total; k; bcLoad; invertK; uSS]
 
-A = 'BC+Load';
+A = 'BC+load';
 k = '\delta, \epsilon and \sigma';
 
-names = {'FEMSolver', 'Create K', 'Apply', 'Invert K', 'Calculate'};
+names = {'FEMSolver', 'Create K', 'BC+load', 'Invert K', 'Calculate'};
 
 
 figure('Renderer', 'painters', 'Position', [10 10 900 500])

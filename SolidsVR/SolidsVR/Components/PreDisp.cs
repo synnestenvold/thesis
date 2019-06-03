@@ -6,12 +6,12 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class PreDef : GH_Component
+    public class PreDisp : GH_Component
     {
  
-        public PreDef()
-          : base("PreDef", "PreDef",
-              "Prescribed deformation in nodes",
+        public PreDisp()
+          : base("PreDisp", "PreDdisp",
+              "Prescribed displacement in nodes",
               "SolidsVR", "Load")
         {
         }
@@ -19,13 +19,13 @@ namespace SolidsVR
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBrepParameter("Sphere", "S", "Sphere for finding point", GH_ParamAccess.list);
-            pManager.AddVectorParameter("Prescribed deformations", "PreDef", "Prescribed deformation as a vector", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Prescribed displacement", "PreDisp", "Prescribed displacement as a vector", GH_ParamAccess.item);
             pManager.AddGenericParameter("Mesh", "Mesh", "Mesh of geometry", GH_ParamAccess.item);
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Prescribed deformations", "PreDef", "Def in point, (x,y,z);(Tx,Ty,Tz)", GH_ParamAccess.list);
+            pManager.AddTextParameter("Prescribed displacement", "PreDisp", "Disp in point, (x,y,z);(Tx,Ty,Tz)", GH_ParamAccess.list);
             pManager.AddTextParameter("Text", "Text", "Text", GH_ParamAccess.item);
             pManager.AddNumberParameter("Size", "Size", "Size", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);

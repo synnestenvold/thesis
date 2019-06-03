@@ -6,11 +6,11 @@ using Rhino.Geometry;
 
 namespace SolidsVR.Components
 {
-    public class PreDefSlider : GH_Component
+    public class PreDispSlider : GH_Component
     {
-        public PreDefSlider()
-          : base("PreDefSlider", "PreDefSlider",
-              "Prescribed deformation slider in VR",
+        public PreDispSlider()
+          : base("PreDispSlider", "PreDispSlider",
+              "Prescribed displacement",
               "SolidsVR", "VR Slider")
         {
         }
@@ -23,7 +23,7 @@ namespace SolidsVR.Components
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddVectorParameter("Prescribed deformation", "PreDef", "Prescribed deformation vector and value", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Prescribed displacement", "PreDisp", "Prescribed displacement", GH_ParamAccess.item);
             pManager.AddTextParameter("Text", "Text", "Slider text", GH_ParamAccess.list);
             pManager.AddNumberParameter("Size", "Size", "Text size", GH_ParamAccess.item);
             pManager.AddPlaneParameter("Plane", "Plane", "Placement for text", GH_ParamAccess.list);
