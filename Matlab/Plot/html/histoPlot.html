@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>histoPlot</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-06-03"><meta name="DC.source" content="histoPlot.m"><style type="text/css">
+      --><title>histoPlot</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-06-04"><meta name="DC.source" content="histoPlot.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -79,10 +79,10 @@ data = [total; k; bcLoad; invertK; uSS]
 A = <span class="string">'BC+load'</span>;
 k = <span class="string">'\delta, \epsilon and \sigma'</span>;
 
-names = {<span class="string">'FEMSolver'</span>, <span class="string">'Create K'</span>, <span class="string">'BC+load'</span>, <span class="string">'Invert K'</span>, <span class="string">'Calculate'</span>};
+names = {<span class="string">'FEMSolver'</span>, <span class="string">'Create K'</span>, <span class="string">'Apply'</span>, <span class="string">'Invert K'</span>, <span class="string">'Calculate'</span>};
 
 
-figure(<span class="string">'Renderer'</span>, <span class="string">'painters'</span>, <span class="string">'Position'</span>, [10 10 900 500])
+figure(<span class="string">'Renderer'</span>, <span class="string">'painters'</span>, <span class="string">'Position'</span>, [10 10 900 400])
 hold <span class="string">on</span>
 b = bar(data,<span class="string">'FaceColor'</span>,<span class="string">'flat'</span>);
 
@@ -160,10 +160,10 @@ data = [total; k; bcLoad; invertK; uSS]
 A = 'BC+load';
 k = '\delta, \epsilon and \sigma';
 
-names = {'FEMSolver', 'Create K', 'BC+load', 'Invert K', 'Calculate'};
+names = {'FEMSolver', 'Create K', 'Apply', 'Invert K', 'Calculate'};
 
 
-figure('Renderer', 'painters', 'Position', [10 10 900 500])
+figure('Renderer', 'painters', 'Position', [10 10 900 400])
 hold on
 b = bar(data,'FaceColor','flat');
 

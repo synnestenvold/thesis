@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Plotfil2</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-06-01"><meta name="DC.source" content="Plotfil2.m"><style type="text/css">
+      --><title>Plotfil2</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-06-05"><meta name="DC.source" content="Plotfil2.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -68,7 +68,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
   </style></head><body><div class="content"><pre class="codeinput">clc; clear;
 
-content = fileread( <span class="string">'Case3_stress.txt'</span> ) ;
+content = fileread( <span class="string">'StressCube.txt'</span> ) ;
 data = textscan( content, <span class="string">'%s'</span>,<span class="string">'HeaderLines'</span>,2) ;
 text = data{1};
 
@@ -145,7 +145,7 @@ r = 1;
 <span class="keyword">end</span>
 
 <span class="comment">%figure(1)</span>
-figure(<span class="string">'Renderer'</span>, <span class="string">'painters'</span>, <span class="string">'Position'</span>, [10 10 1000 400])
+figure(<span class="string">'Renderer'</span>, <span class="string">'painters'</span>, <span class="string">'Position'</span>, [10 10 1000 360])
 hold <span class="string">on</span>
 
 set(gca, <span class="string">'FontName'</span>, <span class="string">'Times New Roman'</span>)
@@ -169,7 +169,7 @@ set(gca,<span class="string">'fontsize'</span>,14)
 
     h = [p1(1);p2(1)];
  <span class="comment">% Now call the legend function passing the handle h and specify the text</span>
-    legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)),<span class="string">'Location'</span>,<span class="string">'east'</span>);
+    legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)));
     xlim([xaxis(1),xaxis(length(xaxis))]);
 <span class="keyword">end</span>
 
@@ -200,19 +200,13 @@ ax.BoxStyle = <span class="string">'full'</span>;
 xlabel(xLabel)
 ylabel(yLabel)
 <span class="comment">%title(Title)</span>
-</pre><pre class="codeoutput">  Columns 1 through 6
-
-          24          90         256         500         936        1470
-
-  Column 7
-
-        2304
+</pre><pre class="codeoutput">     1     8    27    64   125   216   343   512   729
 
 </pre><img vspace="5" hspace="5" src="Plotfil2_01.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 clc; clear;
 
-content = fileread( 'Case3_stress.txt' ) ;
+content = fileread( 'StressCube.txt' ) ;
 data = textscan( content, '%s','HeaderLines',2) ;
 text = data{1};
 
@@ -289,7 +283,7 @@ for i = 1: length(text)
 end
 
 %figure(1)
-figure('Renderer', 'painters', 'Position', [10 10 1000 400])
+figure('Renderer', 'painters', 'Position', [10 10 1000 360])
 hold on
 
 set(gca, 'FontName', 'Times New Roman')
@@ -313,7 +307,7 @@ if it == 2
     
     h = [p1(1);p2(1)];
  % Now call the legend function passing the handle h and specify the text
-    legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)),'Location','east');
+    legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)));
     xlim([xaxis(1),xaxis(length(xaxis))]);
 end
 

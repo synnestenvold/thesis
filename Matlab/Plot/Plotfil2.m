@@ -1,6 +1,6 @@
 clc; clear;
 
-content = fileread( 'Case3_stress.txt' ) ;
+content = fileread( 'StressCube.txt' ) ;
 data = textscan( content, '%s','HeaderLines',2) ;
 text = data{1};
 
@@ -77,7 +77,7 @@ for i = 1: length(text)
 end
 
 %figure(1)
-figure('Renderer', 'painters', 'Position', [10 10 1000 400])
+figure('Renderer', 'painters', 'Position', [10 10 1000 360])
 hold on
 
 set(gca, 'FontName', 'Times New Roman')
@@ -101,7 +101,7 @@ if it == 2
     
     h = [p1(1);p2(1)];
  % Now call the legend function passing the handle h and specify the text
-    legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)),'Location','east');
+    legend(h,cell2mat(Legend(1)),cell2mat(Legend(2)));
     xlim([xaxis(1),xaxis(length(xaxis))]);
 end
 
