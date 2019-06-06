@@ -102,7 +102,7 @@
     <Compile Include="Classes\StiffnessMatrix.cs" />
     <Compile Include="Components\StressDirectionSlider.cs" />
     <Compile Include="Components\SurfaceSlider.cs" />
-    <Compile Include="Components\ViewDeformations.cs" />
+    <Compile Include="Components\ViewDeformation.cs" />
     <Compile Include="Components\ViewStresses.cs" />
   </ItemGroup>
   <ItemGroup>

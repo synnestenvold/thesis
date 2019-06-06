@@ -8,11 +8,11 @@ using System.Drawing;
 
 namespace SolidsVR
 {
-    public class ViewDeformations : GH_Component
+    public class ViewDeformation : GH_Component
     {
 
-        public ViewDeformations()
-          : base("ViewDeformations", "ViewDef",
+        public ViewDeformation()
+          : base("ViewDeformation", "ViewDef",
               "Display deformation in VR",
               "SolidsVR", "VR Preview")
         {
